@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOTS</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dots-grid">
+        <div class="dot" data-id="1" onclick="handleDot(1)">1</div>
+        <div class="dot" data-id="2" onclick="handleDot(2)">2</div>
+        <div class="dot" data-id="3" onclick="handleDot(3)">3</div>
+        <div class="dot" data-id="4" onclick="handleDot(4)">4</div>
+        <div class="dot" data-id="5" onclick="handleDot(5)">5</div>
+        <div class="dot" data-id="6" onclick="handleDot(6)">6</div>
+        <div class="dot" data-id="7" onclick="handleDot(7)">7</div>
+        <div class="dot" data-id="8" onclick="handleDot(8)">8</div>
+        <div class="dot" data-id="9" onclick="handleDot(9)">9</div>
+        <div class="dot" data-id="10" onclick="handleDot(10)">10</div>
+        <div class="dot" data-id="11" onclick="handleDot(11)">11</div>
+        <div class="dot" data-id="12" onclick="handleDot(12)">12</div>
+        <div class="dot" data-id="13" onclick="handleDot(13)">13</div>
+        <div class="dot" data-id="14" onclick="handleDot(14)">14</div>
+        <div class="dot" data-id="15" onclick="handleDot(15)">15</div>
+    </div>
+<div id="chat-modal" class="hidden">
+  <div class="chat-container">
+    <h3>Text Room</h3>
+    <div id="messages" class="messages"></div>
+    <div class="input-section">
+      <input id="message-input" type="text" placeholder="Type your message...">
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="closeChat()">Close</button>
+    </div>
+  </div>
+</div>
+    <script src="script.js"></script>
+
+</body>
+</html>

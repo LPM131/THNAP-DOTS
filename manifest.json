@@ -1,0 +1,9 @@
+{
+  "name": "DOTS",
+  "short_name": "DOTS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f0f0",
+  "theme_color": "#007bff",
+  "orientation": "any"
+}
