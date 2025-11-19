@@ -13,6 +13,9 @@ body {
     padding: 20px;
     height: 100vh;
     box-sizing: border-box;
+    max-width: 600px;
+    margin: 0 auto;
+    justify-items: center;
 }
 
 /* Media query for mobile portrait */
