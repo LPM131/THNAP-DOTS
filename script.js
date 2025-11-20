@@ -51,23 +51,41 @@ function handleDot(id) {
 
 // -----------------------------
 // BACK BUTTONS
-// --- Wordle Setup ---
-const WORD = "APPLE";  // For testing, can be randomized later
-let guesses = [];
+// --- Word of the Day Setup ---
+const WORD_LIST = [
+    "APPLE", "BANJO", "CRANE", "DANCE", "ELITE",
+    "FLAME", "GRAPE", "HOUSE", "INDEX", "JUMBO"
+];
+
+function getWordOfTheDay() {
+    const start = new Date("2025-01-01"); // arbitrary start date
+    const today = new Date();
+    const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+    const index = diffDays % WORD_LIST.length; // cycles through list
+    return WORD_LIST[index];
+}
+
+const WORD = getWordOfTheDay();
+
+// --- Game State ---
+let guesses = JSON.parse(localStorage.getItem("dots_wordle_guesses")) || [];
 let currentGuess = "";
 
+// --- DOM Elements ---
 const board = document.getElementById("game-board");
 const keyboardContainer = document.getElementById("virtual-keyboard");
 const message = document.getElementById("game-message");
 
-// Create grid tiles (6 rows × 5 letters)
+// --- Create 6x5 grid ---
+board.innerHTML = "";
 for (let i = 0; i < 6 * 5; i++) {
     const tile = document.createElement("div");
     tile.classList.add("tile");
     board.appendChild(tile);
 }
 
-// Create virtual keyboard
+// --- Virtual Keyboard ---
+keyboardContainer.innerHTML = "";
 const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
 rows.forEach((row) => {
     const rowDiv = document.createElement("div");
@@ -83,7 +101,7 @@ rows.forEach((row) => {
         rowDiv.appendChild(key);
     });
 
-    // Add backspace key on last row
+    // Add backspace & enter to last row
     if (row === "ZXCVBNM") {
         const backKey = document.createElement("div");
         backKey.classList.add("key");
@@ -101,7 +119,7 @@ rows.forEach((row) => {
     keyboardContainer.appendChild(rowDiv);
 });
 
-// Handle key presses
+// --- Handle key presses ---
 function handleKey(key) {
     if (key === "BACK") {
         currentGuess = currentGuess.slice(0, -1);
@@ -113,7 +131,7 @@ function handleKey(key) {
     updateBoard();
 }
 
-// Update grid tiles
+// --- Update grid ---
 function updateBoard() {
     const allTiles = board.querySelectorAll(".tile");
     for (let row = 0; row < 6; row++) {
@@ -121,7 +139,7 @@ function updateBoard() {
             const tile = allTiles[row * 5 + col];
             if (row < guesses.length) {
                 tile.textContent = guesses[row][col];
-                tile.style.backgroundColor = getTileColor(guesses[row][col], col);
+                tile.style.backgroundColor = getTileColor(guesses[row][col], col, guesses[row]);
             } else if (row === guesses.length) {
                 tile.textContent = currentGuess[col] || "";
                 tile.style.backgroundColor = "#ddd";
@@ -133,20 +151,21 @@ function updateBoard() {
     }
 }
 
-// Simple tile coloring logic
-function getTileColor(char, idx) {
-    if (WORD[idx] === char) return "#6aaa64"; // Green
-    else if (WORD.includes(char)) return "#c9b458"; // Yellow
-    else return "#787c7e"; // Gray
+// --- Tile coloring ---
+function getTileColor(char, idx, guess) {
+    if (WORD[idx] === char) return "#6aaa64"; // green
+    else if (WORD.includes(char)) return "#c9b458"; // yellow
+    else return "#787c7e"; // gray
 }
 
-// Submit guess
+// --- Submit guess ---
 function submitGuess() {
     if (currentGuess.length < 5) {
         message.textContent = "Word must be 5 letters!";
         return;
     }
     guesses.push(currentGuess);
+    localStorage.setItem("dots_wordle_guesses", JSON.stringify(guesses));
     currentGuess = "";
     updateBoard();
     if (guesses[guesses.length - 1] === WORD) {
@@ -157,17 +176,6 @@ function submitGuess() {
         message.textContent = "";
     }
 }
-
-// Responsive adjustment
-function resizeGame() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const gridSize = Math.min(vw * 0.9, vh * 0.5);
-    board.style.width = gridSize + "px";
-    keyboardContainer.style.width = gridSize + "px";
-}
-window.addEventListener("resize", resizeGame);
-resizeGame();
 
 // -----------------------------
 // Physics variables for floating dots
