@@ -1,181 +1,167 @@
-let currentUser = null;
+// -----------------------------
+// 15 Dots Setup (Dynamic Grid)
+// -----------------------------
+const dots = [
+    { id: 1, label: "💬", action: () => handleDot(1) },
+    { id: 2, label: "2", action: () => handleDot(2) },
+    { id: 3, label: "3", action: () => handleDot(3) },
+    { id: 4, label: "4", action: () => handleDot(4) },
+    { id: 5, label: "5", action: () => handleDot(5) },
+    { id: 6, label: "6", action: () => handleDot(6) },
+    { id: 7, label: "7", action: () => handleDot(7) },
+    { id: 8, label: "8", action: () => handleDot(8) },
+    { id: 9, label: "9", action: () => handleDot(9) },
+    { id: 10, label: "10", action: () => handleDot(10) },
+    { id: 11, label: "🔤", action: () => handleDot(11) },
+    { id: 12, label: "12", action: () => handleDot(12) },
+    { id: 13, label: "13", action: () => handleDot(13) },
+    { id: 14, label: "14", action: () => handleDot(14) },
+    { id: 15, label: "15", action: () => handleDot(15) },
+];
 
+const grid = document.querySelector(".dots-grid");
+
+// Render dots dynamically
+function renderDots() {
+    grid.innerHTML = "";
+    dots.forEach(dot => {
+        const div = document.createElement("div");
+        div.classList.add("dot");
+        div.textContent = dot.label;
+        div.addEventListener("click", dot.action);
+        grid.appendChild(div);
+    });
+}
+
+// -----------------------------
+// DOT CLICK HANDLER
+// -----------------------------
 function handleDot(id) {
-  console.log('handleDot called with id:', id);
-  if (id === 1) {
-    showChat();
-  } else if (id === 11) {
-    showGame();
-  } else {
-    alert('Dot ' + id + ' feature not implemented yet.');
-  }
+    grid.classList.add("hidden");
+    if (id === 1) {
+        document.getElementById("chat-modal").classList.remove("hidden");
+    } else if (id === 11) {
+        document.getElementById("game-modal").classList.remove("hidden");
+        initGame(); // Initialize Wordle game
+    } else {
+        alert(`Dot ${id} clicked`);
+        grid.classList.remove("hidden"); // restore grid for other dots
+    }
 }
 
-function showChat() {
-  document.querySelector('.dots-grid').style.display = 'none';
-  document.body.style.overflow = 'hidden';
-  document.getElementById('chat-modal').style.display = 'flex';
-  document.getElementById('thread-dots').style.display = 'block';
-  document.getElementById('chat-interface').style.display = 'none';
-  document.getElementById('chat-title').textContent = 'Text Threads';
-}
-
-function selectThread(thread) {
-  currentUser = thread;
-  document.getElementById('thread-dots').style.display = 'none';
-  document.getElementById('chat-interface').style.display = 'flex';
-  document.getElementById('chat-title').textContent = 'Texting ' + thread;
-  loadMessages(thread);
-}
-
+// -----------------------------
+// BACK BUTTONS
+// -----------------------------
 function backToDots() {
-  document.querySelector('.dots-grid').style.display = 'grid';
-  document.getElementById('chat-modal').style.display = 'none';
-  document.body.style.overflow = 'auto';
-  currentUser = null;
+    document.getElementById("chat-modal").classList.add("hidden");
+    grid.classList.remove("hidden");
+}
+
+function backToGameDots() {
+    document.getElementById("game-modal").classList.add("hidden");
+    grid.classList.remove("hidden");
+}
+
+// -----------------------------
+// CHAT SYSTEM
+// -----------------------------
+const threads = {
+    "Bot": [],
+    "Friend 1": [],
+    "Friend 2": []
+};
+
+let currentThread = null;
+
+function selectThread(name) {
+    currentThread = name;
+    document.getElementById("thread-dots").classList.add("hidden");
+    document.getElementById("chat-interface").classList.remove("hidden");
+    renderMessages();
 }
 
 function sendMessage() {
-  const input = document.getElementById('message-input');
-  const messages = document.getElementById('messages');
-  const msg = input.value.trim();
-  if (msg && currentUser) {
-    try {
-      const messagesList = JSON.parse(localStorage.getItem('chat_' + currentUser) || '[]');
-      const newMessage = { sender: 'You', text: msg, timestamp: Date.now(), read: true };
-      messagesList.push(newMessage);
-      localStorage.setItem('chat_' + currentUser, JSON.stringify(messagesList));
-      displayMessage(newMessage);
-      input.value = '';
-
-      // Simulate a reply if bot
-      if (currentUser === 'Bot') {
-        setTimeout(() => {
-          try {
-            const reply = { sender: currentUser, text: 'Hello! This is a bot reply.', timestamp: Date.now(), read: false };
-            messagesList.push(reply);
-            localStorage.setItem('chat_' + currentUser, JSON.stringify(messagesList));
-            displayMessage(reply);
-          } catch (e) {
-            console.error('Error saving bot reply:', e);
-          }
-        }, 1000);
-      }
-    } catch (e) {
-      alert('Unable to save message. Local storage might be full.');
-      console.error('LocalStorage error:', e);
-    }
-  }
+    const input = document.getElementById("message-input");
+    const msg = input.value.trim();
+    if (!msg || !currentThread) return;
+    
+    threads[currentThread].push({ text: msg, sender: "You" });
+    input.value = "";
+    renderMessages();
 }
 
-function loadMessages(user) {
-  const messages = document.getElementById('messages');
-  messages.innerHTML = '';
-  const messagesList = JSON.parse(localStorage.getItem('chat_' + user) || '[]');
-  messagesList.forEach(displayMessage);
+function renderMessages() {
+    const messagesDiv = document.getElementById("messages");
+    messagesDiv.innerHTML = "";
+    if (!currentThread) return;
+    threads[currentThread].forEach(m => {
+        const div = document.createElement("div");
+        div.textContent = `${m.sender}: ${m.text}`;
+        div.classList.add("message");
+        messagesDiv.appendChild(div);
+    });
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-function displayMessage(msg) {
-  const messages = document.getElementById('messages');
-  const messageDiv = document.createElement('div');
-  const isYou = msg.sender === 'You';
-  messageDiv.innerHTML = `<p class="chat-message ${isYou ? 'you' : 'them'}"><strong>${msg.sender}:</strong> ${msg.text}</p>`;
-  messages.appendChild(messageDiv);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-// Word Game Variables
-let wordOfTheDay = '';
-let currentAttempt = 0;
-const maxAttempts = 6;
-const gameWordLength = 5;
-
-const words = ['apple', 'grape', 'world', 'hello', 'beach', 'light', 'earth', 'swift', 'black', 'white'];
-
-function showGame() {
-    document.querySelector('.dots-grid').style.display = 'none';
-    document.body.style.overflow = 'hidden';
-
-    const modal = document.getElementById('game-modal');
-    modal.classList.add('show');
-
-    initGame();
-}
+// -----------------------------
+// WORDLE GAME
+// -----------------------------
+const wordList = ["APPLE","BRAVE","CRANE","DREAM","EARTH"];
+let targetWord = "";
+let attempts = 0;
 
 function initGame() {
-    // Pick daily word
-    const today = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24));
-    wordOfTheDay = words[today % words.length].toUpperCase();
+    targetWord = wordList[Math.floor(Math.random() * wordList.length)];
+    attempts = 0;
 
-    currentAttempt = 0;
-
-    // Reset board and input
-    const board = document.getElementById('game-board');
-    board.innerHTML = '';
-
-    document.getElementById('game-input').value = '';
-    document.getElementById('game-message').textContent = '';
-
-    // Build board cells
-    for (let i = 0; i < maxAttempts * gameWordLength; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('letter-box');
-        board.appendChild(cell);
+    const board = document.getElementById("game-board");
+    board.innerHTML = "";
+    for (let i = 0; i < 6; i++) {
+        for (let j = 0; j < 5; j++) {
+            const box = document.createElement("div");
+            box.classList.add("letter-box");
+            box.id = `cell-${i}-${j}`;
+            board.appendChild(box);
+        }
     }
+
+    document.getElementById("game-input").value = "";
+    document.getElementById("game-message").textContent = "";
 }
 
 function submitGuess() {
-    const input = document.getElementById('game-input');
-    const guess = input.value.toUpperCase().trim();
-    const message = document.getElementById('game-message');
-
-    if (guess.length !== gameWordLength) {
-        message.textContent = 'Please enter a 5-letter word.';
+    const input = document.getElementById("game-input");
+    const guess = input.value.toUpperCase();
+    if (guess.length !== 5) {
+        alert("Enter a 5-letter word!");
         return;
     }
 
-    if (currentAttempt >= maxAttempts) return;
-
-    const board = document.getElementById('game-board');
-
-    for (let i = 0; i < gameWordLength; i++) {
-        const cellIndex = currentAttempt * gameWordLength + i;
-        const letter = board.children[cellIndex];
-        letter.textContent = guess[i];
-
-        if (wordOfTheDay[i] === guess[i]) {
-            letter.classList.add('correct');
-        } else if (wordOfTheDay.includes(guess[i])) {
-            letter.classList.add('present');
+    for (let i = 0; i < 5; i++) {
+        const cell = document.getElementById(`cell-${attempts}-${i}`);
+        cell.textContent = guess[i];
+        if (guess[i] === targetWord[i]) {
+            cell.style.backgroundColor = "#6aaa64"; // correct
+        } else if (targetWord.includes(guess[i])) {
+            cell.style.backgroundColor = "#c9b458"; // present
         } else {
-            letter.classList.add('absent');
+            cell.style.backgroundColor = "#787c7e"; // absent
         }
     }
 
-    currentAttempt++;
-    input.value = '';
+    attempts++;
+    input.value = "";
 
-    if (guess === wordOfTheDay) {
-        message.textContent = '🎉 You win!';
-    } else if (currentAttempt >= maxAttempts) {
-        message.textContent = `Game over! The word was ${wordOfTheDay}.`;
+    if (guess === targetWord) {
+        document.getElementById("game-message").textContent = "You guessed it!";
+    } else if (attempts >= 6) {
+        document.getElementById("game-message").textContent = `Game over! Word was ${targetWord}`;
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('game-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            submitGuess();
-        }
-    });
+// -----------------------------
+// INIT
+// -----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+    renderDots();
 });
-
-function backToGameDots() {
-    document.querySelector('.dots-grid').style.display = 'grid';
-
-    const modal = document.getElementById('game-modal');
-    modal.classList.remove('show');
-
-    document.body.style.overflow = 'auto';
-    currentAttempt = 0;
-}
