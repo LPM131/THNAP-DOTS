@@ -73,7 +73,7 @@ body {
     height: 100%;
     background: white;
     z-index: 1000;
-    display: none;
+    display: flex;
     flex-direction: column;
 }
 
@@ -306,7 +306,7 @@ body {
     height: 100%;
     background: white;
     z-index: 1000;
-    display: none;
+    display: flex;
     flex-direction: column;
 }
 
