@@ -13,6 +13,7 @@ function handleDot(id) {
 
 function showChat() {
   document.querySelector('.dots-grid').style.display = 'none';
+  document.body.style.overflow = 'hidden';
   document.getElementById('chat-modal').style.display = 'flex';
   document.getElementById('thread-dots').style.display = 'block';
   document.getElementById('chat-interface').style.display = 'none';
@@ -30,6 +31,7 @@ function selectThread(thread) {
 function backToDots() {
   document.querySelector('.dots-grid').style.display = 'grid';
   document.getElementById('chat-modal').style.display = 'none';
+  document.body.style.overflow = 'auto';
   currentUser = null;
 }
 
@@ -92,6 +94,7 @@ const words = ['apple', 'grape', 'world', 'hello', 'beach', 'light', 'earth', 's
 function showGame() {
   console.log('Showing game modal');
   document.querySelector('.dots-grid').style.display = 'none';
+  document.body.style.overflow = 'hidden';
   const modal = document.getElementById('game-modal');
   modal.style.display = 'flex';
   modal.classList.remove('hidden');
@@ -178,5 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function backToGameDots() {
   document.querySelector('.dots-grid').style.display = 'grid';
   document.getElementById('game-modal').style.display = 'none';
+  document.body.style.overflow = 'auto';
   currentAttempt = 0;
 }
