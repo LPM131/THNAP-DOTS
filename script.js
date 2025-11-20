@@ -9,7 +9,7 @@ function handleDot(id) {
 }
 
 function showChat() {
-  document.getElementById('dots-grid').style.display = 'none';
+  document.querySelector('.dots-grid').style.display = 'none';
   document.getElementById('chat-modal').style.display = 'flex';
   document.getElementById('thread-dots').style.display = 'block';
   document.getElementById('chat-interface').style.display = 'none';
@@ -25,7 +25,7 @@ function selectThread(thread) {
 }
 
 function backToDots() {
-  document.getElementById('dots-grid').style.display = 'grid';
+  document.querySelector('.dots-grid').style.display = 'grid';
   document.getElementById('chat-modal').style.display = 'none';
   currentUser = null;
 }
