@@ -104,139 +104,147 @@ function renderMessages() {
 }
 
 // -----------------------------
-// WORDLE GAME WITH KEYBOARD
+// CHAT SYSTEM: Floating Dots
 // -----------------------------
-const wordList = ["APPLE","BRAVE","CRANE","DREAM","EARTH"];
-const keyboardLetters = "QWERTYUIOPASDFGHJKLZXCVBNM".split("");
+const threadsData = {
+    "Bot": { x: 50, y: 50 },
+    "Friend 1": { x: 150, y: 50 },
+    "Friend 2": { x: 250, y: 50 }
+};
 
-function renderKeyboard() {
-    const kb = document.getElementById("keyboard");
-    kb.innerHTML = "";
-    keyboardLetters.forEach(letter => {
-        const btn = document.createElement("div");
-        btn.classList.add("key");
-        btn.textContent = letter;
-        btn.addEventListener("click", () => pressKey(letter));
-        kb.appendChild(btn);
-    });
+const container = document.getElementById("thread-dots");
+const velocities = {}; // vx, vy for each thread
 
-    // Add Enter and Backspace buttons
-    const enter = document.createElement("div");
-    enter.classList.add("key");
-    enter.textContent = "ENTER";
-    enter.style.gridColumn = "span 2";
-    enter.addEventListener("click", submitGuess);
-    kb.appendChild(enter);
+function renderThreadDots() {
+    container.innerHTML = "";
 
-    const backspace = document.createElement("div");
-    backspace.classList.add("key");
-    backspace.textContent = "⌫";
-    backspace.style.gridColumn = "span 2";
-    backspace.addEventListener("click", deleteLetter);
-    kb.appendChild(backspace);
-}
+    Object.keys(threadsData).forEach(name => {
+        const dot = document.createElement("div");
+        dot.classList.add("thread-dot", "floating");
+        dot.textContent = name[0]; // initial
+        dot.style.left = threadsData[name].x + "px";
+        dot.style.top = threadsData[name].y + "px";
 
-let currentGuess = "";
+        // Tap to open chat
+        dot.addEventListener("click", () => selectThread(name));
 
-function pressKey(letter) {
-    if (currentGuess.length >= 5) return;
-    currentGuess += letter;
-    updateBoard();
-}
+        // Drag support
+        let offsetX, offsetY, dragging = false;
 
-function deleteLetter() {
-    currentGuess = currentGuess.slice(0, -1);
-    updateBoard();
-}
+        dot.addEventListener("mousedown", startDrag);
+        dot.addEventListener("touchstart", startDrag, { passive: false });
 
-function updateBoard() {
-    for (let i = 0; i < 5; i++) {
-        const cell = document.getElementById(`cell-${attempts}-${i}`);
-        cell.textContent = currentGuess[i] || "";
-        cell.style.backgroundColor = "#ddd";
-    }
-}
+        function startDrag(e) {
+            e.preventDefault();
+            dragging = true;
+            dot.dataset.dragging = "true";
+            const rect = dot.getBoundingClientRect();
+            const parentRect = container.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            offsetX = clientX - rect.left;
+            offsetY = clientY - rect.top;
 
-function submitGuess() {
-    if (currentGuess.length !== 5) {
-        alert("Enter a 5-letter word!");
-        return;
-    }
-
-    for (let i = 0; i < 5; i++) {
-        const cell = document.getElementById(`cell-${attempts}-${i}`);
-        const letter = currentGuess[i];
-
-        // Trigger flip animation
-        cell.classList.add("flip");
-
-        // Delay coloring to match flip animation
-        setTimeout(() => {
-            if (letter === targetWord[i]) {
-                cell.style.backgroundColor = "#6aaa64"; // correct
-                markKeyboardKey(letter, "correct");
-            } else if (targetWord.includes(letter)) {
-                cell.style.backgroundColor = "#c9b458"; // present
-                markKeyboardKey(letter, "present");
-            } else {
-                cell.style.backgroundColor = "#787c7e"; // absent
-                markKeyboardKey(letter, "absent");
-            }
-            cell.classList.remove("flip"); // reset for next guess
-        }, 250); // halfway through flip
-        cell.textContent = letter;
-    }
-
-    attempts++;
-    if (currentGuess === targetWord) {
-        document.getElementById("game-message").textContent = "You guessed it!";
-        currentGuess = "";
-        return;
-    }
-
-    if (attempts >= 6) {
-        document.getElementById("game-message").textContent = `Game over! Word was ${targetWord}`;
-        currentGuess = "";
-        return;
-    }
-
-    currentGuess = "";
-}
-
-function markKeyboardKey(letter, status) {
-    const keys = document.querySelectorAll(".key");
-    keys.forEach(k => {
-        if (k.textContent === letter) {
-            k.classList.remove("correct", "present", "absent");
-            k.classList.add(status);
+            document.addEventListener("mousemove", drag);
+            document.addEventListener("mouseup", endDrag);
+            document.addEventListener("touchmove", drag, { passive: false });
+            document.addEventListener("touchend", endDrag);
         }
+
+        function drag(e) {
+            if (!dragging) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const parentRect = container.getBoundingClientRect();
+
+            let x = clientX - parentRect.left - offsetX;
+            let y = clientY - parentRect.top - offsetY;
+
+            // Keep inside container
+            x = Math.max(0, Math.min(parentRect.width - 60, x));
+            y = Math.max(0, Math.min(parentRect.height - 60, y));
+
+            dot.style.left = x + "px";
+            dot.style.top = y + "px";
+        }
+
+        function endDrag() {
+            dragging = false;
+            dot.dataset.dragging = "false";
+            localStorage.setItem("threadsPos", JSON.stringify(threadsData));
+            document.removeEventListener("mousemove", drag);
+            document.removeEventListener("mouseup", endDrag);
+            document.removeEventListener("touchmove", drag, { passive: false });
+            document.removeEventListener("touchend", endDrag);
+        }
+
+        container.appendChild(dot);
     });
 }
 
-// Modify initGame to include keyboard
-function initGame() {
-    targetWord = wordList[Math.floor(Math.random() * wordList.length)];
-    attempts = 0;
-    currentGuess = "";
+// -----------------------------
+// Physics variables for floating dots
+// -----------------------------
+// const container = document.getElementById("thread-dots");
+// const velocities = {}; // vx, vy for each thread
 
-    const board = document.getElementById("game-board");
-    board.innerHTML = "";
-    for (let i = 0; i < 6; i++) {
-        for (let j = 0; j < 5; j++) {
-            const box = document.createElement("div");
-            box.classList.add("letter-box");
-            box.id = `cell-${i}-${j}`;
-            board.appendChild(box);
-        }
-    }
-
-    renderKeyboard();
-    document.getElementById("game-message").textContent = "";
+function initPhysics() {
+    Object.keys(threadsData).forEach(name => {
+        // Random initial velocity
+        velocities[name] = {
+            vx: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1),
+            vy: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1)
+        };
+    });
+    requestAnimationFrame(updateDots);
 }
 
+function updateDots() {
+    const rect = container.getBoundingClientRect();
+
+    Object.keys(threadsData).forEach(name => {
+        const dot = document.querySelector(`.thread-dot:nth-child(${Object.keys(threadsData).indexOf(name) + 1})`);
+        if (!dot) return;
+
+        // Skip if dragging
+        if (dot.dataset.dragging === "true") return;
+
+        let pos = threadsData[name];
+        let v = velocities[name];
+
+        pos.x += v.vx;
+        pos.y += v.vy;
+
+        // Bounce off walls
+        if (pos.x < 0 || pos.x > rect.width - 60) {
+            v.vx *= -1;
+            pos.x = Math.max(0, Math.min(rect.width - 60, pos.x));
+        }
+        if (pos.y < 0 || pos.y > rect.height - 60) {
+            v.vy *= -1;
+            pos.y = Math.max(0, Math.min(rect.height - 60, pos.y));
+        }
+
+        dot.style.left = pos.x + "px";
+        dot.style.top = pos.y + "px";
+        threadsData[name] = { x: pos.x, y: pos.y };
+    });
+
+    requestAnimationFrame(updateDots);
+}
+
+
+
 // -----------------------------
-// INIT
+// INIT: load positions & render
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("threadsPos");
+    if (saved) {
+        const pos = JSON.parse(saved);
+        Object.keys(pos).forEach(k => threadsData[k] = pos[k]);
+    }
+    renderThreadDots();
+    initPhysics(); // start physics movement
     renderDots();
 });
