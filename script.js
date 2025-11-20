@@ -1,6 +1,7 @@
 let currentUser = null;
 
 function handleDot(id) {
+  console.log('handleDot called with id:', id);
   if (id === 1) {
     showChat();
   } else if (id === 11) {
