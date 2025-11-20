@@ -1,3 +1,5 @@
+let currentUser = null;
+
 function handleDot(id) {
   if (id === 1) {
     showChat();
@@ -7,29 +9,63 @@ function handleDot(id) {
 }
 
 function showChat() {
-  document.getElementById('chat-modal').classList.remove('hidden');
+  document.getElementById('dots-grid').style.display = 'none';
+  document.getElementById('chat-modal').style.display = 'flex';
+  document.getElementById('thread-dots').style.display = 'block';
+  document.getElementById('chat-interface').style.display = 'none';
+  document.getElementById('chat-title').textContent = 'Text Threads';
 }
 
-function closeChat() {
-  document.getElementById('chat-modal').classList.add('hidden');
+function selectThread(thread) {
+  currentUser = thread;
+  document.getElementById('thread-dots').style.display = 'none';
+  document.getElementById('chat-interface').style.display = 'flex';
+  document.getElementById('chat-title').textContent = 'Texting ' + thread;
+  loadMessages(thread);
+}
+
+function backToDots() {
+  document.getElementById('dots-grid').style.display = 'grid';
+  document.getElementById('chat-modal').style.display = 'none';
+  currentUser = null;
 }
 
 function sendMessage() {
   const input = document.getElementById('message-input');
   const messages = document.getElementById('messages');
   const msg = input.value.trim();
-  if (msg) {
-    const messageDiv = document.createElement('div');
-    messageDiv.innerHTML = '<p><strong>You:</strong> ' + msg + '</p>';
-    messages.appendChild(messageDiv);
+  if (msg && currentUser) {
+    const messagesList = JSON.parse(localStorage.getItem('chat_' + currentUser) || '[]');
+    const newMessage = { sender: 'You', text: msg, timestamp: Date.now(), read: true };
+    messagesList.push(newMessage);
+    localStorage.setItem('chat_' + currentUser, JSON.stringify(messagesList));
+    displayMessage(newMessage);
     input.value = '';
-    messages.scrollTop = messages.scrollHeight;
-    // Simulate a reply
-    setTimeout(() => {
-      const replyDiv = document.createElement('div');
-      replyDiv.innerHTML = '<p><strong>Bot:</strong> Hello! This is a simulated text room.</p>';
-      messages.appendChild(replyDiv);
-      messages.scrollTop = messages.scrollHeight;
-    }, 1000);
+
+    // Simulate a reply if bot
+    if (currentUser === 'Bot') {
+      setTimeout(() => {
+        const reply = { sender: currentUser, text: 'Hello! This is a bot reply.', timestamp: Date.now(), read: false };
+        messagesList.push(reply);
+        localStorage.setItem('chat_' + currentUser, JSON.stringify(messagesList));
+        displayMessage(reply);
+      }, 1000);
+    }
   }
+}
+
+function loadMessages(user) {
+  const messages = document.getElementById('messages');
+  messages.innerHTML = '';
+  const messagesList = JSON.parse(localStorage.getItem('chat_' + user) || '[]');
+  messagesList.forEach(displayMessage);
+}
+
+function displayMessage(msg) {
+  const messages = document.getElementById('messages');
+  const messageDiv = document.createElement('div');
+  const isYou = msg.sender === 'You';
+  messageDiv.innerHTML = `<p class="chat-message ${isYou ? 'you' : 'them'}"><strong>${msg.sender}:</strong> ${msg.text}</p>`;
+  messages.appendChild(messageDiv);
+  messages.scrollTop = messages.scrollHeight;
 }

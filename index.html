@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="dots-grid">
-        <div class="dot" data-id="1" onclick="handleDot(1)">1</div>
+        <div class="dot" data-id="1" onclick="handleDot(1)">💬</div>
         <div class="dot" data-id="2" onclick="handleDot(2)">2</div>
         <div class="dot" data-id="3" onclick="handleDot(3)">3</div>
         <div class="dot" data-id="4" onclick="handleDot(4)">4</div>
@@ -26,17 +26,19 @@
         <div class="dot" data-id="15" onclick="handleDot(15)">15</div>
     </div>
 <div id="chat-modal" class="hidden" style="display: none;">
-  <div class="chat-container">
-    <h3>Text Room</h3>
+  <div class="chat-header">
+    <button onclick="backToDots()">⬅️ Back</button>
+    <h2 id="chat-title">Select User</h2>
+  </div>
+  <div id="thread-dots" class="modal-section">
+    <div class="thread-dot" data-thread="Bot" onclick="selectThread('Bot')">B</div>
+    <div class="thread-dot" data-thread="Friend 1" onclick="selectThread('Friend 1')">F1</div>
+    <div class="thread-dot" data-thread="Friend 2" onclick="selectThread('Friend 2')">F2</div>
+  </div>
+  <div id="chat-interface" class="modal-section hidden" style="display: none;">
     <div id="messages" class="messages"></div>
     <div class="input-section">
       <input id="message-input" type="text" placeholder="Type your message...">
       <button onclick="sendMessage()">Send</button>
-      <button onclick="closeChat()">Close</button>
     </div>
   </div>
-</div>
-    <script src="script.js"></script>
-
-</body>
-</html>
