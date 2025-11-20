@@ -368,8 +368,14 @@ body {
     .game-letter {
         width: 35px;
         height: 35px;
-        width: 35px;
-        height: 35px;
         font-size: 20px;
+    }
+}
+
+/* Disable all animations on mobile to fix touch issues */
+@media (max-width: 600px) {
+    * {
+        animation: none !important;
+        -webkit-animation: none !important;
     }
 }

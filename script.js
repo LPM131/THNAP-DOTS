@@ -89,12 +89,14 @@ const gameWordLength = 5;
 const words = ['apple', 'grape', 'world', 'hello', 'beach', 'light', 'earth', 'swift', 'black', 'white'];
 
 function showGame() {
+  console.log('Showing game modal');
   document.querySelector('.dots-grid').style.display = 'none';
   document.getElementById('game-modal').style.display = 'flex';
   initGame();
 }
 
 function initGame() {
+  console.log('Initializing game');
   // Pick word based on current date
   const today = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24));
   wordOfTheDay = words[today % words.length].toUpperCase();
@@ -113,9 +115,12 @@ function initGame() {
     }
     document.getElementById('game-board').appendChild(row);
   }
+  console.log('Game board created with', maxAttempts, 'rows of', gameWordLength, 'letters');
+  console.log('Word of the day:', wordOfTheDay);
 }
 
 function submitGuess() {
+  console.log('Submit guess called');
   const input = document.getElementById('game-input');
   const guess = input.value.toUpperCase().trim();
   const message = document.getElementById('game-message');
