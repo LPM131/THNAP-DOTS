@@ -37,6 +37,7 @@ function renderDots() {
 // DOT CLICK HANDLER
 // -----------------------------
 function handleDot(id) {
+    const grid = document.querySelector('.dots-grid');
     grid.classList.add("hidden");
     if (id === 1) {
         document.getElementById("chat-modal").classList.remove("hidden");
@@ -51,6 +52,14 @@ function handleDot(id) {
 
 // -----------------------------
 // BACK BUTTONS
+// --- Word of the Day Setup ---
+
+// --- Game State Reset ---
+function initGame() {
+    currentGuess = "";
+    updateBoard();
+}
+
 // --- Word of the Day Setup ---
 const WORD_LIST = ["APPLE", "BANJO", "CRANE", "DANCE", "ELITE", "FLAME", "GRAPE"];
 
