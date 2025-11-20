@@ -167,6 +167,10 @@ body {
     display: none;
 }
 
+.force-show {
+    display: block !important;
+}
+
 .chat-header {
     display: flex;
     align-items: center;

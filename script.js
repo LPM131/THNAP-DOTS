@@ -96,8 +96,9 @@ function showGame() {
   document.querySelector('.dots-grid').style.display = 'none';
   document.body.style.overflow = 'hidden';
   const modal = document.getElementById('game-modal');
-  modal.style.display = 'flex';
+  modal.style.display = 'block';
   modal.classList.remove('hidden');
+  modal.classList.add('force-show');
   modal.offsetHeight; // Force reflow to ensure rendering
   initGame();
 }
