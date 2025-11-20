@@ -35,21 +35,30 @@ function sendMessage() {
   const messages = document.getElementById('messages');
   const msg = input.value.trim();
   if (msg && currentUser) {
-    const messagesList = JSON.parse(localStorage.getItem('chat_' + currentUser) || '[]');
-    const newMessage = { sender: 'You', text: msg, timestamp: Date.now(), read: true };
-    messagesList.push(newMessage);
-    localStorage.setItem('chat_' + currentUser, JSON.stringify(messagesList));
-    displayMessage(newMessage);
-    input.value = '';
+    try {
+      const messagesList = JSON.parse(localStorage.getItem('chat_' + currentUser) || '[]');
+      const newMessage = { sender: 'You', text: msg, timestamp: Date.now(), read: true };
+      messagesList.push(newMessage);
+      localStorage.setItem('chat_' + currentUser, JSON.stringify(messagesList));
+      displayMessage(newMessage);
+      input.value = '';
 
-    // Simulate a reply if bot
-    if (currentUser === 'Bot') {
-      setTimeout(() => {
-        const reply = { sender: currentUser, text: 'Hello! This is a bot reply.', timestamp: Date.now(), read: false };
-        messagesList.push(reply);
-        localStorage.setItem('chat_' + currentUser, JSON.stringify(messagesList));
-        displayMessage(reply);
-      }, 1000);
+      // Simulate a reply if bot
+      if (currentUser === 'Bot') {
+        setTimeout(() => {
+          try {
+            const reply = { sender: currentUser, text: 'Hello! This is a bot reply.', timestamp: Date.now(), read: false };
+            messagesList.push(reply);
+            localStorage.setItem('chat_' + currentUser, JSON.stringify(messagesList));
+            displayMessage(reply);
+          } catch (e) {
+            console.error('Error saving bot reply:', e);
+          }
+        }, 1000);
+      }
+    } catch (e) {
+      alert('Unable to save message. Local storage might be full.');
+      console.error('LocalStorage error:', e);
     }
   }
 }
