@@ -93,6 +93,7 @@ DOTS/
 
 - **Dots as HR**: Revolutionizes UI by removing text-based clutter
 - **No Frameworks**: Ensures lightweight, fast performance
+- **Modal Visibility Control**: Use CSS to set display: none for modal defaults, controlled only by JavaScript element.style.display. Avoid inline styles like style="display: none" as they can cause CSS specificity conflicts and confusion during debugging.
 - **Local Storage**: Enables offline access; scales to backend database
 - **Animations**: CSS keyframes for smooth, watch-inspired movements
 - **PWA First**: Instant loading, app-like experience without app store
