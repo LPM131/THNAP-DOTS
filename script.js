@@ -91,7 +91,9 @@ const words = ['apple', 'grape', 'world', 'hello', 'beach', 'light', 'earth', 's
 function showGame() {
   console.log('Showing game modal');
   document.querySelector('.dots-grid').style.display = 'none';
-  document.getElementById('game-modal').style.display = 'flex';
+  const modal = document.getElementById('game-modal');
+  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
   initGame();
 }
 

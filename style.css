@@ -342,6 +342,7 @@ body {
     font-size: 24px;
     font-weight: bold;
     background: #ffff00;
+    color: black;
     transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 
