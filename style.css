@@ -336,9 +336,10 @@ body {
     height: 40px;
     border: 2px solid #000;
     border-radius: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: inline-block;
+    text-align: center;
+    line-height: 36px;
+    vertical-align: middle;
     font-size: 24px;
     font-weight: bold;
     background: #cccccc;
@@ -370,6 +371,7 @@ body {
         width: 35px;
         height: 35px;
         font-size: 20px;
+        line-height: 31px;
     }
 }
 
