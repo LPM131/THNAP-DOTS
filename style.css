@@ -1,12 +1,18 @@
+html {
+    height: 100vh;
+}
+
 body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
     min-height: 100vh;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .dots-grid {
@@ -66,7 +72,7 @@ body {
 
 /* Chat Full Screen Interface */
 #chat-modal {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -299,7 +305,7 @@ body {
 
 /* Game Styles */
 #game-modal {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
