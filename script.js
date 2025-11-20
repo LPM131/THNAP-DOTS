@@ -52,10 +52,7 @@ function handleDot(id) {
 // -----------------------------
 // BACK BUTTONS
 // --- Word of the Day Setup ---
-const WORD_LIST = [
-    "APPLE", "BANJO", "CRANE", "DANCE", "ELITE",
-    "FLAME", "GRAPE", "HOUSE", "INDEX", "JUMBO"
-];
+const WORD_LIST = ["APPLE", "BANJO", "CRANE", "DANCE", "ELITE", "FLAME", "GRAPE"];
 
 function getWordOfTheDay() {
     const start = new Date("2025-01-01"); // arbitrary start date
@@ -152,7 +149,7 @@ function updateBoard() {
 }
 
 // --- Tile coloring ---
-function getTileColor(char, idx, guess) {
+function getTileColor(char, idx) {
     if (WORD[idx] === char) return "#6aaa64"; // green
     else if (WORD.includes(char)) return "#c9b458"; // yellow
     else return "#787c7e"; // gray
