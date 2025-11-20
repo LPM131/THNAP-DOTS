@@ -58,9 +58,9 @@ body {
 /* Mobile adjustments */
 @media (max-width: 600px) {
     .dot {
-        width: 70px;
-        height: 70px;
-        font-size: 18px;
+        width: 90px;
+        height: 90px;
+        font-size: 20px;
     }
 }
 
