@@ -334,14 +334,14 @@ body {
 .game-letter {
     width: 40px;
     height: 40px;
-    border: 2px solid #ddd;
+    border: 2px solid #3a3a3c;
     border-radius: 4px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 24px;
     font-weight: bold;
-    background: white;
+    background: #f0f0f0;
     transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 
