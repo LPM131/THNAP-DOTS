@@ -89,16 +89,10 @@ const gameWordLength = 5;
 const words = ['apple', 'grape', 'world', 'hello', 'beach', 'light', 'earth', 'swift', 'black', 'white'];
 
 function showGame() {
-  try {
-    console.log('Showing game modal');
-    document.querySelector('.dots-grid').style.display = 'none';
-    document.getElementById('game-modal').style.display = 'flex';
-    initGame();
-    alert('Game modal opened! Check console for logs.');
-  } catch (e) {
-    alert('Error in showGame: ' + e);
-    console.error(e);
-  }
+  console.log('Showing game modal');
+  document.querySelector('.dots-grid').style.display = 'none';
+  document.getElementById('game-modal').style.display = 'flex';
+  initGame();
 }
 
 function initGame() {
