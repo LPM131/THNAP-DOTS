@@ -77,7 +77,7 @@ body, html {
 }
 
 .modal-section {
-    margin-top: 16px;
+    padding: 15px;
 }
 
 .thread-dot {
@@ -99,6 +99,18 @@ body, html {
     max-height: 50vh;
     overflow-y: auto;
     margin-bottom: 12px;
+}
+
+.chat-message {
+    margin: 8px 0;
+}
+
+.you {
+    color: #00d9ff;
+}
+
+.them {
+    color: #ff8a8a;
 }
 
 .input-section {
@@ -137,30 +149,69 @@ button:active {
     margin-bottom: 12px;
 }
 
-#game-board .letter-box {
-    width: 50px;
-    height: 50px;
+.letter-box {
     background-color: #ddd;
     display: flex;
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    font-size: 1.2em;
+    font-size: 2em;
     border-radius: 6px;
+    user-select: none;
+    perspective: 600px; /* needed for 3D flip */
 }
 
-.correct {
-    background: #4caf50;
+.letter-box.flip {
+    animation: flip 0.5s ease forwards;
 }
 
-.present {
-    background: #b3b300;
+@keyframes flip {
+    0% {
+        transform: rotateX(0deg);
+    }
+    50% {
+        transform: rotateX(90deg);
+        background-color: #ddd;
+        color: #000;
+    }
+    100% {
+        transform: rotateX(0deg);
+    }
 }
 
-.absent {
-    background: #444;
+/* Keyboard styling */
+#keyboard {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
 }
 
-.hidden {
-    display: none !important;
+.key {
+    background-color: #d3d6da;
+    padding: 12px 0;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.key:active {
+    background-color: #a8a8a8;
+}
+
+.key.correct { background-color: #6aaa64; color: #fff; }
+.key.present { background-color: #c9b458; color: #fff; }
+.key.absent { background-color: #787c7e; color: #fff; }
+
+/* Ensure modal content fills screen height */
+#game-content {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: space-between;
+    align-items: center;
 }

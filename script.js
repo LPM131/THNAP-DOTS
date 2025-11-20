@@ -104,15 +104,120 @@ function renderMessages() {
 }
 
 // -----------------------------
-// WORDLE GAME
+// WORDLE GAME WITH KEYBOARD
 // -----------------------------
 const wordList = ["APPLE","BRAVE","CRANE","DREAM","EARTH"];
-let targetWord = "";
-let attempts = 0;
+const keyboardLetters = "QWERTYUIOPASDFGHJKLZXCVBNM".split("");
 
+function renderKeyboard() {
+    const kb = document.getElementById("keyboard");
+    kb.innerHTML = "";
+    keyboardLetters.forEach(letter => {
+        const btn = document.createElement("div");
+        btn.classList.add("key");
+        btn.textContent = letter;
+        btn.addEventListener("click", () => pressKey(letter));
+        kb.appendChild(btn);
+    });
+
+    // Add Enter and Backspace buttons
+    const enter = document.createElement("div");
+    enter.classList.add("key");
+    enter.textContent = "ENTER";
+    enter.style.gridColumn = "span 2";
+    enter.addEventListener("click", submitGuess);
+    kb.appendChild(enter);
+
+    const backspace = document.createElement("div");
+    backspace.classList.add("key");
+    backspace.textContent = "⌫";
+    backspace.style.gridColumn = "span 2";
+    backspace.addEventListener("click", deleteLetter);
+    kb.appendChild(backspace);
+}
+
+let currentGuess = "";
+
+function pressKey(letter) {
+    if (currentGuess.length >= 5) return;
+    currentGuess += letter;
+    updateBoard();
+}
+
+function deleteLetter() {
+    currentGuess = currentGuess.slice(0, -1);
+    updateBoard();
+}
+
+function updateBoard() {
+    for (let i = 0; i < 5; i++) {
+        const cell = document.getElementById(`cell-${attempts}-${i}`);
+        cell.textContent = currentGuess[i] || "";
+        cell.style.backgroundColor = "#ddd";
+    }
+}
+
+function submitGuess() {
+    if (currentGuess.length !== 5) {
+        alert("Enter a 5-letter word!");
+        return;
+    }
+
+    for (let i = 0; i < 5; i++) {
+        const cell = document.getElementById(`cell-${attempts}-${i}`);
+        const letter = currentGuess[i];
+
+        // Trigger flip animation
+        cell.classList.add("flip");
+
+        // Delay coloring to match flip animation
+        setTimeout(() => {
+            if (letter === targetWord[i]) {
+                cell.style.backgroundColor = "#6aaa64"; // correct
+                markKeyboardKey(letter, "correct");
+            } else if (targetWord.includes(letter)) {
+                cell.style.backgroundColor = "#c9b458"; // present
+                markKeyboardKey(letter, "present");
+            } else {
+                cell.style.backgroundColor = "#787c7e"; // absent
+                markKeyboardKey(letter, "absent");
+            }
+            cell.classList.remove("flip"); // reset for next guess
+        }, 250); // halfway through flip
+        cell.textContent = letter;
+    }
+
+    attempts++;
+    if (currentGuess === targetWord) {
+        document.getElementById("game-message").textContent = "You guessed it!";
+        currentGuess = "";
+        return;
+    }
+
+    if (attempts >= 6) {
+        document.getElementById("game-message").textContent = `Game over! Word was ${targetWord}`;
+        currentGuess = "";
+        return;
+    }
+
+    currentGuess = "";
+}
+
+function markKeyboardKey(letter, status) {
+    const keys = document.querySelectorAll(".key");
+    keys.forEach(k => {
+        if (k.textContent === letter) {
+            k.classList.remove("correct", "present", "absent");
+            k.classList.add(status);
+        }
+    });
+}
+
+// Modify initGame to include keyboard
 function initGame() {
     targetWord = wordList[Math.floor(Math.random() * wordList.length)];
     attempts = 0;
+    currentGuess = "";
 
     const board = document.getElementById("game-board");
     board.innerHTML = "";
@@ -125,38 +230,8 @@ function initGame() {
         }
     }
 
-    document.getElementById("game-input").value = "";
+    renderKeyboard();
     document.getElementById("game-message").textContent = "";
-}
-
-function submitGuess() {
-    const input = document.getElementById("game-input");
-    const guess = input.value.toUpperCase();
-    if (guess.length !== 5) {
-        alert("Enter a 5-letter word!");
-        return;
-    }
-
-    for (let i = 0; i < 5; i++) {
-        const cell = document.getElementById(`cell-${attempts}-${i}`);
-        cell.textContent = guess[i];
-        if (guess[i] === targetWord[i]) {
-            cell.style.backgroundColor = "#6aaa64"; // correct
-        } else if (targetWord.includes(guess[i])) {
-            cell.style.backgroundColor = "#c9b458"; // present
-        } else {
-            cell.style.backgroundColor = "#787c7e"; // absent
-        }
-    }
-
-    attempts++;
-    input.value = "";
-
-    if (guess === targetWord) {
-        document.getElementById("game-message").textContent = "You guessed it!";
-    } else if (attempts >= 6) {
-        document.getElementById("game-message").textContent = `Game over! Word was ${targetWord}`;
-    }
 }
 
 // -----------------------------
