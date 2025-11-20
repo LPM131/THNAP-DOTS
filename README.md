@@ -20,13 +20,15 @@ The "DOTS" philosophy:
 - **15-Dot Main Grid**: Center-aligned 5x3 (desktop) or 3x5 (mobile) layout with hover/active animations
 - **Messaging System (Dot #1)**:
   - Floating thread dots with initials (e.g., "B" for Bot, "F1" for Friend 1)
-  - Smooth animations resembling watchOS apps
+  - Smooth animations resembling watchOS apps (static on mobile for iOS Chrome touch compatibility)
   - User selection → Chat thread → Message bubbles with read indicators
-  - Local storage for offline chat history
+  - Robust local storage with error handling for reliable offline usage
   - Back navigation keeps main grid hidden during chats
-- **Responsive Design**: Flexbox center-centers content on all screen sizes
-- **PWA Features**: Installable app icon, manifest for native feel
-- **Zero External Dependencies**: Custom-built with vanilla JavaScript, CSS, HTML
+- **Word Game (Dot #11)**:
+  - "Guess the word of the day" style puzzle
+  - 5-letter words with color-coded feedback (green/yellow/gray)
+  - 6 attempts, daily word changes
+  - Mobile-friendly touch interface
 
 ### 🚧 Future Expansions
 - **Additional Dots**: Calculator, to-do list, weather app, etc. - each expandable to full features
@@ -38,10 +40,11 @@ The "DOTS" philosophy:
 
 ## User Journey
 
-1. **Launch**: Centered dot grid loads instantly
-2. **Navigate**: Tap any dot (currently only "CHAT" active)
-3. **Messaging**: Floating dots give thread overview → Tap for chat → Send/receive with read receipts
-4. **Switch**: Back button returns seamlessly to main dots
+1. **Launch**: Centered dot grid loads instantly (💬 = Chat, 🔤 = Word Game)
+2. **Navigate**: Tap a feature dot (Chat and Word Game active)
+3. **Messaging (💬)**: Floating dots give thread overview → Tap for chat → Send/receive with read receipts
+4. **Word Game (🔤)**: 6 attempts to guess the 5-letter word of the day
+5. **Switch**: Back button returns seamlessly to main dots
 
 ## Technical Architecture
 
@@ -52,7 +55,7 @@ The "DOTS" philosophy:
 - `manifest.json`: PWA manifest for app-like installation
 
 ### Technologies
-- **Frontend**: Vanilla JavaScript, CSS Grid/Flexbox, ES6 Modules
+- **Frontend**: Vanilla JavaScript, CSS Grid/Flexbox
 - **Storage**: localStorage for user chats (upgradeable to IndexedDB)
 - **Deployment**: GitHub Pages for static hosting
 - **Future Backend**: Python Flask/Django with WebSockets (socket.io)
@@ -68,6 +71,11 @@ DOTS/
 ```
 
 ## Installation & Setup
+
+### Testing & Troubleshooting
+- **Local Testing**: Use `python -m http.server 8000` to serve over HTTP, avoiding CORS issues with PWA manifests.
+- **Mobile Compatibility**: Thread animations are static on mobile for iOS Chrome touch reliability.
+- **Storage Errors**: App handles localStorage limits gracefully with user alerts.
 
 ### Local Development
 1. Clone/download the files to a folder

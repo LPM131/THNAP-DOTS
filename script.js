@@ -3,13 +3,15 @@ let currentUser = null;
 function handleDot(id) {
   if (id === 1) {
     showChat();
+  } else if (id === 11) {
+    showGame();
   } else {
     alert('Dot ' + id + ' feature not implemented yet.');
   }
 }
 
 function showChat() {
-  document.getElementById('dots-grid').style.display = 'none';
+  document.querySelector('.dots-grid').style.display = 'none';
   document.getElementById('chat-modal').style.display = 'flex';
   document.getElementById('thread-dots').style.display = 'block';
   document.getElementById('chat-interface').style.display = 'none';
@@ -25,7 +27,7 @@ function selectThread(thread) {
 }
 
 function backToDots() {
-  document.getElementById('dots-grid').style.display = 'grid';
+  document.querySelector('.dots-grid').style.display = 'grid';
   document.getElementById('chat-modal').style.display = 'none';
   currentUser = null;
 }
@@ -76,5 +78,91 @@ function displayMessage(msg) {
   const isYou = msg.sender === 'You';
   messageDiv.innerHTML = `<p class="chat-message ${isYou ? 'you' : 'them'}"><strong>${msg.sender}:</strong> ${msg.text}</p>`;
   messages.appendChild(messageDiv);
-  messages.scrollTop = messages.scrollHeight;
+  messages.scrollTop = messages.scrollTop;
+}
+
+// Word Game Variables
+let wordOfTheDay = '';
+let currentAttempt = 0;
+const maxAttempts = 6;
+const gameWordLength = 5;
+const words = ['apple', 'grape', 'world', 'hello', 'beach', 'light', 'earth', 'swift', 'black', 'white'];
+
+function showGame() {
+  document.querySelector('.dots-grid').style.display = 'none';
+  document.getElementById('game-modal').style.display = 'flex';
+  initGame();
+}
+
+function initGame() {
+  // Pick word based on current date
+  const today = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24));
+  wordOfTheDay = words[today % words.length].toUpperCase();
+  currentAttempt = 0;
+  document.getElementById('game-board').innerHTML = '';
+  document.getElementById('game-input').value = '';
+  document.getElementById('game-message').textContent = '';
+
+  for (let i = 0; i < maxAttempts; i++) {
+    const row = document.createElement('div');
+    row.classList.add('game-row');
+    for (let j = 0; j < gameWordLength; j++) {
+      const cell = document.createElement('div');
+      cell.classList.add('game-letter');
+      row.appendChild(cell);
+    }
+    document.getElementById('game-board').appendChild(row);
+  }
+}
+
+function submitGuess() {
+  const input = document.getElementById('game-input');
+  const guess = input.value.toUpperCase().trim();
+  const message = document.getElementById('game-message');
+
+  if (guess.length !== gameWordLength) {
+    message.textContent = 'Please enter a 5-letter word.';
+    return;
+  }
+
+  if (currentAttempt >= maxAttempts) {
+    return;
+  }
+
+  const row = document.getElementById('game-board').children[currentAttempt];
+  for (let i = 0; i < gameWordLength; i++) {
+    const letter = row.children[i];
+    letter.textContent = guess[i];
+    if (wordOfTheDay[i] === guess[i]) {
+      letter.classList.add('correct');
+    } else if (wordOfTheDay.includes(guess[i])) {
+      letter.classList.add('present');
+    } else {
+      letter.classList.add('absent');
+    }
+  }
+
+  currentAttempt++;
+  input.value = '';
+
+  if (guess === wordOfTheDay) {
+    message.textContent = 'Congratulations! You win!';
+  } else if (currentAttempt >= maxAttempts) {
+    message.textContent = `Game over! The word was ${wordOfTheDay}.`;
+  }
+}
+
+// Handle enter key for submit
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('game-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      submitGuess();
+    }
+  });
+});
+
+function backToGameDots() {
+  document.querySelector('.dots-grid').style.display = 'grid';
+  document.getElementById('game-modal').style.display = 'none';
+  currentAttempt = 0;
 }
