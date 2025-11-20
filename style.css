@@ -306,7 +306,7 @@ body {
     height: 100%;
     background: white;
     z-index: 1000;
-    display: flex;
+    display: none;
     flex-direction: column;
 }
 
