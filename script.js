@@ -78,7 +78,7 @@ function displayMessage(msg) {
   const isYou = msg.sender === 'You';
   messageDiv.innerHTML = `<p class="chat-message ${isYou ? 'you' : 'them'}"><strong>${msg.sender}:</strong> ${msg.text}</p>`;
   messages.appendChild(messageDiv);
-  messages.scrollTop = messages.scrollTop;
+  messages.scrollTop = messages.scrollHeight;
 }
 
 // Word Game Variables
@@ -113,7 +113,7 @@ function initGame() {
     for (let j = 0; j < gameWordLength; j++) {
       const cell = document.createElement('div');
       cell.classList.add('game-letter');
-      cell.textContent = 'A'; // Placeholder for visibility
+      cell.textContent = '';
       row.appendChild(cell);
     }
     document.getElementById('game-board').appendChild(row);
@@ -162,6 +162,11 @@ function submitGuess() {
 
 // Handle enter key for submit
 document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('message-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  });
   document.getElementById('game-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       submitGuess();
