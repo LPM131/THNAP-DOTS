@@ -89,101 +89,98 @@ let wordOfTheDay = '';
 let currentAttempt = 0;
 const maxAttempts = 6;
 const gameWordLength = 5;
+
 const words = ['apple', 'grape', 'world', 'hello', 'beach', 'light', 'earth', 'swift', 'black', 'white'];
 
 function showGame() {
-  console.log('Showing game modal');
-  document.querySelector('.dots-grid').style.display = 'none';
-  document.body.style.overflow = 'hidden';
-  const modal = document.getElementById('game-modal');
-  modal.classList.remove('hidden');
-  modal.classList.add('force-show');
-  modal.offsetHeight; // Force reflow to ensure rendering
-  initGame();
+    document.querySelector('.dots-grid').style.display = 'none';
+    document.body.style.overflow = 'hidden';
+
+    const modal = document.getElementById('game-modal');
+    modal.classList.add('show');
+
+    initGame();
 }
 
 function initGame() {
-  console.log('Initializing game');
-  // Pick word based on current date
-  const today = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24));
-  wordOfTheDay = words[today % words.length].toUpperCase();
-  currentAttempt = 0;
-  document.getElementById('game-board').innerHTML = '';
-  document.getElementById('game-input').value = '';
-  document.getElementById('game-message').textContent = '';
+    // Pick daily word
+    const today = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24));
+    wordOfTheDay = words[today % words.length].toUpperCase();
 
-  for (let i = 0; i < maxAttempts; i++) {
-    const row = document.createElement('div');
-    row.classList.add('game-row');
-    for (let j = 0; j < gameWordLength; j++) {
-      const cell = document.createElement('div');
-      cell.classList.add('game-letter');
-      cell.textContent = '';
-      row.appendChild(cell);
+    currentAttempt = 0;
+
+    // Reset board and input
+    const board = document.getElementById('game-board');
+    board.innerHTML = '';
+
+    document.getElementById('game-input').value = '';
+    document.getElementById('game-message').textContent = '';
+
+    // Build board rows
+    for (let i = 0; i < maxAttempts; i++) {
+        const row = document.createElement('div');
+        row.classList.add('game-row');
+
+        for (let j = 0; j < gameWordLength; j++) {
+            const cell = document.createElement('div');
+            cell.classList.add('game-letter');
+            row.appendChild(cell);
+        }
+        board.appendChild(row);
     }
-    document.getElementById('game-board').appendChild(row);
-  }
-  console.log('Game board created with', maxAttempts, 'rows of', gameWordLength, 'letters');
-  console.log('Word of the day:', wordOfTheDay);
 }
 
 function submitGuess() {
-  console.log('Submit guess called');
-  const input = document.getElementById('game-input');
-  const guess = input.value.toUpperCase().trim();
-  const message = document.getElementById('game-message');
+    const input = document.getElementById('game-input');
+    const guess = input.value.toUpperCase().trim();
+    const message = document.getElementById('game-message');
 
-  if (guess.length !== gameWordLength) {
-    message.textContent = 'Please enter a 5-letter word.';
-    return;
-  }
-
-  if (currentAttempt >= maxAttempts) {
-    return;
-  }
-
-  const row = document.getElementById('game-board').children[currentAttempt];
-  for (let i = 0; i < gameWordLength; i++) {
-    const letter = row.children[i];
-    letter.textContent = guess[i];
-    if (wordOfTheDay[i] === guess[i]) {
-      letter.classList.add('correct');
-    } else if (wordOfTheDay.includes(guess[i])) {
-      letter.classList.add('present');
-    } else {
-      letter.classList.add('absent');
+    if (guess.length !== gameWordLength) {
+        message.textContent = 'Please enter a 5-letter word.';
+        return;
     }
-  }
 
-  currentAttempt++;
-  input.value = '';
+    if (currentAttempt >= maxAttempts) return;
 
-  if (guess === wordOfTheDay) {
-    message.textContent = 'Congratulations! You win!';
-  } else if (currentAttempt >= maxAttempts) {
-    message.textContent = `Game over! The word was ${wordOfTheDay}.`;
-  }
+    const row = document.getElementById('game-board').children[currentAttempt];
+
+    for (let i = 0; i < gameWordLength; i++) {
+        const letter = row.children[i];
+        letter.textContent = guess[i];
+
+        if (wordOfTheDay[i] === guess[i]) {
+            letter.classList.add('correct');
+        } else if (wordOfTheDay.includes(guess[i])) {
+            letter.classList.add('present');
+        } else {
+            letter.classList.add('absent');
+        }
+    }
+
+    currentAttempt++;
+    input.value = '';
+
+    if (guess === wordOfTheDay) {
+        message.textContent = '🎉 You win!';
+    } else if (currentAttempt >= maxAttempts) {
+        message.textContent = `Game over! The word was ${wordOfTheDay}.`;
+    }
 }
 
-// Handle enter key for submit
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('message-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  });
-  document.getElementById('game-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      submitGuess();
-    }
-  });
+    document.getElementById('game-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            submitGuess();
+        }
+    });
 });
 
 function backToGameDots() {
-  document.querySelector('.dots-grid').style.display = 'grid';
-  const modal = document.getElementById('game-modal');
-  modal.classList.remove('force-show');
-  modal.style.setProperty('display', 'none', 'important');
-  document.body.style.overflow = 'auto';
-  currentAttempt = 0;
+    document.querySelector('.dots-grid').style.display = 'grid';
+
+    const modal = document.getElementById('game-modal');
+    modal.classList.remove('show');
+
+    document.body.style.overflow = 'auto';
+    currentAttempt = 0;
 }

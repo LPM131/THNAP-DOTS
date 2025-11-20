@@ -167,8 +167,8 @@ body {
     display: none;
 }
 
-.force-show {
-    display: flex !important;
+.show {
+    display: flex;
 }
 
 .chat-header {
