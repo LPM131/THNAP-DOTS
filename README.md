@@ -74,8 +74,9 @@ DOTS/
 
 ### Testing & Troubleshooting
 - **Local Testing**: Use `python -m http.server 8000` to serve over HTTP, avoiding CORS issues with PWA manifests.
-- **Mobile Compatibility**: Thread animations are static on mobile for iOS Chrome touch reliability.
+- **Mobile Compatibility**: Animations disabled globally on mobile for improved iOS Chrome touch reliability (may have slower initial response than Safari).
 - **Storage Errors**: App handles localStorage limits gracefully with user alerts.
+- **File Opening**: Open via local server for full functionality; direct file:// may cause CORS/CSP issues.
 
 ### Local Development
 1. Clone/download the files to a folder
@@ -160,10 +161,11 @@ The "DOTS" philosophy:
 
 ## User Journey
 
-1. **Launch**: Centered dot grid loads instantly
-2. **Navigate**: Tap any dot (currently only "CHAT" active)
-3. **Messaging**: Floating dots give thread overview → Tap for chat → Send/receive with read receipts
-4. **Switch**: Back button returns seamlessly to main dots
+1. **Launch**: Centered dot grid loads instantly (💬 = Chat, 🔤 = Word Game)
+2. **Navigate**: Tap a feature dot (Chat and Word Game active)
+3. **Messaging (💬)**: Floating dots give thread overview → Tap for chat → Send/receive with read receipts
+4. **Word Game (🔤)**: 6 attempts to guess the daily 5-letter word with color feedback
+5. **Switch**: Back button returns seamlessly to main dots
 
 ## Technical Architecture
 
