@@ -3,6 +3,10 @@ body {
     padding: 0;
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .dots-grid {
@@ -11,12 +15,10 @@ body {
     grid-template-rows: repeat(3, 1fr);
     gap: 15px;
     padding: 20px;
-    height: 100vh;
     box-sizing: border-box;
     max-width: 600px;
-    margin: 0 auto;
+    margin: auto;
     justify-items: center;
-    justify-content: center;
 }
 
 /* Media query for mobile portrait */
