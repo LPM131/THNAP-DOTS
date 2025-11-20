@@ -113,7 +113,7 @@ function initGame() {
     for (let j = 0; j < gameWordLength; j++) {
       const cell = document.createElement('div');
       cell.classList.add('game-letter');
-      cell.textContent = '?'; // Placeholder for visibility
+      cell.textContent = 'A'; // Placeholder for visibility
       row.appendChild(cell);
     }
     document.getElementById('game-board').appendChild(row);
