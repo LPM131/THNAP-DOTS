@@ -116,17 +116,11 @@ function initGame() {
     document.getElementById('game-input').value = '';
     document.getElementById('game-message').textContent = '';
 
-    // Build board rows
-    for (let i = 0; i < maxAttempts; i++) {
-        const row = document.createElement('div');
-        row.classList.add('game-row');
-
-        for (let j = 0; j < gameWordLength; j++) {
-            const cell = document.createElement('div');
-            cell.classList.add('game-letter');
-            row.appendChild(cell);
-        }
-        board.appendChild(row);
+    // Build board cells
+    for (let i = 0; i < maxAttempts * gameWordLength; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('letter-box');
+        board.appendChild(cell);
     }
 }
 
@@ -142,10 +136,11 @@ function submitGuess() {
 
     if (currentAttempt >= maxAttempts) return;
 
-    const row = document.getElementById('game-board').children[currentAttempt];
+    const board = document.getElementById('game-board');
 
     for (let i = 0; i < gameWordLength; i++) {
-        const letter = row.children[i];
+        const cellIndex = currentAttempt * gameWordLength + i;
+        const letter = board.children[cellIndex];
         letter.textContent = guess[i];
 
         if (wordOfTheDay[i] === guess[i]) {
