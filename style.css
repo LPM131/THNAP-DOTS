@@ -168,7 +168,7 @@ body {
 }
 
 .force-show {
-    display: block !important;
+    display: flex !important;
 }
 
 .chat-header {
@@ -356,8 +356,8 @@ body {
     vertical-align: middle;
     font-size: 24px;
     font-weight: bold;
-    background: #cccccc;
-    color: black;
+    background: #333;
+    color: white;
     transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 

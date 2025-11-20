@@ -96,7 +96,8 @@ function showGame() {
   document.querySelector('.dots-grid').style.display = 'none';
   document.body.style.overflow = 'hidden';
   const modal = document.getElementById('game-modal');
-  modal.style.setProperty('display', 'flex', 'important');
+  modal.classList.remove('hidden');
+  modal.classList.add('force-show');
   modal.offsetHeight; // Force reflow to ensure rendering
   initGame();
 }
@@ -180,7 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function backToGameDots() {
   document.querySelector('.dots-grid').style.display = 'grid';
-  document.getElementById('game-modal').style.display = 'none';
+  const modal = document.getElementById('game-modal');
+  modal.classList.remove('force-show');
+  modal.style.setProperty('display', 'none', 'important');
   document.body.style.overflow = 'auto';
   currentAttempt = 0;
 }
