@@ -98,6 +98,7 @@ function showGame() {
   const modal = document.getElementById('game-modal');
   modal.style.display = 'flex';
   modal.classList.remove('hidden');
+  modal.offsetHeight; // Force reflow to ensure rendering
   initGame();
 }
 
