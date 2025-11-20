@@ -1,240 +1,174 @@
-<<<<<<< HEAD
-# DOTS - Innovative Dots-Based Messaging Platform
+DOTS – Innovative Dots-Based Messaging Platform
+Overview
 
-## Overview
+DOTS is a mobile-first Progressive Web App (PWA) that reimagines app interfaces using a "dots everywhere" concept. Every feature, function, and action is represented as a circular dot in a tactile, interactive grid. Inspired by Apple Watch aesthetics and modern minimalist design, DOTS prioritizes snappy response times, offline functionality, and user-friendly experiences.
 
-DOTS is a unique mobile-first Progressive Web App (PWA) that revolutionizes app interfaces with a "dots everywhere" concept. Instead of traditional buttons, menus, or tabs, every feature is represented by a clickable dot in a tactile, centered grid. Inspired by Apple Watch aesthetics and modern minimalist design, DOTS provides an intuitive, touch-focused experience perfect for mobile users.
+DOTS is entirely self-contained — users create an account, interact with chats, games, and features entirely inside the app, with no external apps or services required. Future backend integration may support real-time messaging, invite-only communities, and end-to-end encryption.
 
-## Core Concept
+Core Philosophy
 
-The "DOTS" philosophy:
-- **Every function is a dot**: Touch targets are uniform, centered circles
-- **No cluttered UI**: Clean, distraction-free screens
-- **Smooth transitions**: Seamless full-screen navigation between features
-- **Mobile-optimized**: Large dot sizes (90px on phones), animations, and PWA installability
-- **Customizable backend**: Ready for invite-only user management and real-time messaging
+Everything is a dot: All UI elements, interactions, and notifications are circular touch targets.
 
-## Key Features
+Self-contained functionality: The app works entirely in-browser/PWA; no external apps needed.
 
-### 🔥 Current Implementation
-- **15-Dot Main Grid**: Center-aligned 5x3 (desktop) or 3x5 (mobile) layout with hover/active animations
-- **Messaging System (Dot #1)**:
-  - Floating thread dots with initials (e.g., "B" for Bot, "F1" for Friend 1)
-  - Smooth animations resembling watchOS apps (static on mobile for iOS Chrome touch compatibility)
-  - User selection → Chat thread → Message bubbles with read indicators
-  - Robust local storage with error handling for reliable offline usage
-  - Back navigation keeps main grid hidden during chats
-- **Word Game (Dot #11)**:
-  - "Guess the word of the day" style puzzle
-  - 5-letter words with color-coded feedback (green/yellow/gray)
-  - 6 attempts, daily word changes
-  - Mobile-friendly touch interface
+Snappy UX: Instant response times, smooth animations, and minimal lag.
 
-### 🚧 Future Expansions
-- **Additional Dots**: Calculator, to-do list, weather app, etc. - each expandable to full features
-- **Authentication**: Invite-based login system for private communities
-- **Server Integration**: Real-time messaging with WebSockets on user's personal server
-- **Privacy**: E2E encryption for secure chats
-- **Notifications**: Push alerts for new messages
-- **Customization**: User themes, dot icons (initials to Bitmojis)
+Mobile-first: Optimized for phones and tablets with touch-friendly layouts and gestures.
 
-## User Journey
+Offline-first: Local storage (or IndexedDB) ensures core functionality without internet access.
 
-1. **Launch**: Centered dot grid loads instantly (💬 = Chat, 🔤 = Word Game)
-2. **Navigate**: Tap a feature dot (Chat and Word Game active)
-3. **Messaging (💬)**: Floating dots give thread overview → Tap for chat → Send/receive with read receipts
-4. **Word Game (🔤)**: 6 attempts to guess the 5-letter word of the day
-5. **Switch**: Back button returns seamlessly to main dots
+User Flow
 
-## Technical Architecture
+Launch App: Centered dot grid loads instantly (3×5 on mobile).
 
-### Files
-- `index.html`: Semantic HTML structure with viewport meta for mobile
-- `style.css`: Responsive grid layout, dot animations, PWA styling
-- `script.js`: Dot interactions, chat logic, local storage management
-- `manifest.json`: PWA manifest for app-like installation
+Navigate: Tap any dot to open its feature — e.g., chat (💬) or word game (🔤).
 
-### Technologies
-- **Frontend**: Vanilla JavaScript, CSS Grid/Flexbox
-- **Storage**: localStorage for user chats (upgradeable to IndexedDB)
-- **Deployment**: GitHub Pages for static hosting
-- **Future Backend**: Python Flask/Django with WebSockets (socket.io)
+Messaging (💬): Floating chat thread dots move freely like Apple Watch apps; tap a dot to open a conversation.
 
-### Directory Structure
-```
+Word Game (🔤): Interactive daily 5-letter word puzzle with flip animations and 6 attempts.
+
+Back Navigation: Return seamlessly to the main dot grid from any feature.
+
+Features
+🔹 Current Implementation
+
+Main Grid:
+
+15-dot grid (3×5 on mobile) with tactile, centered dots.
+
+Large touch targets (~90px) for mobile-friendly navigation.
+
+Messaging System:
+
+Chat threads represented as floating, draggable dots inside the chat modal.
+
+Apple Watch–style physics: smooth movement, bounce at container edges, and persistence of positions.
+
+Tap a dot to open the conversation interface.
+
+Local storage preserves chat history.
+
+Word Game:
+
+Daily 5-letter word puzzle, 6 attempts per day.
+
+Flip animations reveal correct/present/absent letters.
+
+Offline-compatible and touch-optimized.
+
+🔹 Future Plans
+
+Invite-only authentication: Simple, app-contained invite system for private communities.
+
+Real-time messaging: Optional backend for live chat.
+
+End-to-end encryption: Secure chat storage and transmission.
+
+Additional dots: Calculator, to-do list, weather, and more, all using the dot paradigm.
+
+Custom themes and dot icons: Initials, Bitmojis, or user-defined visuals.
+
+Interactive notifications: Unread badges, context menus, and tap animations.
+
+DOTS Rules & Guidelines
+1️⃣ Core Rules
+
+All interactions must be represented by dots whenever possible.
+
+The app must run entirely within the PWA — no external applications required.
+
+Prioritize snappy response times and user-friendly interaction.
+
+Local storage ensures offline access.
+
+2️⃣ Messaging Rules
+
+Each chat thread is a draggable, floating dot.
+
+Dots bounce at edges and avoid overlapping where possible.
+
+Tap a dot to open chat; back button restores floating dot view.
+
+Dot positions and chat history persist locally.
+
+3️⃣ Word Game Rules
+
+6×5 letter grid with flip animations on guesses.
+
+Game must be fully functional offline.
+
+Letter feedback uses color-coding (green, yellow, gray).
+
+4️⃣ Design Rules
+
+Uniform dot size: ~90px on mobile; consistent design language.
+
+Minimalist interface: Clean screens with no unnecessary clutter.
+
+Animations & feedback: Subtle float, bounce, or pulse effects that do not impact performance.
+
+Responsive layout: Works on different mobile screen sizes, defaulting to 3×5 grid.
+
+5️⃣ Development Guidelines
+
+Use vanilla JavaScript, HTML, and CSS to maintain speed and light weight.
+
+New dots/features must be self-contained — no dependencies on external services.
+
+Maintain backward compatibility for existing users’ chats, game progress, and dot positions.
+
+Technical Architecture
+
+Files
+
 DOTS/
-├── index.html
-├── style.css
-├── script.js
-├── manifest.json
+├── index.html          # Main structure
+├── style.css           # Responsive grid, animations, dot styles
+├── script.js           # Dot interactions, chat & game logic
+├── manifest.json       # PWA manifest
 └── README.md
-```
 
-## Installation & Setup
 
-### Testing & Troubleshooting
-- **Local Testing**: Use `python -m http.server 8000` to serve over HTTP, avoiding CORS issues with PWA manifests.
-- **Mobile Compatibility**: Animations disabled globally on mobile for improved iOS Chrome touch reliability (may have slower initial response than Safari).
-- **Storage Errors**: App handles localStorage limits gracefully with user alerts.
-- **File Opening**: Open via local server for full functionality; direct file:// may cause CORS/CSP issues.
+Technologies:
 
-### Local Development
-1. Clone/download the files to a folder
-2. Open `index.html` in any modern web browser (Chrome recommended)
-3. Use developer tools to test mobile view (Ctrl+Shift+M in Chrome)
+Vanilla JavaScript, CSS Grid/Flexbox, HTML5
 
-### Production Deployment
-1. Upload files to GitHub repository
-2. Enable GitHub Pages in repo Settings → Pages → Deploy from main branch
-3. App available at `https://[username].github.io/[repo-name]`
-4. Install as PWA on mobile devices
+localStorage (upgradeable to IndexedDB)
 
-## Design Decisions
+PWA-first deployment
 
-- **Dots as HR**: Revolutionizes UI by removing text-based clutter
-- **No Frameworks**: Ensures lightweight, fast performance
-- **Modal Visibility Control**: Modals default to `display: none` in CSS, controlled solely by JavaScript `element.style.display` assignments. Keeps visibility specification clean and prevents accidental overrides.
-- **Local Storage**: Enables offline access; scales to backend database
-- **Animations**: CSS keyframes for smooth, watch-inspired movements
-- **PWA First**: Instant loading, app-like experience without app store
+Deployment:
 
-## Privacy & Security Notes
+Local testing: python -m http.server 8000
 
-- Current: No data sharing; all local storage
-- Future: End-to-end encryption (Olm/Signal libraries) + server-side audit logs
-- No tracking or external APIs used
+Production: GitHub Pages or personal server
 
-## Contributing
+Installation & Setup
 
-DOTS encourages experimentation with dot-based interfaces. Future contributions could include:
-- New dot features (extend `handleDot()` function)
-- Animation variations in CSS
-- Backend integration guides
-- Custom theme support
+Clone or download the repository.
 
-## Credits
+Open index.html in a modern web browser (Chrome recommended).
 
-Built from scratch to demonstrate unique mobile interaction patterns. Inspired by Apple's watchOS and modern MD design guidelines.
+Test mobile view using developer tools.
 
-## License
+Install as PWA for app-like experience.
 
-Open-source under MIT License - use and modify freely.
+Contributing
 
----
+New features must adhere to the DOTS paradigm.
 
-=======
-# DOTS - Innovative Dots-Based Messaging Platform
+Prioritize performance, user-friendliness, and offline functionality.
 
-## Overview
+Follow design rules and ensure dot consistency across the interface.
 
-DOTS is a unique mobile-first Progressive Web App (PWA) that revolutionizes app interfaces with a "dots everywhere" concept. Instead of traditional buttons, menus, or tabs, every feature is represented by a clickable dot in a tactile, centered grid. Inspired by Apple Watch aesthetics and modern minimalist design, DOTS provides an intuitive, touch-focused experience perfect for mobile users.
+Privacy & Security
 
-## Core Concept
+Current: Data stored locally; no external tracking.
 
-The "DOTS" philosophy:
-- **Every function is a dot**: Touch targets are uniform, centered circles
-- **No cluttered UI**: Clean, distraction-free screens
-- **Smooth transitions**: Seamless full-screen navigation between features
-- **Mobile-optimized**: Large dot sizes (90px on phones), animations, and PWA installability
-- **Customizable backend**: Ready for invite-only user management and real-time messaging
+Future: E2E encryption and optional server storage.
 
-## Key Features
+Invite-based authentication will control access while maintaining privacy.
 
-### 🔥 Current Implementation
-- **15-Dot Main Grid**: Center-aligned 5x3 (desktop) or 3x5 (mobile) layout with hover/active animations
-- **Messaging System (Dot #1)**:
-  - Floating thread dots with initials (e.g., "B" for Bot, "F1" for Friend 1)
-  - Smooth animations resembling watchOS apps
-  - User selection → Chat thread → Message bubbles with read indicators
-  - Local storage for offline chat history
-  - Back navigation keeps main grid hidden during chats
-- **Responsive Design**: Flexbox center-centers content on all screen sizes
-- **PWA Features**: Installable app icon, manifest for native feel
-- **Zero External Dependencies**: Custom-built with vanilla JavaScript, CSS, HTML
+License
 
-### 🚧 Future Expansions
-- **Additional Dots**: Calculator, to-do list, weather app, etc. - each expandable to full features
-- **Authentication**: Invite-based login system for private communities
-- **Server Integration**: Real-time messaging with WebSockets on user's personal server
-- **Privacy**: E2E encryption for secure chats
-- **Notifications**: Push alerts for new messages
-- **Customization**: User themes, dot icons (initials to Bitmojis)
-
-## User Journey
-
-1. **Launch**: Centered dot grid loads instantly (💬 = Chat, 🔤 = Word Game)
-2. **Navigate**: Tap a feature dot (Chat and Word Game active)
-3. **Messaging (💬)**: Floating dots give thread overview → Tap for chat → Send/receive with read receipts
-4. **Word Game (🔤)**: 6 attempts to guess the daily 5-letter word with color feedback
-5. **Switch**: Back button returns seamlessly to main dots
-
-## Technical Architecture
-
-### Files
-- `index.html`: Semantic HTML structure with viewport meta for mobile
-- `style.css`: Responsive grid layout, dot animations, PWA styling
-- `script.js`: Dot interactions, chat logic, local storage management
-- `manifest.json`: PWA manifest for app-like installation
-
-### Technologies
-- **Frontend**: Vanilla JavaScript, CSS Grid/Flexbox, ES6 Modules
-- **Storage**: localStorage for user chats (upgradeable to IndexedDB)
-- **Deployment**: GitHub Pages for static hosting
-- **Future Backend**: Python Flask/Django with WebSockets (socket.io)
-
-### Directory Structure
-```
-DOTS/
-├── index.html
-├── style.css
-├── script.js
-├── manifest.json
-└── README.md
-```
-
-## Installation & Setup
-
-### Local Development
-1. Clone/download the files to a folder
-2. Open `index.html` in any modern web browser (Chrome recommended)
-3. Use developer tools to test mobile view (Ctrl+Shift+M in Chrome)
-
-### Production Deployment
-1. Upload files to GitHub repository
-2. Enable GitHub Pages in repo Settings → Pages → Deploy from main branch
-3. App available at `https://[username].github.io/[repo-name]`
-4. Install as PWA on mobile devices
-
-## Design Decisions
-
-- **Dots as HR**: Revolutionizes UI by removing text-based clutter
-- **No Frameworks**: Ensures lightweight, fast performance
-- **Local Storage**: Enables offline access; scales to backend database
-- **Animations**: CSS keyframes for smooth, watch-inspired movements
-- **PWA First**: Instant loading, app-like experience without app store
-
-## Privacy & Security Notes
-
-- Current: No data sharing; all local storage
-- Future: End-to-end encryption (Olm/Signal libraries) + server-side audit logs
-- No tracking or external APIs used
-
-## Contributing
-
-DOTS encourages experimentation with dot-based interfaces. Future contributions could include:
-- New dot features (extend `handleDot()` function)
-- Animation variations in CSS
-- Backend integration guides
-- Custom theme support
-
-## Credits
-
-Built from scratch to demonstrate unique mobile interaction patterns. Inspired by Apple's watchOS and modern MD design guidelines.
-
-## License
-
-Open-source under MIT License - use and modify freely.
-
----
-
->>>>>>> 4d95fced841007688ee5a996d91f7e151ae464c5
+Open-source under the MIT License — modify and use freely.
