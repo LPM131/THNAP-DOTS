@@ -51,136 +51,123 @@ function handleDot(id) {
 
 // -----------------------------
 // BACK BUTTONS
-// -----------------------------
-function backToDots() {
-    document.getElementById("chat-modal").classList.add("hidden");
-    grid.classList.remove("hidden");
+// --- Wordle Setup ---
+const WORD = "APPLE";  // For testing, can be randomized later
+let guesses = [];
+let currentGuess = "";
+
+const board = document.getElementById("game-board");
+const keyboardContainer = document.getElementById("virtual-keyboard");
+const message = document.getElementById("game-message");
+
+// Create grid tiles (6 rows × 5 letters)
+for (let i = 0; i < 6 * 5; i++) {
+    const tile = document.createElement("div");
+    tile.classList.add("tile");
+    board.appendChild(tile);
 }
 
-function backToGameDots() {
-    document.getElementById("game-modal").classList.add("hidden");
-    grid.classList.remove("hidden");
-}
+// Create virtual keyboard
+const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+rows.forEach((row) => {
+    const rowDiv = document.createElement("div");
+    rowDiv.style.display = "grid";
+    rowDiv.style.gridTemplateColumns = `repeat(${row.length}, 1fr)`;
+    rowDiv.style.gap = "5px";
 
-// -----------------------------
-// CHAT SYSTEM
-// -----------------------------
-const threads = {
-    "Bot": [],
-    "Friend 1": [],
-    "Friend 2": []
-};
-
-let currentThread = null;
-
-function selectThread(name) {
-    currentThread = name;
-    document.getElementById("thread-dots").classList.add("hidden");
-    document.getElementById("chat-interface").classList.remove("hidden");
-    renderMessages();
-}
-
-function sendMessage() {
-    const input = document.getElementById("message-input");
-    const msg = input.value.trim();
-    if (!msg || !currentThread) return;
-    
-    threads[currentThread].push({ text: msg, sender: "You" });
-    input.value = "";
-    renderMessages();
-}
-
-function renderMessages() {
-    const messagesDiv = document.getElementById("messages");
-    messagesDiv.innerHTML = "";
-    if (!currentThread) return;
-    threads[currentThread].forEach(m => {
-        const div = document.createElement("div");
-        div.textContent = `${m.sender}: ${m.text}`;
-        div.classList.add("message");
-        messagesDiv.appendChild(div);
+    [...row].forEach((char) => {
+        const key = document.createElement("div");
+        key.classList.add("key");
+        key.textContent = char;
+        key.addEventListener("click", () => handleKey(char));
+        rowDiv.appendChild(key);
     });
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    // Add backspace key on last row
+    if (row === "ZXCVBNM") {
+        const backKey = document.createElement("div");
+        backKey.classList.add("key");
+        backKey.textContent = "⌫";
+        backKey.addEventListener("click", () => handleKey("BACK"));
+        rowDiv.appendChild(backKey);
+
+        const enterKey = document.createElement("div");
+        enterKey.classList.add("key");
+        enterKey.textContent = "ENTER";
+        enterKey.addEventListener("click", () => handleKey("ENTER"));
+        rowDiv.appendChild(enterKey);
+    }
+
+    keyboardContainer.appendChild(rowDiv);
+});
+
+// Handle key presses
+function handleKey(key) {
+    if (key === "BACK") {
+        currentGuess = currentGuess.slice(0, -1);
+    } else if (key === "ENTER") {
+        submitGuess();
+    } else if (currentGuess.length < 5) {
+        currentGuess += key;
+    }
+    updateBoard();
 }
 
-// -----------------------------
-// CHAT SYSTEM: Floating Dots
-// -----------------------------
-const threadsData = {
-    "Bot": { x: 50, y: 50 },
-    "Friend 1": { x: 150, y: 50 },
-    "Friend 2": { x: 250, y: 50 }
-};
-
-const container = document.getElementById("thread-dots");
-const velocities = {}; // vx, vy for each thread
-
-function renderThreadDots() {
-    container.innerHTML = "";
-
-    Object.keys(threadsData).forEach(name => {
-        const dot = document.createElement("div");
-        dot.classList.add("thread-dot", "floating");
-        dot.textContent = name[0]; // initial
-        dot.style.left = threadsData[name].x + "px";
-        dot.style.top = threadsData[name].y + "px";
-
-        // Tap to open chat
-        dot.addEventListener("click", () => selectThread(name));
-
-        // Drag support
-        let offsetX, offsetY, dragging = false;
-
-        dot.addEventListener("mousedown", startDrag);
-        dot.addEventListener("touchstart", startDrag, { passive: false });
-
-        function startDrag(e) {
-            e.preventDefault();
-            dragging = true;
-            dot.dataset.dragging = "true";
-            const rect = dot.getBoundingClientRect();
-            const parentRect = container.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            offsetX = clientX - rect.left;
-            offsetY = clientY - rect.top;
-
-            document.addEventListener("mousemove", drag);
-            document.addEventListener("mouseup", endDrag);
-            document.addEventListener("touchmove", drag, { passive: false });
-            document.addEventListener("touchend", endDrag);
+// Update grid tiles
+function updateBoard() {
+    const allTiles = board.querySelectorAll(".tile");
+    for (let row = 0; row < 6; row++) {
+        for (let col = 0; col < 5; col++) {
+            const tile = allTiles[row * 5 + col];
+            if (row < guesses.length) {
+                tile.textContent = guesses[row][col];
+                tile.style.backgroundColor = getTileColor(guesses[row][col], col);
+            } else if (row === guesses.length) {
+                tile.textContent = currentGuess[col] || "";
+                tile.style.backgroundColor = "#ddd";
+            } else {
+                tile.textContent = "";
+                tile.style.backgroundColor = "#ddd";
+            }
         }
-
-        function drag(e) {
-            if (!dragging) return;
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const parentRect = container.getBoundingClientRect();
-
-            let x = clientX - parentRect.left - offsetX;
-            let y = clientY - parentRect.top - offsetY;
-
-            // Keep inside container
-            x = Math.max(0, Math.min(parentRect.width - 60, x));
-            y = Math.max(0, Math.min(parentRect.height - 60, y));
-
-            dot.style.left = x + "px";
-            dot.style.top = y + "px";
-        }
-
-        function endDrag() {
-            dragging = false;
-            dot.dataset.dragging = "false";
-            localStorage.setItem("threadsPos", JSON.stringify(threadsData));
-            document.removeEventListener("mousemove", drag);
-            document.removeEventListener("mouseup", endDrag);
-            document.removeEventListener("touchmove", drag, { passive: false });
-            document.removeEventListener("touchend", endDrag);
-        }
-
-        container.appendChild(dot);
-    });
+    }
 }
+
+// Simple tile coloring logic
+function getTileColor(char, idx) {
+    if (WORD[idx] === char) return "#6aaa64"; // Green
+    else if (WORD.includes(char)) return "#c9b458"; // Yellow
+    else return "#787c7e"; // Gray
+}
+
+// Submit guess
+function submitGuess() {
+    if (currentGuess.length < 5) {
+        message.textContent = "Word must be 5 letters!";
+        return;
+    }
+    guesses.push(currentGuess);
+    currentGuess = "";
+    updateBoard();
+    if (guesses[guesses.length - 1] === WORD) {
+        message.textContent = "🎉 You guessed it!";
+    } else if (guesses.length === 6) {
+        message.textContent = `😢 The word was: ${WORD}`;
+    } else {
+        message.textContent = "";
+    }
+}
+
+// Responsive adjustment
+function resizeGame() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const gridSize = Math.min(vw * 0.9, vh * 0.5);
+    board.style.width = gridSize + "px";
+    keyboardContainer.style.width = gridSize + "px";
+}
+window.addEventListener("resize", resizeGame);
+resizeGame();
 
 // -----------------------------
 // Physics variables for floating dots
