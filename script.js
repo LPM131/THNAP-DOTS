@@ -128,100 +128,173 @@ function updateDots() {
 }
 
 
-// ---------------------------
-// WORDLE MODULE
-// ---------------------------
-const WORDS = ["APPLE", "CRANE", "BRAIN", "CHESS", "FLAME", "GRAPE"];
-let todayWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-let guesses = [];
-let current = "";
+// ------------------------------
+// WORDLE 100% CLEAN MODULE
+// ------------------------------
 
+const WORD_LIST = ["APPLE", "BANJO", "CRANE", "DANCE", "ELITE", "FLAME", "GRAPE"];
 
-function openWordle() {
-    wordleModal.classList.remove("hidden");
-    setupBoard();
-    setupKeyboard();
+function getWordOfTheDay() {
+    const start = new Date("2025-01-01");
+    const today = new Date();
+    const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+    return WORD_LIST[diff % WORD_LIST.length];
 }
 
-function setupBoard() {
+let WORD = getWordOfTheDay();
+let guesses = [];
+let currentGuess = "";
+
+// Elements (shared from globals)
+const message = gameMsg;
+
+// ------------------------------
+// Init board (30 tiles)
+// ------------------------------
+function initBoard() {
     board.innerHTML = "";
     for (let i = 0; i < 30; i++) {
-        const t = document.createElement("div");
-        t.classList.add("tile");
-        board.appendChild(t);
+        const tile = document.createElement("div");
+        tile.classList.add("tile");
+        const span = document.createElement("span");
+        tile.appendChild(span);
+        board.appendChild(tile);
     }
 }
 
-function setupKeyboard() {
+// ------------------------------
+// Init Keyboard
+// ------------------------------
+function initKeyboard() {
     keyboard.innerHTML = "";
 
-    const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+    const keys = [
+        "QWERTYUIOP",
+        "ASDFGHJKL",
+        "ZXCVBNM"
+    ];
 
-    rows.forEach(r => {
-        const row = document.createElement("div");
-        row.classList.add("keyboard-row");
+    keys.forEach(row => {
+        const rowDiv = document.createElement("div");
+        rowDiv.classList.add("keyboard-row");
 
-        r.split("").forEach(c => {
-            const key = document.createElement("div");
-            key.classList.add("key");
-            key.textContent = c;
-            key.addEventListener("click", () => pressKey(c));
-            row.appendChild(key);
-        });
-
-        if (r === "ZXCVBNM") {
-            const back = document.createElement("div");
-            back.classList.add("key");
-            back.textContent = "⌫";
-            back.onclick = () => pressKey("BACK");
-            row.appendChild(back);
-
-            const enter = document.createElement("div");
-            enter.classList.add("key");
-            enter.textContent = "ENTER";
-            enter.onclick = () => pressKey("ENTER");
-            row.appendChild(enter);
+        if (row === "ZXCVBNM") {
+            addKey(rowDiv, "ENTER", "wide");
         }
 
-        keyboard.appendChild(row);
+        [...row].forEach(k => addKey(rowDiv, k));
+
+        if (row === "ZXCVBNM") {
+            addKey(rowDiv, "⌫", "wide");
+        }
+
+        keyboard.appendChild(rowDiv);
     });
 }
 
-function pressKey(k) {
-    if (k === "BACK") current = current.slice(0, -1);
-
-    else if (k === "ENTER") submitGuess();
-
-    else if (current.length < 5) current += k;
-
-    renderBoard();
+function addKey(rowDiv, char, wide = "") {
+    const key = document.createElement("div");
+    key.classList.add("key");
+    if (wide) key.classList.add(wide);
+    key.textContent = char;
+    key.onclick = () => handleKey(char);
+    rowDiv.appendChild(key);
 }
 
-function renderBoard() {
-    const tiles = document.querySelectorAll(".tile");
+// ------------------------------
+// Key handling
+// ------------------------------
+function handleKey(k) {
+    if (k === "⌫") {
+        currentGuess = currentGuess.slice(0, -1);
+        updateBoard();
+        return;
+    }
 
-    for (let r = 0; r < 6; r++) {
-        for (let c = 0; c < 5; c++) {
-            const t = tiles[r * 5 + c];
+    if (k === "ENTER") {
+        submitGuess();
+        return;
+    }
 
-            if (r < guesses.length) t.textContent = guesses[r][c];
-            else if (r === guesses.length) t.textContent = current[c] || "";
-            else t.textContent = "";
+    if (currentGuess.length < 5) {
+        currentGuess += k;
+        updateBoard();
+    }
+}
+
+// ------------------------------
+// Update Board
+// ------------------------------
+function updateBoard() {
+    const tiles = [...document.querySelectorAll(".tile span")];
+
+    for (let i = 0; i < 30; i++) {
+        let row = Math.floor(i / 5);
+
+        if (row < guesses.length) {
+            tiles[i].textContent = guesses[row][i % 5];
+        } else if (row === guesses.length) {
+            tiles[i].textContent = currentGuess[i % 5] || "";
+        } else {
+            tiles[i].textContent = "";
         }
     }
 }
 
+// ------------------------------
+// Submit guess
+// ------------------------------
 function submitGuess() {
-    if (current.length !== 5) {
-        gameMsg.textContent = "Must be 5 letters.";
+    if (currentGuess.length < 5) {
+        message.textContent = "Not enough letters.";
         return;
     }
 
-    guesses.push(current);
-    if (current === todayWord) {
-        gameMsg.textContent = "🎉 Correct!";
-    }
+    const guess = currentGuess;
+    guesses.push(guess);
+    currentGuess = "";
+    message.textContent = "";
 
-    current = "";
-    renderBoard();
+    revealGuess(guess, guesses.length - 1);
+}
+
+// ------------------------------
+// Reveal animation & coloring
+// ------------------------------
+function revealGuess(guess, row) {
+    const tiles = [...document.querySelectorAll(".tile")];
+    const rowTiles = tiles.slice(row * 5, row * 5 + 5);
+
+    [...guess].forEach((char, i) => {
+        setTimeout(() => {
+            rowTiles[i].classList.add("flip");
+
+            if (WORD[i] === char) rowTiles[i].classList.add("correct");
+            else if (WORD.includes(char)) rowTiles[i].classList.add("present");
+            else rowTiles[i].classList.add("absent");
+
+            rowTiles[i].querySelector("span").textContent = char;
+
+            if (i === 4) checkEndGame(guess);
+
+        }, i * 300);
+    });
+}
+
+function checkEndGame(guess) {
+    if (guess === WORD) {
+        message.textContent = "🎉 You got it!";
+    } else if (guesses.length === 6) {
+        message.textContent = `The word was: ${WORD}`;
+    }
+}
+
+// ------------------------------
+// Initialize on modal open
+// ------------------------------
+function openWordle() {
+    wordleModal.classList.remove("hidden");
+    initBoard();
+    initKeyboard();
+    updateBoard();
 }
