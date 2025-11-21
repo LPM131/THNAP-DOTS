@@ -117,62 +117,16 @@ body, html {
     flex: 1;
 }
 
-/* KEYBOARD */
-#keyboard {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.keyboard-row {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-}
-
-.key {
-    padding: 14px;
-    background: #bbb;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.key:active {
-    background: #999;
-}
-
-button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background-color: #007aff;
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-button:active {
-    background-color: #005bb5;
-}
-
+/* GAME BOARD */
 #game-board {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, 1fr);  /* 5 columns */
     gap: 8px;  /* Space out the tiles a little more */
-    width: min(90vw, 380px);
-    height: auto; /* Allow dynamic height scaling */
-    max-height: 320px;
+    width: 90vw;  /* 90% of the viewport width */
+    max-width: 380px;  /* Restrict max width to avoid cramming */
+    height: auto;
+    max-height: 320px;  /* Maintain consistent height */
     margin-top: 15px;
-}
-
-/* Board is 6 rows × 5 columns */
-#game-board {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    width: 90vw;
-    max-width: 350px;
 }
 
 .tile {
@@ -183,16 +137,11 @@ button:active {
     display: flex;
     justify-content: center;
     align-items: center;
-
-    font-size: clamp(20px, 6vw, 36px);
+    font-size: clamp(20px, 6vw, 36px);  /* Adjust font size */
     font-weight: bold;
     text-transform: uppercase;
-    height: 60px;  /* Make sure height is fixed to avoid distortion */
-    width: 60px;   /* Consistent width for all tiles */
-}
-
-.tile span {
-    position: absolute;
+    height: 60px;  /* Fixed height */
+    width: 60px;   /* Fixed width */
 }
 
 /* Flip animation */
@@ -211,18 +160,19 @@ button:active {
 .present { background: #c9b458 !important; border-color: #c9b458 !important; color: white !important; }
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
 
+/* KEYBOARD */
 #keyboard {
     display: grid;
-    grid-template-columns: repeat(10, 1fr); /* 10 columns for full width */
+    grid-template-columns: repeat(10, 1fr);  /* 10 columns for full width */
     gap: 6px;
-    width: 90%;       /* Reduce width to prevent cramming */
-    max-width: 480px; /* Maximum width on larger screens */
+    width: 90vw;  /* 90% width */
+    max-width: 480px;  /* Restrict max width */
     margin: 0 auto 10px auto;  /* Center the keyboard properly */
 }
 
 .keyboard-row {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);  /* Same grid structure */
+    grid-template-columns: repeat(10, 1fr);  /* 10 columns */
     gap: 6px;
 }
 
@@ -233,11 +183,7 @@ button:active {
     font-weight: bold;
     text-align: center;
     user-select: none;
-    font-size: clamp(18px, 5vw, 28px); /* Increase size of the keys */
-}
-
-.key.wide {
-    grid-column: span 2;  /* Make wide keys a bit more spacious */
+    font-size: clamp(18px, 5vw, 28px);  /* Increase size of the keys */
 }
 
 /* Special size for backspace key */
