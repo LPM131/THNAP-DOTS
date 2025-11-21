@@ -120,12 +120,12 @@ body, html {
 /* GAME BOARD */
 #game-board {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);  /* 5 columns */
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;  /* Space out the tiles a little more */
     width: 90vw;  /* 90% of the viewport width */
     max-width: 380px;  /* Restrict max width to avoid cramming */
     height: auto;
-    max-height: 320px;  /* Maintain consistent height */
+    max-height: 260px;  /* Maintain consistent height, reduced for spacing */
     margin-top: 15px;
 }
 
@@ -173,7 +173,6 @@ body, html {
 .keyboard-row {
     display: flex;  /* Flex row for each keyboard row */
     gap: 6px;  /* Space between keys in row */
-    justify-content: center;  /* Center keys horizontally */
 }
 
 .key {
