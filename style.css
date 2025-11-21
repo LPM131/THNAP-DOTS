@@ -156,19 +156,14 @@ button:active {
     background-color: #005bb5;
 }
 
-/* --- Perfect Wordle Board Scaling --- */
 #game-board {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-
-    /* The secret:
-       Board total height = 6 rows * tile-size + spacing
-    */
+    gap: 8px;  /* Space out the tiles a little more */
     width: min(90vw, 380px);
-    height: min(60vh, 320px);
-
-    margin-top: 10px;
+    height: auto; /* Allow dynamic height scaling */
+    max-height: 320px;
+    margin-top: 15px;
 }
 
 /* Board is 6 rows × 5 columns */
@@ -187,11 +182,13 @@ button:active {
     position: relative;
     display: flex;
     justify-content: center;
-    align-items: center;   /* THIS fixes vertical centering */
+    align-items: center;
 
     font-size: clamp(20px, 6vw, 36px);
     font-weight: bold;
     text-transform: uppercase;
+    height: 60px;  /* Make sure height is fixed to avoid distortion */
+    width: 60px;   /* Consistent width for all tiles */
 }
 
 .tile span {
@@ -214,40 +211,39 @@ button:active {
 .present { background: #c9b458 !important; border-color: #c9b458 !important; color: white !important; }
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
 
-/* --- KEYBOARD --- */
 #keyboard {
-    width: 100%;
-    max-width: 500px;
-
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); /* 10 columns for full width */
     gap: 6px;
-
-    padding-bottom: env(safe-area-inset-bottom, 12px);
-
-    /* Keep within screen */
-    height: auto;
-    margin-top: auto;
+    width: 90%;       /* Reduce width to prevent cramming */
+    max-width: 480px; /* Maximum width on larger screens */
+    margin: 0 auto 10px auto;  /* Center the keyboard properly */
 }
 
 .keyboard-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    grid-template-columns: repeat(10, 1fr);  /* Same grid structure */
     gap: 6px;
 }
 
 .key {
     background: #d3d6da;
-    padding: 14px 6px;
-    border-radius: 6px;
+    padding: 20px 10px;  /* More padding for larger keys */
+    border-radius: 8px;
     font-weight: bold;
     text-align: center;
     user-select: none;
-    font-size: clamp(14px, 4vw, 20px);
+    font-size: clamp(18px, 5vw, 28px); /* Increase size of the keys */
 }
 
 .key.wide {
-    grid-column: span 2;
+    grid-column: span 2;  /* Make wide keys a bit more spacious */
+}
+
+/* Special size for backspace key */
+.key.wide-backspace {
+    padding: 20px 15px;
+    font-size: clamp(16px, 4vw, 26px); /* Resize backspace key */
 }
 
 /* Message */
