@@ -221,3 +221,35 @@ body, html {
     font-weight: bold;
     color: #333;
 }
+
+/* --- POKEMON --- */
+.pokemon-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    padding: 20px;
+}
+
+#pokemon-silhouette {
+    width: 150px;
+    height: 150px;
+    filter: brightness(0);
+    object-fit: contain;
+}
+
+#pokemon-guess {
+    padding: 12px 16px;
+    font-size: 18px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    text-align: center;
+    text-transform: lowercase;
+}
+
+#pokemon-feedback {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}

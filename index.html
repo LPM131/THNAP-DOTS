@@ -68,4 +68,19 @@
         </div>
     </div>
 
+    <!-- POKEMON MODAL -->
+    <div id="pokemon-modal" class="modal hidden">
+        <div class="header">
+            <button class="back" onclick="backToMain()">⬅ Back</button>
+            <h2>Guess the Pokémon</h2>
+        </div>
+
+        <div id="pokemon-area" class="pokemon-area">
+            <img id="pokemon-silhouette" src="" alt="Pokemon silhouette" width="200" height="200">
+            <input id="pokemon-guess" type="text" placeholder="Enter Pokémon name">
+            <button onclick="guessPokemon()">Guess</button>
+            <p id="pokemon-feedback"></p>
+        </div>
+    </div>
+
 </body>

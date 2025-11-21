@@ -28,6 +28,7 @@ document.querySelectorAll(".dot").forEach(dot => {
 
         if (id === 1) openChat();
         else if (id === 11) openWordle();
+        else if (id === 13) openPokemon();
         else {
             alert(`Dot ${id} clicked`);
             backToMain();
@@ -38,6 +39,7 @@ document.querySelectorAll(".dot").forEach(dot => {
 function backToMain() {
     chatModal.classList.add("hidden");
     wordleModal.classList.add("hidden");
+    document.getElementById("pokemon-modal").classList.add("hidden");
     mainGrid.classList.remove("hidden");
 }
 
@@ -127,6 +129,43 @@ function updateDots() {
     requestAnimationFrame(updateDots);
 }
 
+// --- POKEMON ---
+
+let currentPokemonName = "";
+
+function openPokemon() {
+    const modal = document.getElementById("pokemon-modal");
+    modal.classList.remove("hidden");
+    loadPokemon();
+}
+
+function loadPokemon() {
+    const id = Math.floor(Math.random() * 898) + 1;
+    fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+    .then(response => response.json())
+    .then(data => {
+        const img = document.getElementById("pokemon-silhouette");
+        img.src = data.sprites.front_default;
+        currentPokemonName = data.name;
+        document.getElementById("pokemon-feedback").textContent = "";
+    })
+    .catch(error => {
+        console.error("Error loading Pokémon:", error);
+        document.getElementById("pokemon-feedback").textContent = "Error loading Pokémon.";
+    });
+}
+
+function guessPokemon() {
+    const guess = document.getElementById("pokemon-guess").value.trim().toLowerCase();
+    if (!guess) return;
+    if (guess === currentPokemonName) {
+        document.getElementById("pokemon-feedback").textContent = "🎉 Correct! It's " + currentPokemonName.charAt(0).toUpperCase() + currentPokemonName.slice(1) + "!";
+        setTimeout(() => { loadPokemon(); document.getElementById("pokemon-guess").value = ""; }, 2000);
+    } else {
+        document.getElementById("pokemon-feedback").textContent = "❌ Wrong! Try again.";
+    }
+    document.getElementById("pokemon-guess").value = "";
+}
 
 // ------------------------------
 // WORDLE 100% CLEAN MODULE
@@ -225,7 +264,7 @@ function handleKey(k) {
 
 // ------------------------------
 // Update Board
-// ------------------------------
+// ------------------------------ 
 function updateBoard() {
     const tiles = [...document.querySelectorAll(".tile span")];
 
@@ -244,7 +283,7 @@ function updateBoard() {
 
 // ------------------------------
 // Submit guess
-// ------------------------------
+// ------------------------------ 
 function submitGuess() {
     if (currentGuess.length < 5) {
         messageEl.textContent = "Not enough letters.";
