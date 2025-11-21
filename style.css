@@ -160,52 +160,46 @@ body, html {
 .present { background: #c9b458 !important; border-color: #c9b458 !important; color: white !important; }
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
 
-/* Keyboard */
+/* Updated Keyboard Layout */
 #keyboard {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);  /* Ensure 10 columns for the entire keyboard */
-    gap: 10px;  /* Increased space between the keys */
-    width: 90vw;  /* Set to 90% of the screen width */
-    max-width: 480px;  /* Maximum width for larger screens */
-    margin: 10px auto;  /* Center the keyboard */
+    grid-template-columns: repeat(10, 1fr);  /* 10 columns for the keyboard */
+    gap: 8px;  /* Space between the keys */
+    width: 90vw;  /* Make it 90% of the screen width */
+    max-width: 480px;  /* Max width for larger screens */
+    margin: 0 auto 10px auto;  /* Center the keyboard properly */
 }
 
 .keyboard-row {
     display: grid;
-    grid-template-columns: repeat(10, 1fr); /* Ensure equal space between keys */
-    gap: 10px;  /* Space between the keys */
-    justify-items: center;  /* Center align the keys */
+    grid-template-columns: repeat(10, 1fr); /* Make sure there are 10 columns */
+    gap: 8px;  /* Space between the keys */
+    justify-items: center;  /* Center the keys horizontally */
 }
 
 .key {
     background: #d3d6da;
-    padding: 20px 14px;  /* Adjust the padding to increase key size */
+    padding: 16px 10px;  /* Increase padding for larger keys */
     border-radius: 8px;
     font-weight: bold;
     text-align: center;
     user-select: none;
-    font-size: clamp(16px, 5vw, 22px);  /* Adjust font size to be responsive */
+    font-size: clamp(16px, 5vw, 22px);  /* Responsive font size */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 }
 
+/* Wider key (for Backspace, Enter) */
 .key.wide {
-    grid-column: span 2;  /* For the wide keys like "ENTER" and "BACKSPACE" */
+    grid-column: span 2;  /* Spans across two columns */
 }
 
-/* Backspace key specific style */
+/* Backspace key adjustment */
 .key.wide-backspace {
-    padding: 20px 16px;
-    font-size: clamp(16px, 5vw, 22px);  /* Larger font size for the backspace key */
-}
-
-/* Special button effect */
-.key:active {
-    background: #a0a0a0;  /* Slightly darker color on key press */
-}
-
-/* Special size for backspace key */
-.key.wide-backspace {
-    padding: 20px 15px;
-    font-size: clamp(16px, 4vw, 26px); /* Resize backspace key */
+    padding: 16px 12px;  /* Make the backspace key larger */
+    font-size: clamp(16px, 5vw, 22px); /* Resize font to match */
 }
 
 /* Message */
