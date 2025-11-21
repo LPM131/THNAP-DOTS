@@ -1,151 +1,162 @@
-/* Reset */
+/* RESET */
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body, html {
-    width: 100%;
     height: 100%;
-    font-family: 'Helvetica', sans-serif;
-    background-color: #fff;
+    background: #fff;
+    font-family: Helvetica, sans-serif;
+    overflow: hidden;
 }
 
-/* Dots Grid Styling */
+/* MAIN DOT GRID */
 .dots-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 columns */
-    grid-template-rows: repeat(3, 1fr); /* 3 rows */
-    gap: 15px; /* Space between dots */
-    max-width: 100%;
-    margin: 20px auto;
-    padding: 20px;
-    justify-items: center; /* Centers dots within each cell */
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 20px;
+    width: 90vw;
+    height: 90vh;
+    margin: auto;
+    padding-top: 5vh;
 }
 
-/* Individual Dot Styling */
 .dot {
+    background: #007AFF;
     width: 90px;
     height: 90px;
-    background-color: #007bff;
-    color: white;
     border-radius: 50%;
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 24px;
+    align-items: center;
+    color: white;
+    font-size: 26px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: transform .2s;
 }
 
-/* Hover Effect */
-.dot:hover {
-    background-color: #0056b3;
-}
-
-/* Active Effect */
 .dot:active {
-    transform: scale(0.95);
+    transform: scale(0.9);
 }
 
-/* Modal default styling */
+/* MODALS */
 .modal {
-    display: block;  /* Ensure modal shows up */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    overflow: auto;
+    background: white;
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
 }
 
-.modal.hidden {
-    display: none; /* Hidden when necessary */
+.hidden {
+    display: none !important;
 }
 
-.chat-header {
+/* HEADERS */
+.header {
     display: flex;
     justify-content: space-between;
     padding: 20px;
 }
 
-.modal-section {
-    padding: 15px;
-}
-
-/* Floating chat container */
-#thread-dots {
+/* CHAT */
+.thread-area {
+    flex: 1;
     position: relative;
-    width: 100%;
-    height: 70vh; /* allows space for chat header and input */
+    background: #f1f1f1;
     overflow: hidden;
-    background: #f0f0f0;
-    border-radius: 12px;
-    margin-top: 12px;
 }
 
-/* Chat dots */
 .thread-dot {
     position: absolute;
-    width: 60px;
-    height: 60px;
-    background-color: #4a90e2;
+    width: 70px;
+    height: 70px;
+    background: #4A90E2;
+    color: #fff;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: white;
-    font-weight: bold;
     cursor: pointer;
     user-select: none;
-    transition: transform 0.2s ease;
+    font-weight: bold;
 }
 
-/* Slight floating animation */
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-5px); }
-    100% { transform: translateY(0px); }
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-.thread-dot.floating {
-    animation: float 3s ease-in-out infinite;
-}
-
-/* Chat interface */
 .messages {
-    max-height: 50vh;
+    flex: 1;
     overflow-y: auto;
-    margin-bottom: 12px;
-}
-
-.chat-message {
-    margin: 8px 0;
-}
-
-.you {
-    color: #00d9ff;
-}
-
-.them {
-    color: #ff8a8a;
+    padding: 10px;
 }
 
 .input-section {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 10px;
+    padding: 10px;
 }
 
-input[type="text"] {
+/* WORDLE */
+.wordle-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 20px;
     flex: 1;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 1em;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(5, 55px);
+    gap: 5px;
+}
+
+.tile {
+    width: 55px;
+    height: 55px;
+    background: #ddd;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+/* KEYBOARD */
+#keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.key {
+    padding: 14px;
+    background: #bbb;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.key:active {
+    background: #999;
 }
 
 button {

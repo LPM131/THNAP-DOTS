@@ -12,61 +12,60 @@
 </head>
 
 <body>
-    <!-- Main Dots UI -->
-    <div class="dots-grid">
-        <div class="dot" data-id="1" onclick="handleDot(1)">💬</div>
-        <div class="dot" data-id="2" onclick="handleDot(2)">2</div>
-        <div class="dot" data-id="3" onclick="handleDot(3)">3</div>
-        <div class="dot" data-id="4" onclick="handleDot(4)">4</div>
-        <div class="dot" data-id="5" onclick="handleDot(5)">5</div>
-        <div class="dot" data-id="6" onclick="handleDot(6)">6</div>
-        <div class="dot" data-id="7" onclick="handleDot(7)">7</div>
-        <div class="dot" data-id="8" onclick="handleDot(8)">8</div>
-        <div class="dot" data-id="9" onclick="handleDot(9)">9</div>
-        <div class="dot" data-id="10" onclick="handleDot(10)">10</div>
-        <div class="dot" data-id="11" onclick="handleDot(11)">🔤</div>
-        <div class="dot" data-id="12" onclick="handleDot(12)">12</div>
-        <div class="dot" data-id="13" onclick="handleDot(13)">13</div>
-        <div class="dot" data-id="14" onclick="handleDot(14)">14</div>
-        <div class="dot" data-id="15" onclick="handleDot(15)">15</div>
+
+    <!-- MAIN GRID -->
+    <div id="main-grid" class="dots-grid">
+        <div class="dot" data-id="1">💬</div>
+        <div class="dot" data-id="2">2</div>
+        <div class="dot" data-id="3">3</div>
+        <div class="dot" data-id="4">4</div>
+        <div class="dot" data-id="5">5</div>
+
+        <div class="dot" data-id="6">6</div>
+        <div class="dot" data-id="7">7</div>
+        <div class="dot" data-id="8">8</div>
+        <div class="dot" data-id="9">9</div>
+        <div class="dot" data-id="10">10</div>
+
+        <div class="dot" data-id="11">🔤</div>
+        <div class="dot" data-id="12">12</div>
+        <div class="dot" data-id="13">13</div>
+        <div class="dot" data-id="14">14</div>
+        <div class="dot" data-id="15">15</div>
     </div>
 
     <!-- CHAT MODAL -->
     <div id="chat-modal" class="modal hidden">
-        <div class="chat-header">
-            <button onclick="backToDots()">⬅️ Back</button>
-            <h2 id="chat-title">Select User</h2>
+        <div class="header">
+            <button class="back" onclick="backToMain()">⬅ Back</button>
+            <h2>Chats</h2>
         </div>
 
-        <div id="thread-dots" class="modal-section">
-            <div class="thread-dot" onclick="selectThread('Bot')">B</div>
-            <div class="thread-dot" onclick="selectThread('Friend 1')">F1</div>
-            <div class="thread-dot" onclick="selectThread('Friend 2')">F2</div>
-        </div>
+        <div id="thread-area" class="thread-area"></div>
 
-        <div id="chat-interface" class="modal-section hidden">
+        <div id="chat-area" class="chat-area hidden">
             <div id="messages" class="messages"></div>
 
             <div class="input-section">
-                <input id="message-input" type="text" placeholder="Type your message...">
+                <input id="chat-input" type="text" placeholder="Type...">
                 <button onclick="sendMessage()">Send</button>
             </div>
         </div>
     </div>
 
-    <!-- GAME MODAL -->
-    <div id="game-modal" class="modal hidden">
-        <div class="chat-header">
-            <button onclick="backToGameDots()">⬅️ Back</button>
+    <!-- WORDLE MODAL -->
+    <div id="wordle-modal" class="modal hidden">
+        <div class="header">
+            <button class="back" onclick="backToMain()">⬅ Back</button>
             <h2>WORD OF THE DAY</h2>
         </div>
 
-        <div id="game-content" class="modal-section">
+        <div id="wordle-area" class="wordle-area">
             <div id="game-board"></div>
-            <div id="virtual-keyboard"></div>
-            <div id="game-message"></div>
+            <div id="keyboard"></div>
+
+            <div id="game-message" class="game-message"></div>
         </div>
     </div>
 
 </body>
-</html>
