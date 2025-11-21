@@ -107,41 +107,46 @@ body, html {
     padding: 10px;
 }
 
-/* WORDLE */
-.wordle-area {
+/* --- WORDLE BOARD LAYOUT (Official Style) --- */
+
+#game-container {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    padding-bottom: 20px;
-    flex: 1;
+    height: calc(100vh - 80px); /* fit inside modal */
+    padding: 10px 0;
 }
 
-/* GAME BOARD */
+/* Board is 6 rows × 5 columns */
 #game-board {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);  /* 5 columns */
-    gap: 8px;  /* Space between the tiles */
-    width: 90vw;  /* 90% of the viewport width */
-    max-width: 380px;  /* Restrict max width to avoid cramming */
-    height: auto;
-    max-height: 320px;  /* Maintain consistent height */
-    margin-top: 15px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    width: 90vw;
+    max-width: 350px;
 }
 
 .tile {
+    width: 100%;
+    padding-top: 100%; /* perfect squares */
     background: #ffffff;
     border: 2px solid #d3d6da;
     border-radius: 4px;
     position: relative;
+
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-size: clamp(20px, 6vw, 36px);  /* Adjust font size to fit the screen */
+    justify-content: center;
+
+    font-size: 2rem;
     font-weight: bold;
     text-transform: uppercase;
-    height: 60px;  /* Fixed height */
-    width: 60px;   /* Fixed width */
+}
+
+/* Inner tile text */
+.tile span {
+    position: absolute;
 }
 
 /* Flip animation */
@@ -160,35 +165,40 @@ body, html {
 .present { background: #c9b458 !important; border-color: #c9b458 !important; color: white !important; }
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
 
-/* KEYBOARD */
+/* --- KEYBOARD --- */
+
 #keyboard {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);  /* 10 columns for the keyboard */
-    gap: 8px;  /* Increased space between the keys */
-    width: 90vw;  /* Make it 90% of the screen width */
-    max-width: 480px;  /* Max width for larger screens */
-    margin: 0 auto 10px auto;  /* Center the keyboard */
+    width: 95vw;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .keyboard-row {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr); /* Make sure there are 10 columns */
-    gap: 8px;  /* Space between the keys */
-    justify-items: center;  /* Center align the keys */
+    display: flex;
+    justify-content: center;
+    gap: 6px;
 }
 
 .key {
+    padding: 14px 10px;
     background: #d3d6da;
-    padding: 16px 10px;  /* Increase padding for larger keys */
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: bold;
+    flex: 1;
     text-align: center;
+    cursor: pointer;
     user-select: none;
-    font-size: clamp(16px, 5vw, 22px);  /* Responsive font size */
 }
 
 .key.wide {
-    grid-column: span 2;  /* For the wide keys like "ENTER" and "BACKSPACE" */
+    flex: 1.5;
+}
+
+.key:active {
+    background: #bbb;
 }
 
 /* Backspace key specific style */
