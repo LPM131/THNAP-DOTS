@@ -151,7 +151,8 @@ const message = gameMsg;
 // ------------------------------
 // Init board (30 tiles)
 // ------------------------------
-function initBoard() {
+function setupBoard() {
+    console.log("setupBoard called");
     board.innerHTML = "";
     for (let i = 0; i < 30; i++) {
         const tile = document.createElement("div");
@@ -165,7 +166,8 @@ function initBoard() {
 // ------------------------------
 // Init Keyboard
 // ------------------------------
-function initKeyboard() {
+function setupKeyboard() {
+    console.log("setupKeyboard called");
     keyboard.innerHTML = "";
 
     const keys = [
@@ -205,6 +207,7 @@ function addKey(rowDiv, char, wide = "") {
 // Key handling
 // ------------------------------
 function handleKey(k) {
+    console.log("handleKey called with", k);
     if (k === "⌫") {
         currentGuess = currentGuess.slice(0, -1);
         updateBoard();
@@ -293,8 +296,9 @@ function checkEndGame(guess) {
 // Initialize on modal open
 // ------------------------------
 function openWordle() {
+    console.log("openWordle called");
     wordleModal.classList.remove("hidden");
-    initBoard();
-    initKeyboard();
+    setupBoard();
+    setupKeyboard();
     updateBoard();
 }
