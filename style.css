@@ -162,19 +162,18 @@ body, html {
 
 /* Updated Keyboard Layout */
 #keyboard {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);  /* 10 columns for the keyboard */
-    gap: 8px;  /* Space between the keys */
+    display: flex;
+    flex-direction: column;  /* Stack rows vertically */
+    gap: 8px;  /* Space between keyboard rows */
     width: 90vw;  /* Make it 90% of the screen width */
     max-width: 480px;  /* Max width for larger screens */
     margin: 0 auto 10px auto;  /* Center the keyboard properly */
 }
 
 .keyboard-row {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr); /* Make sure there are 10 columns */
-    gap: 8px;  /* Space between the keys */
-    justify-items: center;  /* Center the keys horizontally */
+    display: flex;  /* Flex row for each keyboard row */
+    gap: 6px;  /* Space between keys in row */
+    justify-content: center;  /* Center keys horizontally */
 }
 
 .key {
@@ -189,11 +188,12 @@ body, html {
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    flex: 1;  /* Equal flex for normal keys */
 }
 
 /* Wider key (for Backspace, Enter) */
 .key.wide {
-    grid-column: span 2;  /* Spans across two columns */
+    flex: 2;  /* Wider than normal keys */
 }
 
 /* Backspace key adjustment */
