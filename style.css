@@ -120,12 +120,12 @@ body, html {
 /* GAME BOARD */
 #game-board {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;  /* Space out the tiles a little more */
+    grid-template-columns: repeat(5, 1fr);  /* 5 columns */
+    gap: 8px;  /* Space between the tiles */
     width: 90vw;  /* 90% of the viewport width */
     max-width: 380px;  /* Restrict max width to avoid cramming */
     height: auto;
-    max-height: 260px;  /* Maintain consistent height, reduced for spacing */
+    max-height: 320px;  /* Maintain consistent height */
     margin-top: 15px;
 }
 
@@ -137,7 +137,7 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: clamp(20px, 6vw, 36px);  /* Adjust font size */
+    font-size: clamp(20px, 6vw, 36px);  /* Adjust font size to fit the screen */
     font-weight: bold;
     text-transform: uppercase;
     height: 60px;  /* Fixed height */
@@ -160,19 +160,21 @@ body, html {
 .present { background: #c9b458 !important; border-color: #c9b458 !important; color: white !important; }
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
 
-/* Updated Keyboard Layout */
+/* KEYBOARD */
 #keyboard {
-    display: flex;
-    flex-direction: column;  /* Stack rows vertically */
-    gap: 8px;  /* Space between keyboard rows */
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);  /* 10 columns for the keyboard */
+    gap: 8px;  /* Increased space between the keys */
     width: 90vw;  /* Make it 90% of the screen width */
     max-width: 480px;  /* Max width for larger screens */
-    margin: 0 auto 10px auto;  /* Center the keyboard properly */
+    margin: 0 auto 10px auto;  /* Center the keyboard */
 }
 
 .keyboard-row {
-    display: flex;  /* Flex row for each keyboard row */
-    gap: 6px;  /* Space between keys in row */
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); /* Make sure there are 10 columns */
+    gap: 8px;  /* Space between the keys */
+    justify-items: center;  /* Center align the keys */
 }
 
 .key {
@@ -183,22 +185,27 @@ body, html {
     text-align: center;
     user-select: none;
     font-size: clamp(16px, 5vw, 22px);  /* Responsive font size */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    flex: 1;  /* Equal flex for normal keys */
 }
 
-/* Wider key (for Backspace, Enter) */
 .key.wide {
-    flex: 2;  /* Wider than normal keys */
+    grid-column: span 2;  /* For the wide keys like "ENTER" and "BACKSPACE" */
 }
 
-/* Backspace key adjustment */
+/* Backspace key specific style */
 .key.wide-backspace {
-    padding: 16px 12px;  /* Make the backspace key larger */
-    font-size: clamp(16px, 5vw, 22px); /* Resize font to match */
+    padding: 16px 12px;
+    font-size: clamp(16px, 5vw, 22px); /* Larger font size for the backspace key */
+}
+
+/* Special button effect */
+.key:active {
+    background: #a0a0a0;  /* Slightly darker color on key press */
+}
+
+/* Special size for backspace key */
+.key.wide-backspace {
+    padding: 16px 14px;
+    font-size: clamp(16px, 4vw, 26px); /* Resize backspace key */
 }
 
 /* Message */
