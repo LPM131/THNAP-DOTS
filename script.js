@@ -131,7 +131,6 @@ function updateDots() {
 // ------------------------------
 // WORDLE 100% CLEAN MODULE
 // ------------------------------
-
 const WORD_LIST = ["APPLE", "BANJO", "CRANE", "DANCE", "ELITE", "FLAME", "GRAPE"];
 
 function getWordOfTheDay() {
@@ -145,30 +144,30 @@ let WORD = getWordOfTheDay();
 let guesses = [];
 let currentGuess = "";
 
-// Elements (shared from globals)
-const message = gameMsg;
+// Elements
+const boardEl = document.getElementById("game-board");
+const keyboardEl = document.getElementById("keyboard");
+const messageEl = document.getElementById("game-message");
 
 // ------------------------------
 // Init board (30 tiles)
 // ------------------------------
-function setupBoard() {
-    console.log("setupBoard called");
-    board.innerHTML = "";
+function initBoard() {
+    boardEl.innerHTML = "";
     for (let i = 0; i < 30; i++) {
         const tile = document.createElement("div");
         tile.classList.add("tile");
         const span = document.createElement("span");
         tile.appendChild(span);
-        board.appendChild(tile);
+        boardEl.appendChild(tile);
     }
 }
 
 // ------------------------------
 // Init Keyboard
 // ------------------------------
-function setupKeyboard() {
-    console.log("setupKeyboard called");
-    keyboard.innerHTML = "";
+function initKeyboard() {
+    keyboardEl.innerHTML = "";
 
     const keys = [
         "QWERTYUIOP",
@@ -190,7 +189,7 @@ function setupKeyboard() {
             addKey(rowDiv, "⌫", "wide");
         }
 
-        keyboard.appendChild(rowDiv);
+        keyboardEl.appendChild(rowDiv);
     });
 }
 
@@ -207,7 +206,6 @@ function addKey(rowDiv, char, wide = "") {
 // Key handling
 // ------------------------------
 function handleKey(k) {
-    console.log("handleKey called with", k);
     if (k === "⌫") {
         currentGuess = currentGuess.slice(0, -1);
         updateBoard();
@@ -249,21 +247,21 @@ function updateBoard() {
 // ------------------------------
 function submitGuess() {
     if (currentGuess.length < 5) {
-        message.textContent = "Not enough letters.";
+        messageEl.textContent = "Not enough letters.";
         return;
     }
 
     const guess = currentGuess;
     guesses.push(guess);
     currentGuess = "";
-    message.textContent = "";
+    messageEl.textContent = "";
 
     revealGuess(guess, guesses.length - 1);
 }
 
 // ------------------------------
 // Reveal animation & coloring
-// ------------------------------
+// ------------------------------ 
 function revealGuess(guess, row) {
     const tiles = [...document.querySelectorAll(".tile")];
     const rowTiles = tiles.slice(row * 5, row * 5 + 5);
@@ -286,19 +284,25 @@ function revealGuess(guess, row) {
 
 function checkEndGame(guess) {
     if (guess === WORD) {
-        message.textContent = "🎉 You got it!";
+        messageEl.textContent = "🎉 You got it!";
     } else if (guesses.length === 6) {
-        message.textContent = `The word was: ${WORD}`;
+        messageEl.textContent = `The word was: ${WORD}`;
     }
 }
 
 // ------------------------------
 // Initialize on modal open
 // ------------------------------
-function openWordle() {
-    console.log("openWordle called");
-    wordleModal.classList.remove("hidden");
-    setupBoard();
-    setupKeyboard();
+function initGame() {
+    guesses = [];
+    currentGuess = "";
+    WORD = getWordOfTheDay();
+    initBoard();
+    initKeyboard();
     updateBoard();
+}
+
+function openWordle() {
+    wordleModal.classList.remove("hidden");
+    initGame();
 }
