@@ -117,23 +117,6 @@ body, html {
     flex: 1;
 }
 
-#game-board {
-    display: grid;
-    grid-template-columns: repeat(5, 55px);
-    gap: 5px;
-}
-
-.tile {
-    width: 55px;
-    height: 55px;
-    background: #ddd;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-}
-
 /* KEYBOARD */
 #keyboard {
     display: flex;
@@ -173,15 +156,19 @@ button:active {
     background-color: #005bb5;
 }
 
-/* --- WORDLE BOARD LAYOUT (Official Style) --- */
+/* --- Perfect Wordle Board Scaling --- */
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
 
-#game-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    height: calc(100vh - 80px); /* fit inside modal */
-    padding: 10px 0;
+    /* The secret:
+       Board total height = 6 rows * tile-size + spacing
+    */
+    width: min(90vw, 380px);
+    height: min(60vh, 320px);
+
+    margin-top: 10px;
 }
 
 /* Board is 6 rows × 5 columns */
@@ -194,23 +181,19 @@ button:active {
 }
 
 .tile {
-    width: 100%;
-    padding-top: 100%; /* perfect squares */
     background: #ffffff;
     border: 2px solid #d3d6da;
     border-radius: 4px;
     position: relative;
-
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;   /* THIS fixes vertical centering */
 
-    font-size: 2rem;
+    font-size: clamp(20px, 6vw, 36px);
     font-weight: bold;
     text-transform: uppercase;
 }
 
-/* Inner tile text */
 .tile span {
     position: absolute;
 }
@@ -232,39 +215,39 @@ button:active {
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
 
 /* --- KEYBOARD --- */
-
 #keyboard {
-    width: 95vw;
+    width: 100%;
     max-width: 500px;
+
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 6px;
+
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+
+    /* Keep within screen */
+    height: auto;
+    margin-top: auto;
 }
 
 .keyboard-row {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
     gap: 6px;
 }
 
 .key {
-    padding: 14px 10px;
     background: #d3d6da;
+    padding: 14px 6px;
     border-radius: 6px;
     font-weight: bold;
-    flex: 1;
     text-align: center;
-    cursor: pointer;
     user-select: none;
+    font-size: clamp(14px, 4vw, 20px);
 }
 
 .key.wide {
-    flex: 1.5;
-}
-
-.key:active {
-    background: #bbb;
+    grid-column: span 2;
 }
 
 /* Message */
