@@ -246,10 +246,38 @@ body, html {
     border-radius: 8px;
     text-align: center;
     text-transform: lowercase;
+    position: relative;
 }
 
 #pokemon-feedback {
     font-size: 1.2rem;
     font-weight: bold;
     color: #333;
+}
+
+.pokemon-suggestions {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+}
+
+.pokemon-suggestions .item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.pokemon-suggestions .item:hover {
+    background: #f0f0f0;
 }

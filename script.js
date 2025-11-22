@@ -129,13 +129,13 @@ function updateDots() {
     requestAnimationFrame(updateDots);
 }
 
+let pokemonNames = [];
+
 // --- POKEMON ---
 
 let currentPokemonName = "";
 
-function openPokemon() {
-    const modal = document.getElementById("pokemon-modal");
-    modal.classList.remove("hidden");
+function loadAllPokemonNames() {
     loadPokemon();
 }
 
