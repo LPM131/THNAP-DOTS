@@ -40,8 +40,7 @@ document.querySelectorAll(".dot").forEach(dot => {
 function backToMain() {
     chatModal.classList.add("hidden");
     wordleModal.classList.add("hidden");
-    document.getElementById("pokemon-modal").classList.add("hidden");
-    mainGrid.classList.remove("hidden");
+    document.getElementById("pokemon-modal")?.classList.add("hidden");
 }
 
 
@@ -449,47 +448,40 @@ function openWordle() {
     initGame();
 }
 
-/* ======================================================
-   DOT #12 — CROSSWORD PUZZLE MODULE
-   ====================================================== */
-
 const crosswordModal = document.getElementById("crossword-modal");
 const crosswordGrid = document.getElementById("crossword-grid");
-const crosswordClue = document.getElementById("crossword-clue");
+const acrossCluesEl = document.getElementById("across-clues");
+const downCluesEl = document.getElementById("down-clues");
+const crosswordKeyboard = document.getElementById("crossword-keyboard");
 
-let crosswordSize = 15;
+let crosswordSize = 12;
 let crosswordCells = [];
-let crosswordData = null;
 let selectedCell = null;
 let selectedDirection = "across";
 
-// Sample puzzle
 const DAILY_CROSSWORD = {
-    size: 15,
+    size: 12,
     grid: [
-        "CAT..DOG.......",
-        "..A..O........E",
-        "RAT..GHOST.....",
-        "....BIRD.......",
-        "...TREE....FROG",
-        "......PLANT....",
-        "....COW........",
-        "....PIG........",
-        "....HORSE......",
-        "SNAKE....BEAR..",
-        ".....MOUSE.....",
-        "....SHEEP......",
-        "...GOAT........",
-        "..DEER.........",
-        "FOX............"
+        "CATDOG.....",
+        "..A.O......",
+        "RATGHOST...",
+        "....BIRD...",
+        "...TREE.FROG",
+        "......PLANT",
+        "....COW....",
+        "....PIG....",
+        "....HORSE..",
+        "SNAKE..BEAR",
+        ".....MOUSE.",
+        "....SHEEP.."
     ],
     clues: {
         across: {
             1: "Furry pet (3)",
             4: "Barks (3)",
             7: "Ghost sound (5)",
-            12: "Tree dwelling singer (4)",
-            14: "Green giant (4)"
+            12: "Bird singer (4)",
+            14: "Tree giant (4)"
         },
         down: {
             1: "Farm animal (3)",
@@ -499,39 +491,22 @@ const DAILY_CROSSWORD = {
     }
 };
 
-function openCrossword() {
-    crosswordModal.classList.remove("hidden");
-    loadDailyPuzzle();
-}
-
-function closeCrossword() {
-    crosswordModal.classList.add("hidden");
-}
-
-function loadDailyPuzzle() {
-    crosswordData = DAILY_CROSSWORD;
-    crosswordSize = crosswordData.size;
-    drawGrid();
-    drawClueNumbers();
-    selectFirstCell();
-    setupKeyboard();
-}
-
+/* =========================
+   DRAW GRID
+   ========================= */
 function drawGrid() {
-    crosswordGrid.style.gridTemplateColumns = `repeat(${crosswordSize}, 40px)`;
+    crosswordGrid.style.gridTemplateColumns = `repeat(${crosswordSize}, 1fr)`;
     crosswordGrid.innerHTML = "";
     crosswordCells = [];
 
     for (let r = 0; r < crosswordSize; r++) {
         for (let c = 0; c < crosswordSize; c++) {
-            const char = crosswordData.grid[r][c];
+            const char = DAILY_CROSSWORD.grid[r][c] || ".";
             const cell = document.createElement("div");
             cell.classList.add("cross-cell");
+            if (char === ".") cell.classList.add("black");
             cell.dataset.row = r;
             cell.dataset.col = c;
-
-            if (char === ".") cell.classList.add("black");
-
             cell.addEventListener("click", () => selectCell(cell));
             crosswordGrid.appendChild(cell);
             crosswordCells.push(cell);
@@ -539,118 +514,109 @@ function drawGrid() {
     }
 }
 
-function drawClueNumbers() {
-    let number = 1;
-    for (let r = 0; r < crosswordSize; r++) {
-        for (let c = 0; c < crosswordSize; c++) {
-            const cell = getCell(r, c);
-            if (cell.classList.contains("black")) continue;
+/* =========================
+   NUMBERING & CLUES
+   ========================= */
+function numberCells() {
+    crosswordCells.forEach(cell => {
+        if (cell.classList.contains("black")) return;
+        const r = +cell.dataset.row;
+        const c = +cell.dataset.col;
 
-            const startsAcross = c === 0 || getCell(r, c - 1).classList.contains("black");
-            const startsDown = r === 0 || getCell(r - 1, c).classList.contains("black");
+        const startsAcross = c === 0 || getCell(r, c - 1).classList.contains("black");
+        const startsDown = r === 0 || getCell(r - 1, c).classList.contains("black");
 
-            if (startsAcross || startsDown) {
-                const numEl = document.createElement("div");
-                numEl.classList.add("clue-number");
-                numEl.textContent = number;
-                cell.appendChild(numEl);
-                number++;
-            }
+        if (startsAcross || startsDown) {
+            const numEl = document.createElement("div");
+            numEl.classList.add("clue-number");
+            numEl.textContent = r*crosswordSize+c+1;
+            cell.appendChild(numEl);
         }
-    }
+    });
 }
 
-function getCell(r, c) {
-    return crosswordCells[r * crosswordSize + c];
-}
-
+/* =========================
+   SELECT CELL
+   ========================= */
 function selectCell(cell) {
+    if (cell.classList.contains("black")) return;
+
     crosswordCells.forEach(c => c.classList.remove("selected", "word-highlight"));
     cell.classList.add("selected");
     selectedCell = cell;
     highlightWord(cell, selectedDirection);
-    updateClueDisplay(cell);
+    updateClues(cell);
 }
 
+/* =========================
+   HIGHLIGHT WORD
+   ========================= */
 function highlightWord(cell, direction) {
-    const r = parseInt(cell.dataset.row);
-    const c = parseInt(cell.dataset.col);
+    const r = +cell.dataset.row;
+    const c = +cell.dataset.col;
     let coords = [];
 
     if (direction === "across") {
-        let cc = c;
-        while (cc >= 0 && !getCell(r, cc).classList.contains("black")) cc--;
-        cc++;
-        while (cc < crosswordSize && !getCell(r, cc).classList.contains("black")) {
-            coords.push([r, cc]);
-            cc++;
-        }
+        let cc = c; while(cc>=0 && !getCell(r,cc).classList.contains("black")) cc--; cc++;
+        while(cc<crosswordSize && !getCell(r,cc).classList.contains("black")) { coords.push([r,cc]); cc++; }
     } else {
-        let rr = r;
-        while (rr >= 0 && !getCell(rr, c).classList.contains("black")) rr--;
-        rr++;
-        while (rr < crosswordSize && !getCell(rr, c).classList.contains("black")) {
-            coords.push([rr, c]);
-            rr++;
-        }
+        let rr = r; while(rr>=0 && !getCell(rr,c).classList.contains("black")) rr--; rr++;
+        while(rr<crosswordSize && !getCell(rr,c).classList.contains("black")) { coords.push([rr,c]); rr++; }
     }
 
-    coords.forEach(([rr, cc]) => {
-        const cell = getCell(rr, cc);
-        if (!cell.classList.contains("selected"))
-            cell.classList.add("word-highlight");
-    });
+    coords.forEach(([rr,cc]) => getCell(rr,cc).classList.add("word-highlight"));
 }
 
-function updateClueDisplay(cell) {
+/* =========================
+   UPDATE CLUE PANEL
+   ========================= */
+function updateClues(cell) {
     const number = cell.querySelector(".clue-number")?.textContent || "?";
-    const clueObj = crosswordData.clues[selectedDirection];
-    let clueText = clueObj[number] || "—";
-
-    crosswordClue.innerHTML = `
-        <span class="clue-direction">${selectedDirection.toUpperCase()}</span>
-        <span class="clue-number">${number}.</span>
-        <span class="clue-text">${clueText}</span>
-    `;
+    acrossCluesEl.innerHTML = "";
+    downCluesEl.innerHTML = "";
+    for(const [n, clue] of Object.entries(DAILY_CROSSWORD.clues.across)) {
+        const li = document.createElement("li"); li.textContent = `${n}. ${clue}`; acrossCluesEl.appendChild(li);
+    }
+    for(const [n, clue] of Object.entries(DAILY_CROSSWORD.clues.down)) {
+        const li = document.createElement("li"); li.textContent = `${n}. ${clue}`; downCluesEl.appendChild(li);
+    }
 }
 
-function selectFirstCell() {
-    const cell = crosswordCells.find(c => !c.classList.contains("black"));
-    if (cell) selectCell(cell);
-}
+/* =========================
+   HELPER
+   ========================= */
+function getCell(r,c) { return crosswordCells[r*crosswordSize+c]; }
 
-function setupKeyboard() {
-    document.querySelectorAll("#crossword-keyboard .ck-key").forEach(key => {
-        key.onclick = () => {
-            const value = key.dataset.key;
-            if (!selectedCell || selectedCell.classList.contains("black")) return;
+/* =========================
+   KEYBOARD INPUT
+   ========================= */
+crosswordKeyboard.querySelectorAll("button").forEach(btn=>{
+    btn.onclick = () => {
+        if(!selectedCell || selectedCell.classList.contains("black")) return;
+        const val = btn.dataset.key;
+        if(val==="BACK") { selectedCell.textContent=""; return; }
+        if(val==="NEXT") { moveNext(); return; }
+        selectedCell.textContent=val;
+        moveNext();
+    };
+});
 
-            if (value === "BACK") return backspaceCell();
-            if (value === "NEXT") return moveToNextCell();
-
-            fillCell(value);
-        };
-    });
-}
-
-function fillCell(letter) {
-    selectedCell.textContent = letter;
-    moveToNextCell();
-}
-
-function backspaceCell() {
-    selectedCell.textContent = "";
-}
-
-function moveToNextCell() {
-    if (!selectedCell) return;
-    const r = parseInt(selectedCell.dataset.row);
-    const c = parseInt(selectedCell.dataset.col);
-
-    let nr = r, nc = c;
-    if (selectedDirection === "across") nc++;
+function moveNext() {
+    const r = +selectedCell.dataset.row;
+    const c = +selectedCell.dataset.col;
+    let nr=r,nc=c;
+    if(selectedDirection==="across") nc++;
     else nr++;
+    const next=getCell(nr,nc);
+    if(next && !next.classList.contains("black")) selectCell(next);
+}
 
-    const next = getCell(nr, nc);
-    if (next && !next.classList.contains("black")) selectCell(next);
+/* =========================
+   INIT CROSSWORD
+   ========================= */
+function openCrossword() {
+    crosswordModal.classList.remove("hidden");
+    drawGrid();
+    numberCells();
+    selectCell(crosswordCells.find(c=>!c.classList.contains("black")));
 }
