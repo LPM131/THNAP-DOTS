@@ -168,7 +168,7 @@ function openPokemon() {
     document.getElementById("pokemon-modal").classList.remove("hidden");
 
     loadAllPokemonNames().then(() => {
-        createGenButtons();
+        document.querySelector('.gen-row button:first-child').classList.add('active');
         loadPokemon();
     });
 
@@ -176,36 +176,28 @@ function openPokemon() {
     input.addEventListener("input", spellingAssist);
 }
 
-/* GENERATION BUTTON BAR */
-function createGenButtons() {
-    const bar = document.getElementById("gen-filter");
-    bar.innerHTML = "";
+/* GENERATION SETTING */
+function setGeneration(gen) {
+    document.querySelectorAll('.gen-row button').forEach(btn => btn.classList.remove('active'));
 
-    const gens = ["Gen 1","Gen 2","Gen 3","Gen 4","Gen 5","Gen 6","Gen 7","Gen 8","Gen 9","ALL"];
+    if (gen === 'all') {
+        filteredList = fullPokemonData;
+        document.querySelector('.gen-row:nth-child(2) button:first-child').classList.add('active');  // ALL is first in second row? Wait, no.
 
-    gens.forEach(g => {
-        const btn = document.createElement("button");
-        btn.className = "gen-btn";
-        btn.textContent = g;
+Wait, the ALL is the 10th button, Gen 6-9, ALL
 
-        btn.onclick = () => {
-            document.querySelectorAll(".gen-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
+Second row: 6,7,8,9,ALL so button:last-child for ALL
 
-            if (g === "ALL") filteredList = fullPokemonData;
-            else {
-                const [start, end] = GEN_RANGES[g];
-                filteredList = fullPokemonData.slice(start - 1, end);
-            }
+Yes, document.querySelector('.gen-row:nth-child(2) button:last-child').classList.add('active');
 
-            loadPokemon();
-        };
+    } else {
+        const row = gen <= 5 ? 1 : 2;
+        const index = gen <= 5 ? gen - 1 : gen - 6;
 
-        bar.appendChild(btn);
-    });
-
-    bar.children[0].classList.add("active");
-    filteredList = fullPokemonData.slice(0, 151);
+document.querySelector(`.gen-row:nth-child(${row}) button:nth-child(${index + 1})`).classList.add('active');
+        filteredList = fullPokemonData.slice(GEN_RANGES[`Gen ${gen}`][0] - 1, GEN_RANGES[`Gen ${gen}`][1]);
+    }
+    loadPokemon();
 }
 
 /* LOAD RANDOM POKEMON */
