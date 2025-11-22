@@ -28,6 +28,7 @@ document.querySelectorAll(".dot").forEach(dot => {
 
         if (id === 1) openChat();
         else if (id === 11) openWordle();
+        else if (id === 12) openCrossword();
         else if (id === 13) openPokemon();
         else {
             alert(`Dot ${id} clicked`);
@@ -456,18 +457,13 @@ const crosswordModal = document.getElementById("crossword-modal");
 const crosswordGrid = document.getElementById("crossword-grid");
 const crosswordClue = document.getElementById("crossword-clue");
 
-let crosswordSize = 15; // NYT standard 15x15
+let crosswordSize = 15;
 let crosswordCells = [];
 let crosswordData = null;
-
 let selectedCell = null;
 let selectedDirection = "across";
-let activeClue = null;
 
-/* ============================
-   SAMPLE DAILY PUZZLE
-   (Replace with server puzzles)
-   ============================ */
+// Sample puzzle
 const DAILY_CROSSWORD = {
     size: 15,
     grid: [
@@ -493,7 +489,7 @@ const DAILY_CROSSWORD = {
             4: "Barks (3)",
             7: "Ghost sound (5)",
             12: "Tree dwelling singer (4)",
-            14: "Green giant (4)",
+            14: "Green giant (4)"
         },
         down: {
             1: "Farm animal (3)",
@@ -503,32 +499,26 @@ const DAILY_CROSSWORD = {
     }
 };
 
-/* ============================
-   OPEN CROSSWORD
-   ============================ */
 function openCrossword() {
     crosswordModal.classList.remove("hidden");
     loadDailyPuzzle();
 }
 
-/* ============================
-   LOAD PUZZLE
-   ============================ */
+function closeCrossword() {
+    crosswordModal.classList.add("hidden");
+}
+
 function loadDailyPuzzle() {
     crosswordData = DAILY_CROSSWORD;
     crosswordSize = crosswordData.size;
-
     drawGrid();
     drawClueNumbers();
     selectFirstCell();
     setupKeyboard();
 }
 
-/* ============================
-   DRAW GRID
-   ============================ */
 function drawGrid() {
-    crosswordGrid.style.gridTemplateColumns = `repeat(${crosswordSize}, 1fr)`;
+    crosswordGrid.style.gridTemplateColumns = `repeat(${crosswordSize}, 40px)`;
     crosswordGrid.innerHTML = "";
     crosswordCells = [];
 
@@ -540,9 +530,7 @@ function drawGrid() {
             cell.dataset.row = r;
             cell.dataset.col = c;
 
-            if (char === ".") {
-                cell.classList.add("black");
-            }
+            if (char === ".") cell.classList.add("black");
 
             cell.addEventListener("click", () => selectCell(cell));
             crosswordGrid.appendChild(cell);
@@ -551,51 +539,35 @@ function drawGrid() {
     }
 }
 
-/* ============================
-   CLUE NUMBERS
-   ============================ */
 function drawClueNumbers() {
-    crosswordCells.forEach(cell => {
-        if (cell.classList.contains("black")) return;
+    let number = 1;
+    for (let r = 0; r < crosswordSize; r++) {
+        for (let c = 0; c < crosswordSize; c++) {
+            const cell = getCell(r, c);
+            if (cell.classList.contains("black")) continue;
 
-        const r = parseInt(cell.dataset.row);
-        const c = parseInt(cell.dataset.col);
+            const startsAcross = c === 0 || getCell(r, c - 1).classList.contains("black");
+            const startsDown = r === 0 || getCell(r - 1, c).classList.contains("black");
 
-        let number = null;
-
-        const startsAcross = c === 0 || getCell(r, c - 1).classList.contains("black");
-        const startsDown = r === 0 || getCell(r - 1, c).classList.contains("black");
-
-        if (startsAcross || startsDown) {
-            number = getClueNumber(r, c);
-            const numEl = document.createElement("div");
-            numEl.classList.add("clue-number");
-            numEl.textContent = number;
-            cell.appendChild(numEl);
+            if (startsAcross || startsDown) {
+                const numEl = document.createElement("div");
+                numEl.classList.add("clue-number");
+                numEl.textContent = number;
+                cell.appendChild(numEl);
+                number++;
+            }
         }
-    });
+    }
 }
 
-/* basic numbering system */
-function getClueNumber(r, c) {
-    return r * crosswordSize + c + 1;
-}
-
-/* helper */
 function getCell(r, c) {
     return crosswordCells[r * crosswordSize + c];
 }
 
-/* ============================
-   CELL SELECTION & HIGHLIGHTS
-   ============================ */
 function selectCell(cell) {
-    // remove previous highlighting
     crosswordCells.forEach(c => c.classList.remove("selected", "word-highlight"));
-
     cell.classList.add("selected");
     selectedCell = cell;
-
     highlightWord(cell, selectedDirection);
     updateClueDisplay(cell);
 }
@@ -603,26 +575,20 @@ function selectCell(cell) {
 function highlightWord(cell, direction) {
     const r = parseInt(cell.dataset.row);
     const c = parseInt(cell.dataset.col);
-
-    // find word span
     let coords = [];
 
     if (direction === "across") {
-        // scan left
         let cc = c;
         while (cc >= 0 && !getCell(r, cc).classList.contains("black")) cc--;
         cc++;
-
         while (cc < crosswordSize && !getCell(r, cc).classList.contains("black")) {
             coords.push([r, cc]);
             cc++;
         }
     } else {
-        // scan up
         let rr = r;
         while (rr >= 0 && !getCell(rr, c).classList.contains("black")) rr--;
         rr++;
-
         while (rr < crosswordSize && !getCell(rr, c).classList.contains("black")) {
             coords.push([rr, c]);
             rr++;
@@ -636,13 +602,9 @@ function highlightWord(cell, direction) {
     });
 }
 
-/* ============================
-   UPDATE CLUE PANEL
-   ============================ */
 function updateClueDisplay(cell) {
     const number = cell.querySelector(".clue-number")?.textContent || "?";
     const clueObj = crosswordData.clues[selectedDirection];
-
     let clueText = clueObj[number] || "—";
 
     crosswordClue.innerHTML = `
@@ -652,20 +614,15 @@ function updateClueDisplay(cell) {
     `;
 }
 
-/* select first non-black cell */
 function selectFirstCell() {
     const cell = crosswordCells.find(c => !c.classList.contains("black"));
     if (cell) selectCell(cell);
 }
 
-/* ============================
-   KEYBOARD INPUT
-   ============================ */
 function setupKeyboard() {
     document.querySelectorAll("#crossword-keyboard .ck-key").forEach(key => {
         key.onclick = () => {
-            const value = key.dataset.key || key.textContent;
-
+            const value = key.dataset.key;
             if (!selectedCell || selectedCell.classList.contains("black")) return;
 
             if (value === "BACK") return backspaceCell();
@@ -687,25 +644,13 @@ function backspaceCell() {
 
 function moveToNextCell() {
     if (!selectedCell) return;
-
     const r = parseInt(selectedCell.dataset.row);
     const c = parseInt(selectedCell.dataset.col);
 
     let nr = r, nc = c;
-
     if (selectedDirection === "across") nc++;
     else nr++;
 
     const next = getCell(nr, nc);
-    if (next && !next.classList.contains("black")) {
-        selectCell(next);
-    }
+    if (next && !next.classList.contains("black")) selectCell(next);
 }
-
-/* ==========================================
-   TIE CROSSWORD TO DOT #12
-   ========================================== */
-document.querySelector('[data-id="12"]').addEventListener("click", () => {
-    mainGrid.classList.add("hidden");
-    openCrossword();
-});

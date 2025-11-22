@@ -120,23 +120,16 @@
          ============================= -->
     <div id="crossword-modal" class="hidden">
         <div class="header">
-            <button class="back" onclick="backToMain()">←</button>
+            <button class="back" onclick="closeCrossword()">⬅ Back</button>
             <h2>Crossword Puzzle</h2>
         </div>
-
         <div class="crossword-area">
-
-            <!-- Clue display -->
             <div id="crossword-clue">
                 <span class="clue-direction">Across</span>
                 <span class="clue-number">1.</span>
                 <span class="clue-text">Loading…</span>
             </div>
-
-            <!-- Crossword Grid -->
             <div id="crossword-grid"></div>
-
-            <!-- On-Screen Keyboard -->
             <div id="crossword-keyboard">
                 <div class="ck-row">
                     <div class="ck-key">Q</div><div class="ck-key">W</div><div class="ck-key">E</div>
@@ -161,4 +154,3 @@
     </div>
 
 </body>
-</html>
