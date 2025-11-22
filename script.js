@@ -176,26 +176,24 @@ function openPokemon() {
     input.addEventListener("input", spellingAssist);
 }
 
-/* GENERATION SETTING */
+// ---------------------------
+// GENERATION FILTER
+// ---------------------------
 function setGeneration(gen) {
     document.querySelectorAll('.gen-row button').forEach(btn => btn.classList.remove('active'));
 
     if (gen === 'all') {
         filteredList = fullPokemonData;
-        document.querySelector('.gen-row:nth-child(2) button:first-child').classList.add('active');  // ALL is first in second row? Wait, no.
-
-Wait, the ALL is the 10th button, Gen 6-9, ALL
-
-Second row: 6,7,8,9,ALL so button:last-child for ALL
-
-Yes, document.querySelector('.gen-row:nth-child(2) button:last-child').classList.add('active');
-
+        document.querySelector('.gen-row:nth-child(2) button:last-child').classList.add('active');
     } else {
+        const start = GEN_RANGES[`Gen ${gen}`][0] - 1;
+        const end = GEN_RANGES[`Gen ${gen}`][1];
+        filteredList = fullPokemonData.slice(start, end);
+
+        // Highlight the clicked gen
         const row = gen <= 5 ? 1 : 2;
         const index = gen <= 5 ? gen - 1 : gen - 6;
-
-document.querySelector(`.gen-row:nth-child(${row}) button:nth-child(${index + 1})`).classList.add('active');
-        filteredList = fullPokemonData.slice(GEN_RANGES[`Gen ${gen}`][0] - 1, GEN_RANGES[`Gen ${gen}`][1]);
+        document.querySelector(`.gen-row:nth-child(${row}) button:nth-child(${index + 1})`).classList.add('active');
     }
     loadPokemon();
 }
@@ -243,7 +241,7 @@ function giveHint() {
     feedback.textContent = `Hint: Starts with \"${currentPokemonName[0].toUpperCase()}\"`;
 }
 
-/* SPELLING ASSIST DROPDOWN */
+// SPELLING ASSIST DROPDOWN
 function spellingAssist() {
     const q = document.getElementById("pokemon-guess").value.toLowerCase();
     const list = document.getElementById("pokemon-suggestions");
@@ -267,6 +265,9 @@ function spellingAssist() {
 
     list.style.display = matches.length ? "block" : "none";
 }
+
+// Load input event listener
+document.getElementById("pokemon-guess").addEventListener("input", spellingAssist);
 
 // ------------------------------
 // WORDLE 100% CLEAN MODULE
@@ -365,7 +366,7 @@ function handleKey(k) {
 
 // ------------------------------
 // Update Board
-// ------------------------------ 
+// ------------------------------
 function updateBoard() {
     const tiles = [...document.querySelectorAll(".tile span")];
 
@@ -384,7 +385,7 @@ function updateBoard() {
 
 // ------------------------------
 // Submit guess
-// ------------------------------ 
+// ------------------------------
 function submitGuess() {
     if (currentGuess.length < 5) {
         messageEl.textContent = "Not enough letters.";
@@ -401,7 +402,7 @@ function submitGuess() {
 
 // ------------------------------
 // Reveal animation & coloring
-// ------------------------------ 
+// ------------------------------
 function revealGuess(guess, row) {
     const tiles = [...document.querySelectorAll(".tile")];
     const rowTiles = tiles.slice(row * 5, row * 5 + 5);

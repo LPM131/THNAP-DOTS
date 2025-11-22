@@ -222,19 +222,21 @@ body, html {
     color: #333;
 }
 
+/* GEN BUTTONS */
 .gen-filter {
-    width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;      /* center both rows */
     gap: 8px;
     margin-bottom: 15px;
+    width: 100%;
+    align-items: center;
 }
 
 .gen-row {
     display: flex;
     justify-content: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .gen-row button {
