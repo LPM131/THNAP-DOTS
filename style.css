@@ -18,7 +18,8 @@ body, html {
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
     padding: 10px;
-    max-width: 500px;
+    width: 90vw;
+    max-width: 420px;
     margin: auto;
 }
 
@@ -182,7 +183,7 @@ body, html {
     justify-content: center;
     align-items: center;   /* THIS fixes vertical centering */
 
-    font-size: clamp(20px, 6vw, 36px);
+    font-size: clamp(16px, 4vw, 28px);
     font-weight: bold;
     text-transform: uppercase;
 }
@@ -234,7 +235,7 @@ body, html {
     text-align: center;
     cursor: pointer;
     user-select: none;
-    font-size: clamp(14px, 4vw, 20px);
+    font-size: clamp(12px, 3vw, 18px);
 }
 
 .key.wide {
@@ -442,7 +443,7 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: min(5vw, 26px);
+    font-size: min(4vw, 20px);
     font-weight: bold;
     text-transform: uppercase;
     user-select: none;
