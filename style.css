@@ -222,7 +222,96 @@ body, html {
     color: #333;
 }
 
-/* --- POKEMON --- */
+/* GENERATION BUTTON ROW */
+.gen-filter {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px;
+    margin-bottom: 10px;
+    scrollbar-width: none;
+}
+.gen-filter::-webkit-scrollbar { display: none; }
+
+.gen-btn {
+    padding: 10px 16px;
+    background: #e5e5e5;
+    border-radius: 8px;
+    white-space: nowrap;
+    font-weight: bold;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.gen-btn.active {
+    background: #007aff;
+    color: white;
+}
+
+/* IMAGE */
+#pokemon-silhouette {
+    width: 160px;
+    height: 160px;
+    filter: brightness(0);
+    object-fit: contain;
+}
+
+/* INPUT */
+.input-wrapper {
+    position: relative;
+    width: 80%;
+}
+
+#pokemon-guess {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 2px solid #aaa;
+}
+
+/* AUTO-SUGGEST LIST */
+.pokemon-suggestions {
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: none;
+    max-height: 180px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    z-index: 20;
+}
+.pokemon-suggestions li {
+    padding: 8px;
+    cursor: pointer;
+}
+.pokemon-suggestions li:hover {
+    background: #f2f2f2;
+}
+
+/* BUTTON ROW */
+.poke-buttons {
+    display: flex;
+    gap: 20px;
+}
+.guess-btn, .hint-btn {
+    padding: 14px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    background: #007aff;
+    color: white;
+}
+.hint-btn {
+    background: #ffb700;
+}
+/* --------------------------- */
+/* POKEMON AREA */
+/* --------------------------- */
 .pokemon-area {
     display: flex;
     flex-direction: column;
@@ -232,52 +321,8 @@ body, html {
     padding: 20px;
 }
 
-#pokemon-silhouette {
-    width: 150px;
-    height: 150px;
-    filter: brightness(0);
-    object-fit: contain;
-}
-
-#pokemon-guess {
-    padding: 12px 16px;
-    font-size: 18px;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    text-align: center;
-    text-transform: lowercase;
-    position: relative;
-}
-
 #pokemon-feedback {
     font-size: 1.2rem;
     font-weight: bold;
     color: #333;
-}
-
-.pokemon-suggestions {
-    position: absolute;
-    left: 0;
-    top: 100%;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 10;
-    display: none;
-}
-
-.pokemon-suggestions .item {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.pokemon-suggestions .item:hover {
-    background: #f0f0f0;
 }

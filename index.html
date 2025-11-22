@@ -69,18 +69,36 @@
     </div>
 
     <!-- POKEMON MODAL -->
-    <div id="pokemon-modal" class="modal">
+    <div id="pokemon-modal" class="modal hidden">
         <div class="header">
             <button class="back" onclick="backToMain()">⬅ Back</button>
-            <h2>Guess the Pokémon</h2>
+            <h2>Guess That Pokémon</h2>
         </div>
 
         <div id="pokemon-area" class="pokemon-area">
-            <img id="pokemon-silhouette" src="" alt="Pokemon silhouette" width="200" height="200">
-            <input id="pokemon-guess" type="text" placeholder="Enter Pokémon name">
-            <button onclick="guessPokemon()">Guess</button>
+
+            <!-- GENERATION FILTER -->
+            <div id="gen-filter" class="gen-filter">
+                <!-- Buttons injected by JS -->
+            </div>
+
+            <!-- SILHOUETTE -->
+            <img id="pokemon-silhouette" src="" alt="Pokemon silhouette">
+
+            <!-- INPUT + AUTOCOMPLETE -->
+            <div class="input-wrapper">
+                <input id="pokemon-guess" type="text" placeholder="Start typing..." autocomplete="off">
+                <ul id="pokemon-suggestions" class="pokemon-suggestions"></ul>
+            </div>
+
+            <!-- GUESS + HINT BUTTONS -->
+            <div class="poke-buttons">
+                <button onclick="guessPokemon()" class="guess-btn">Guess</button>
+                <button onclick="giveHint()" class="hint-btn">Hint</button>
+            </div>
+
+            <!-- FEEDBACK -->
             <p id="pokemon-feedback"></p>
-            <ul id="pokemon-suggestions" class="pokemon-suggestions"></ul>
         </div>
     </div>
 
