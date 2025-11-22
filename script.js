@@ -136,7 +136,20 @@ let pokemonNames = [];
 let currentPokemonName = "";
 
 function loadAllPokemonNames() {
-    loadPokemon();
+    if (pokemonNames.length > 0) return Promise.resolve();
+    return fetch('https://pokeapi.co/api/v2/pokemon?limit=898')
+    .then(response => response.json())
+    .then(data => {
+        pokemonNames = data.results.map(p => p.name);
+    });
+}
+
+function openPokemon() {
+    const modal = document.getElementById("pokemon-modal");
+    modal.classList.remove("hidden");
+    loadAllPokemonNames().then(() => loadPokemon());
+    const input = document.getElementById("pokemon-guess");
+    input.addEventListener("input", handleInput);
 }
 
 function loadPokemon() {
@@ -146,8 +159,10 @@ function loadPokemon() {
     .then(data => {
         const img = document.getElementById("pokemon-silhouette");
         img.src = data.sprites.front_default;
+        img.style.filter = 'brightness(0)';
         currentPokemonName = data.name;
         document.getElementById("pokemon-feedback").textContent = "";
+        document.getElementById("pokemon-suggestions").style.display = 'none';
     })
     .catch(error => {
         console.error("Error loading Pokémon:", error);
@@ -157,14 +172,40 @@ function loadPokemon() {
 
 function guessPokemon() {
     const guess = document.getElementById("pokemon-guess").value.trim().toLowerCase();
+    const ul = document.getElementById("pokemon-suggestions");
+    ul.style.display = 'none';
     if (!guess) return;
     if (guess === currentPokemonName) {
         document.getElementById("pokemon-feedback").textContent = "🎉 Correct! It's " + currentPokemonName.charAt(0).toUpperCase() + currentPokemonName.slice(1) + "!";
+        const img = document.getElementById("pokemon-silhouette");
+        img.style.filter = 'none';
         setTimeout(() => { loadPokemon(); document.getElementById("pokemon-guess").value = ""; }, 2000);
     } else {
         document.getElementById("pokemon-feedback").textContent = "❌ Wrong! Try again.";
     }
     document.getElementById("pokemon-guess").value = "";
+}
+
+function handleInput() {
+    const query = document.getElementById("pokemon-guess").value.toLowerCase();
+    const ul = document.getElementById("pokemon-suggestions");
+    if (!query) {
+        ul.style.display = 'none';
+        return;
+    }
+    const matches = pokemonNames.filter(name => name.startsWith(query)).slice(0, 10);
+    ul.innerHTML = '';
+    matches.forEach(name => {
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+        li.onclick = () => {
+            document.getElementById("pokemon-guess").value = name.charAt(0).toUpperCase() + name.slice(1);
+            ul.style.display = 'none';
+        };
+        ul.appendChild(li);
+    });
+    ul.style.display = matches.length ? 'block' : 'none';
 }
 
 // ------------------------------
