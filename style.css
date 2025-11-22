@@ -16,18 +16,20 @@ body, html {
 /* MAIN DOT GRID */
 .dots-grid {
     display: grid;
-    grid-template-columns: repeat(5, 90px);
-    gap: 20px;
-    background: rgba(255,255,255,0.15);
-    padding: 30px;
-    border-radius: 40px;
-    backdrop-filter: blur(15px);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 15px;
+    width: 90vw;
+    max-width: 400px;
+    padding: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .dot {
-    width: 90px;
-    height: 90px;
+    aspect-ratio: 1;
+    width: 100%;
     border-radius: 50%;
     background: linear-gradient(145deg, #ffffff, #dddddd);
     display: flex;
