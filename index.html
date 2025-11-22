@@ -113,3 +113,52 @@
             <!-- FEEDBACK -->
             <p id="pokemon-feedback"></p>
         </div>
+    </div>
+
+    <!-- =============================
+         DOT #12 — CROSSWORD MODAL
+         ============================= -->
+    <div id="crossword-modal" class="hidden">
+        <div class="header">
+            <button class="back" onclick="backToMain()">←</button>
+            <h2>Crossword Puzzle</h2>
+        </div>
+
+        <div class="crossword-area">
+
+            <!-- Clue display -->
+            <div id="crossword-clue">
+                <span class="clue-direction">Across</span>
+                <span class="clue-number">1.</span>
+                <span class="clue-text">Loading…</span>
+            </div>
+
+            <!-- Crossword Grid -->
+            <div id="crossword-grid"></div>
+
+            <!-- On-Screen Keyboard -->
+            <div id="crossword-keyboard">
+                <div class="ck-row">
+                    <div class="ck-key">Q</div><div class="ck-key">W</div><div class="ck-key">E</div>
+                    <div class="ck-key">R</div><div class="ck-key">T</div><div class="ck-key">Y</div>
+                    <div class="ck-key">U</div><div class="ck-key">I</div><div class="ck-key">O</div>
+                    <div class="ck-key">P</div>
+                </div>
+                <div class="ck-row">
+                    <div class="ck-key">A</div><div class="ck-key">S</div><div class="ck-key">D</div>
+                    <div class="ck-key">F</div><div class="ck-key">G</div><div class="ck-key">H</div>
+                    <div class="ck-key">J</div><div class="ck-key">K</div><div class="ck-key">L</div>
+                </div>
+                <div class="ck-row">
+                    <div class="ck-key wide function" data-key="BACK">⌫</div>
+                    <div class="ck-key">Z</div><div class="ck-key">X</div><div class="ck-key">C</div>
+                    <div class="ck-key">V</div><div class="ck-key">B</div><div class="ck-key">N</div>
+                    <div class="ck-key">M</div>
+                    <div class="ck-key wide function" data-key="NEXT">Next</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
