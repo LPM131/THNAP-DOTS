@@ -1,84 +1,115 @@
 /* RESET */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-body, html {
-    height: 100vh;
-    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+body {
+  background: #000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #fff;
+  min-height: 100vh;
 }
 
-/* MAIN DOT GRID */
-.dots-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 8px;
-    width: calc(100vw - 10px);
-    padding: 5px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 25px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+h1 {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 2rem;
+  font-weight: 300;
 }
 
+/* Main grid container */
+.main-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 14px;
+  max-width: 360px; /* Approx iPhone screen width */
+  margin: 20px auto;
+  padding: 10px;
+  background: #121212;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+}
+
+/* Each dot */
 .dot {
-    aspect-ratio: 1;
-    width: 100%;
-    border-radius: 50%;
-    background: linear-gradient(145deg, #ffffff, #dddddd);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 40px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: relative;
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 6px rgba(255, 255, 255, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+  user-select: none;
 }
 
+/* Neon glow effect for icon inside dot */
+.dot .icon {
+  width: 36px;
+  height: 36px;
+  stroke: #0ff; /* default cyan neon */
+  filter: drop-shadow(0 0 5px #0ff);
+  transition: stroke 0.3s ease, filter 0.3s ease;
+}
+
+/* Different neon colors for first few dots (customize) */
+.dot[data-id="1"] .icon {
+  stroke: #00f0b7;
+  filter: drop-shadow(0 0 6px #00f0b7);
+}
+.dot[data-id="11"] .icon {
+  stroke: #ffec3d;
+  filter: drop-shadow(0 0 6px #ffec3d);
+}
+.dot[data-id="13"] .icon {
+  stroke: #ff2d55;
+  filter: drop-shadow(0 0 6px #ff2d55);
+}
+
+/* Hover effect */
 .dot:hover {
-    transform: scale(1.15);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    inset 0 0 10px rgba(255, 255, 255, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
 }
 
-.dot:active {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+.dot:hover .icon {
+  filter: drop-shadow(0 0 10px currentColor);
 }
 
-/* POKEBALL DOT */
-.dot.pokeball {
-    background: radial-gradient(circle at top, red 50%, white 50%);
-    border: 2px solid #000;
+/* Text icon inside svg for letters */
+.dot svg text {
+  pointer-events: none;
+  user-select: none;
+  font-weight: 700;
 }
 
-.dot.pokeball::before {
-    content: '';
-    position: absolute;
-    width: 60%;
-    height: 15%;
-    background: black;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 4px;
-}
-
-.dot.pokeball::after {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: white;
-    border: 3px solid black;
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+/* Responsive - center grid on smaller screens */
+@media (max-width: 400px) {
+  .main-grid {
+    max-width: 320px;
+    grid-gap: 12px;
+  }
+  .dot {
+    width: 64px;
+    height: 64px;
+  }
+  .dot .icon {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 /* MODALS */

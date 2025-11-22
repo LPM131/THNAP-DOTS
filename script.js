@@ -1,7 +1,64 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const mainGrid = document.getElementById('main-grid');
+  const title = document.querySelector('h1') || document.createElement('h1');
+  const appContainer = document.getElementById('app-container') || document.body;
+
+  // Function to show main grid and hide feature view
+  function showMainGrid() {
+    if (title) {
+      title.textContent = 'DOTS';
+    }
+    if (mainGrid) mainGrid.style.display = 'grid';
+
+    // Remove any feature content if present
+    const featureView = document.getElementById('feature-view');
+    if (featureView) {
+      featureView.remove();
+    }
+
+    // Hide modals
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => modal.classList.add('hidden'));
+  }
+
+  // Function to show feature by calling existing functions
+  function showFeature(dotId) {
+    const featureMap = {
+      1: openChat,
+      11: openWordle,
+      13: openPokemon,
+      12: openCrossword
+    };
+
+    const openFunction = featureMap[dotId];
+    if (openFunction) {
+      if (title) {
+        title.textContent = '';
+      }
+      if (mainGrid) mainGrid.style.display = 'none';
+      openFunction();
+    }
+  }
+
+  // Handle click on dots
+  if (mainGrid) {
+    mainGrid.addEventListener('click', (e) => {
+      let dot = e.target.closest('.dot');
+      if (!dot) return;
+      let dotId = dot.getAttribute('data-id');
+      if (dotId) {
+        showFeature(dotId);
+      }
+    });
+  }
+
+  // Initial setup
+  showMainGrid();
+});
+
 // ---------------------------
 // DOM ELEMENTS
 // ---------------------------
-const mainGrid = document.getElementById("main-grid");
 const chatModal = document.getElementById("chat-modal");
 const wordleModal = document.getElementById("wordle-modal");
 
@@ -16,31 +73,19 @@ const board = document.getElementById("game-board");
 const keyboard = document.getElementById("keyboard");
 const gameMsg = document.getElementById("game-message");
 
-
 // ---------------------------
-// NAVIGATION
+// MODIFIED NAVIGATION
 // ---------------------------
-document.querySelectorAll(".dot").forEach(dot => {
-    dot.addEventListener("click", () => {
-        const id = parseInt(dot.dataset.id);
-
-        mainGrid.classList.add("hidden");
-
-        if (id === 1) openChat();
-        else if (id === 11) openWordle();
-        else if (id === 13) openPokemon();
-        else {
-            alert(`Dot ${id} clicked`);
-            backToMain();
-        }
-    });
-});
-
 function backToMain() {
     chatModal.classList.add("hidden");
     wordleModal.classList.add("hidden");
     document.getElementById("pokemon-modal").classList.add("hidden");
-    mainGrid.classList.remove("hidden");
+    document.getElementById("crossword-modal").classList.add("hidden");
+
+    const mainGrid = document.getElementById('main-grid');
+    const title = document.querySelector('h1');
+    if (mainGrid) mainGrid.style.display = 'grid';
+    if (title) title.textContent = 'DOTS';
 }
 
 
@@ -701,11 +746,3 @@ function moveToNextCell() {
         selectCell(next);
     }
 }
-
-/* ==========================================
-   TIE CROSSWORD TO DOT #12
-   ========================================== */
-document.querySelector('[data-id="12"]').addEventListener("click", () => {
-    mainGrid.classList.add("hidden");
-    openCrossword();
-});
