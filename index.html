@@ -1,114 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DOTS App</title>
-  <link rel="stylesheet" href="style.css">
-  <script defer src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOTS</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+
+    <script defer src="script.js"></script>
 </head>
+
 <body>
 
-  <!-- MAIN GRID -->
-  <div id="main-grid" class="dots-grid">
-    <div class="dot" data-id="1">💬</div>
-    <div class="dot" data-id="2">2</div>
-    <div class="dot" data-id="3">3</div>
-    <div class="dot" data-id="4">4</div>
-    <div class="dot" data-id="5">5</div>
+    <!-- MAIN GRID -->
+    <div id="main-grid" class="dots-grid">
+        <div class="dot" data-id="1">💬</div>
+        <div class="dot" data-id="2">2</div>
+        <div class="dot" data-id="3">3</div>
+        <div class="dot" data-id="4">4</div>
+        <div class="dot" data-id="5">5</div>
 
-    <div class="dot" data-id="6">6</div>
-    <div class="dot" data-id="7">7</div>
-    <div class="dot" data-id="8">8</div>
-    <div class="dot" data-id="9">9</div>
-    <div class="dot" data-id="10">10</div>
+        <div class="dot" data-id="6">6</div>
+        <div class="dot" data-id="7">7</div>
+        <div class="dot" data-id="8">8</div>
+        <div class="dot" data-id="9">9</div>
+        <div class="dot" data-id="10">10</div>
 
-    <div class="dot" data-id="11">🔤</div>
-    <div class="dot" data-id="12">12</div>
-    <div class="dot pokeball" data-id="13"></div>
-    <div class="dot" data-id="14">14</div>
-    <div class="dot" data-id="15">15</div>
-  </div>
+        <div class="dot" data-id="11">🔤</div>
+        <div class="dot" data-id="12">12</div>
+        <div class="dot pokeball" data-id="13"></div>
+        <div class="dot" data-id="14">14</div>
+        <div class="dot" data-id="15">15</div>
+    </div>
 
-  <!-- CHAT MODAL -->
-  <div id="chat-modal" class="modal hidden">
-      <div class="header">
-          <button class="back" onclick="backToMain()">⬅ Back</button>
-          <h2>Chats</h2>
-      </div>
+    <!-- CHAT MODAL -->
+    <div id="chat-modal" class="modal hidden">
+        <div class="header">
+            <button class="back" onclick="backToMain()">⬅ Back</button>
+            <h2>Chats</h2>
+        </div>
 
-      <div id="thread-area" class="thread-area"></div>
+        <div id="thread-area" class="thread-area"></div>
 
-      <div id="chat-area" class="chat-area hidden">
-          <div id="messages" class="messages"></div>
+        <div id="chat-area" class="chat-area hidden">
+            <div id="messages" class="messages"></div>
 
-          <div class="input-section">
-              <input id="chat-input" type="text" placeholder="Type...">
-              <button onclick="sendMessage()">Send</button>
-          </div>
-      </div>
-  </div>
+            <div class="input-section">
+                <input id="chat-input" type="text" placeholder="Type...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
 
-  <!-- WORDLE MODAL -->
-  <div id="wordle-modal" class="modal hidden">
-      <div class="header">
-          <button class="back" onclick="backToMain()">⬅ Back</button>
-          <h2>WORD OF THE DAY</h2>
-      </div>
+    <!-- WORDLE MODAL -->
+    <div id="wordle-modal" class="modal hidden">
+        <div class="header">
+            <button class="back" onclick="backToMain()">⬅ Back</button>
+            <h2>WORD OF THE DAY</h2>
+        </div>
 
-      <div id="wordle-area" class="wordle-area">
-          <div id="game-board"></div>
-          <div id="keyboard"></div>
+        <div id="wordle-area" class="wordle-area">
+            <div id="game-board"></div>
+            <div id="keyboard"></div>
 
-          <div id="game-message" class="game-message"></div>
-      </div>
-  </div>
+            <div id="game-message" class="game-message"></div>
+        </div>
+    </div>
 
-  <!-- POKEMON MODAL -->
-  <div id="pokemon-modal" class="modal hidden">
-      <div class="header">
-          <button class="back" onclick="backToMain()">⬅ Back</button>
-          <h2>Guess That Pokémon</h2>
-      </div>
+    <!-- POKEMON MODAL -->
+    <div id="pokemon-modal" class="modal hidden">
+        <div class="header">
+            <button class="back" onclick="backToMain()">⬅ Back</button>
+            <h2>Guess That Pokémon</h2>
+        </div>
 
-      <div id="pokemon-area" class="pokemon-area">
+        <div id="pokemon-area" class="pokemon-area">
 
-          <!-- GENERATION FILTER -->
-          <div id="gen-filter" class="gen-filter">
-              <div class="gen-row">
-                  <button onclick="setGeneration(1)">Gen 1</button>
-                  <button onclick="setGeneration(2)">Gen 2</button>
-                  <button onclick="setGeneration(3)">Gen 3</button>
-                  <button onclick="setGeneration(4)">Gen 4</button>
-                  <button onclick="setGeneration(5)">Gen 5</button>
-              </div>
-              <div class="gen-row">
-                  <button onclick="setGeneration(6)">Gen 6</button>
-                  <button onclick="setGeneration(7)">Gen 7</button>
-                  <button onclick="setGeneration(8)">Gen 8</button>
-                  <button onclick="setGeneration(9)">Gen 9</button>
-                  <button onclick="setGeneration('all')">All</button>
-              </div>
-          </div>
+            <!-- GENERATION FILTER -->
+            <div id="gen-filter" class="gen-filter">
+                <div class="gen-row">
+                    <button onclick="setGeneration(1)">Gen 1</button>
+                    <button onclick="setGeneration(2)">Gen 2</button>
+                    <button onclick="setGeneration(3)">Gen 3</button>
+                    <button onclick="setGeneration(4)">Gen 4</button>
+                    <button onclick="setGeneration(5)">Gen 5</button>
+                </div>
+                <div class="gen-row">
+                    <button onclick="setGeneration(6)">Gen 6</button>
+                    <button onclick="setGeneration(7)">Gen 7</button>
+                    <button onclick="setGeneration(8)">Gen 8</button>
+                    <button onclick="setGeneration(9)">Gen 9</button>
+                    <button onclick="setGeneration('all')">All</button>
+                </div>
+            </div>
 
-          <!-- SILHOUETTE -->
-          <img id="pokemon-silhouette" src="" alt="Pokemon silhouette">
+            <!-- SILHOUETTE -->
+            <img id="pokemon-silhouette" src="" alt="Pokemon silhouette">
 
-          <!-- INPUT + AUTOCOMPLETE -->
-          <div class="input-wrapper">
-              <input id="pokemon-guess" type="text" placeholder="Start typing..." autocomplete="off">
-              <ul id="pokemon-suggestions" class="pokemon-suggestions"></ul>
-          </div>
+            <!-- INPUT + AUTOCOMPLETE -->
+            <div class="input-wrapper">
+                <input id="pokemon-guess" type="text" placeholder="Start typing..." autocomplete="off">
+                <ul id="pokemon-suggestions" class="pokemon-suggestions"></ul>
+            </div>
 
-          <!-- GUESS + HINT BUTTONS -->
-          <div class="poke-buttons">
-              <button onclick="guessPokemon()" class="guess-btn">Guess</button>
-              <button onclick="giveHint()" class="hint-btn">Hint</button>
-          </div>
+            <!-- GUESS + HINT BUTTONS -->
+            <div class="poke-buttons">
+                <button onclick="guessPokemon()" class="guess-btn">Guess</button>
+                <button onclick="giveHint()" class="hint-btn">Hint</button>
+            </div>
 
-          <!-- FEEDBACK -->
-          <p id="pokemon-feedback"></p>
-      </div>
-  </div>
+            <!-- FEEDBACK -->
+            <p id="pokemon-feedback"></p>
+        </div>
+    </div>
+
+    <!-- =============================
+         DOT #12 — CROSSWORD MODAL
+         ============================= -->
+    <div id="crossword-modal" class="hidden">
+        <div class="header">
+            <button class="back" onclick="backToMain()">←</button>
+            <h2>Crossword Puzzle</h2>
+        </div>
+
+        <div class="crossword-area">
+
+            <!-- Clue display -->
+            <div id="crossword-clue">
+                <span class="clue-direction">Across</span>
+                <span class="clue-number">1.</span>
+                <span class="clue-text">Loading…</span>
+            </div>
+
+            <!-- Crossword Grid -->
+            <div id="crossword-grid"></div>
+
+            <!-- On-Screen Keyboard -->
+            <div id="crossword-keyboard">
+                <div class="ck-row">
+                    <div class="ck-key">Q</div><div class="ck-key">W</div><div class="ck-key">E</div>
+                    <div class="ck-key">R</div><div class="ck-key">T</div><div class="ck-key">Y</div>
+                    <div class="ck-key">U</div><div class="ck-key">I</div><div class="ck-key">O</div>
+                    <div class="ck-key">P</div>
+                </div>
+                <div class="ck-row">
+                    <div class="ck-key">A</div><div class="ck-key">S</div><div class="ck-key">D</div>
+                    <div class="ck-key">F</div><div class="ck-key">G</div><div class="ck-key">H</div>
+                    <div class="ck-key">J</div><div class="ck-key">K</div><div class="ck-key">L</div>
+                </div>
+                <div class="ck-row">
+                    <div class="ck-key wide function" data-key="BACK">⌫</div>
+                    <div class="ck-key">Z</div><div class="ck-key">X</div><div class="ck-key">C</div>
+                    <div class="ck-key">V</div><div class="ck-key">B</div><div class="ck-key">N</div>
+                    <div class="ck-key">M</div>
+                    <div class="ck-key wide function" data-key="NEXT">Next</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
+</html>
