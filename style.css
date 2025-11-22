@@ -22,13 +22,13 @@ h1 {
 /* Main grid container */
 .main-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 14px;
-  max-width: 360px; /* Approx iPhone screen width */
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 12px;
+  max-width: 380px; /* Adjusted for iPhone layout */
   margin: 20px auto;
-  padding: 10px;
+  padding: 16px;
   background: #121212;
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.8);
 }
 
@@ -62,18 +62,66 @@ h1 {
   transition: stroke 0.3s ease, filter 0.3s ease;
 }
 
-/* Different neon colors for first few dots (customize) */
-.dot[data-id="1"] .icon {
+/* Unique neon colors for each dot */
+.dot[data-id="1"] .icon { /* Chat */
   stroke: #00f0b7;
   filter: drop-shadow(0 0 6px #00f0b7);
 }
-.dot[data-id="11"] .icon {
+.dot[data-id="2"] .icon { /* Notes */
+  stroke: #4ecdc4;
+  filter: drop-shadow(0 0 6px #4ecdc4);
+}
+.dot[data-id="3"] .icon { /* Games */
+  stroke: #45b7d1;
+  filter: drop-shadow(0 0 6px #45b7d1);
+}
+.dot[data-id="4"] .icon { /* Calendar */
+  stroke: #96ceb4;
+  filter: drop-shadow(0 0 6px #96ceb4);
+}
+.dot[data-id="5"] .icon { /* Settings */
+  stroke: #feca57;
+  filter: drop-shadow(0 0 6px #feca57);
+}
+.dot[data-id="6"] .icon { /* Music */
+  stroke: #ff9ff3;
+  filter: drop-shadow(0 0 6px #ff9ff3);
+}
+.dot[data-id="7"] .icon { /* Camera */
+  stroke: #54a0ff;
+  filter: drop-shadow(0 0 6px #54a0ff);
+}
+.dot[data-id="8"] .icon { /* Letters */
+  stroke: #5f27cd;
+  filter: drop-shadow(0 0 6px #5f27cd);
+}
+.dot[data-id="9"] .icon { /* Safari */
+  stroke: #00d2d3;
+  filter: drop-shadow(0 0 6px #00d2d3);
+}
+.dot[data-id="10"] .icon { /* Messages */
+  stroke: #ff9f43;
+  filter: drop-shadow(0 0 6px #ff9f43);
+}
+.dot[data-id="11"] .icon { /* Wordle */
   stroke: #ffec3d;
   filter: drop-shadow(0 0 6px #ffec3d);
 }
-.dot[data-id="13"] .icon {
+.dot[data-id="12"] .icon { /* Crossword */
+  stroke: #26de81;
+  filter: drop-shadow(0 0 6px #26de81);
+}
+.dot[data-id="13"] .icon { /* Pokemon */
   stroke: #ff2d55;
   filter: drop-shadow(0 0 6px #ff2d55);
+}
+.dot[data-id="14"] .icon { /* Notes */
+  stroke: #a29bfe;
+  filter: drop-shadow(0 0 6px #a29bfe);
+}
+.dot[data-id="15"] .icon { /* Utilities */
+  stroke: #fd79a8;
+  filter: drop-shadow(0 0 6px #fd79a8);
 }
 
 /* Hover effect */
