@@ -12,46 +12,15 @@ const KEYBOARD_ROWS = [
 // Tracks the best status we've seen for each letter: 0 = gray, 1 = yellow, 2 = green
 const letterStatus = {};
 
-// Call this function right after you process a correct guess (after pressing Enter)
+// Keyboard coloring that WAS working (uses .key)
 function updateKeyboard(guess, answer) {
-  const countInAnswer = {};
-  for (const ch of answer) {
-    countInAnswer[ch] = (countInAnswer[ch] || 0) + 1;
-  }
-
-  // First pass: mark all correct positions (green)
-  for (let i = 0; i < 5; i++) {
-    if (guess[i] === answer[i]) {
-      letterStatus[guess[i]] = 2;           // green wins everything
-      countInAnswer[guess[i]]--;
-    }
-  }
-
-  // Second pass: mark wrong-position (yellow) only for remaining letters
-  for (let i = 0; i < 5; i++) {
-    const ch = guess[i];
-    if (guess[i] !== answer[i] && countInAnswer[ch] > 0) {
-      // Only upgrade to yellow if it wasn't already green
-      if (letterStatus[ch] !== 2) {
-        letterStatus[ch] = 1;
-      }
-      countInAnswer[ch]--;
-    } else if (guess[i] !== answer[i]) {
-      // Only mark gray if we haven't seen it be green or yellow before
-      if (!letterStatus[ch]) {
-        letterStatus[ch] = 0;
-      }
-    }
-  }
-
-  // FIXED SELECTOR
-  document.querySelectorAll('[data-key]').forEach(keyEl => {
-    const letter = keyEl.textContent.trim();
+  document.querySelectorAll('.key').forEach(key => {
+    const letter = key.textContent;
     if (letter.length === 1 && letterStatus[letter] !== undefined) {
-      keyEl.classList.remove('correct','present','absent');
-      if (letterStatus[letter] === 2) keyEl.classList.add('correct');
-      else if (letterStatus[letter] === 1) keyEl.classList.add('present');
-      else keyEl.classList.add('absent');
+      key.className = 'key';
+      if (letterStatus[letter] === 2) key.classList.add('correct');
+      else if (letterStatus[letter] === 1) key.classList.add('present');
+      else if (letterStatus[letter] === 0) key.classList.add('absent');
     }
   });
 }
