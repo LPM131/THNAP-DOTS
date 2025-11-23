@@ -15,43 +15,33 @@ const letterStatus = {};
 // Call this function right after you process a correct guess (after pressing Enter)
 function updateKeyboard(guess, answer) {
   const countInAnswer = {};
-  for (const ch of answer) {
-    countInAnswer[ch] = (countInAnswer[ch] || 0) + 1;
-  }
+  for (const ch of answer) countInAnswer[ch] = (countInAnswer[ch] || 0) + 1;
 
-  // First pass: mark all correct positions (green)
   for (let i = 0; i < 5; i++) {
     if (guess[i] === answer[i]) {
-      letterStatus[guess[i]] = 2;           // green wins everything
+      letterStatus[guess[i]] = 2;
       countInAnswer[guess[i]]--;
     }
   }
 
-  // Second pass: mark wrong-position (yellow) only for remaining letters
   for (let i = 0; i < 5; i++) {
     const ch = guess[i];
     if (guess[i] !== answer[i] && countInAnswer[ch] > 0) {
-      // Only upgrade to yellow if it wasn't already green
-      if (letterStatus[ch] !== 2) {
-        letterStatus[ch] = 1;
-      }
+      if (letterStatus[ch] !== 2) letterStatus[ch] = 1;
       countInAnswer[ch]--;
-    } else if (guess[i] !== answer[i]) {
-      // Only mark gray if we haven't seen it be green or yellow before
-      if (!letterStatus[ch]) {
-        letterStatus[ch] = 0;
-      }
+    } else if (guess[i] !== answer[i] && letterStatus[ch] === undefined) {
+      letterStatus[ch] = 0;
     }
   }
 
-  // Now repaint the actual keyboard keys
+  // FIXED: keep .nyt-key class, only add/remove correct/present/absent
   document.querySelectorAll('.nyt-key').forEach(key => {
-    const letter = key.textContent;
-    if (letter.length === 1 && letterStatus[letter] !== undefined) {
-      key.className = 'key'; // reset
+    const letter = key.textContent.trim().toUpperCase();
+    if (letter && letterStatus[letter] !== undefined) {
+      key.classList.remove('correct', 'present', 'absent');
       if (letterStatus[letter] === 2) key.classList.add('correct');
       else if (letterStatus[letter] === 1) key.classList.add('present');
-      else if (letterStatus[letter] === 0) key.classList.add('absent');
+      else key.classList.add('absent');
     }
   });
 }
@@ -393,17 +383,14 @@ function initBoard() {
 }
 
 function initKeyboard() {
-    // Keyboard is now statically in HTML, just attach event listeners
-    document.querySelectorAll('.nyt-key').forEach(button => {
-        const letter = button.textContent;
-        if (letter === 'ENTER') {
-            button.onclick = () => handleKey('ENTER');
-        } else if (letter === '⌫') {
-            button.onclick = () => handleKey('BACKSPACE');
-        } else {
-            button.onclick = () => handleKey(letter);
-        }
-    });
+  document.querySelectorAll('.nyt-key').forEach(button => {
+    button.onclick = () => {
+      const key = button.dataset.key;
+      if (key === 'ENTER') handleKey('ENTER');
+      else if (key === 'BACKSPACE') handleKey('BACKSPACE');
+      else if (key.length === 1) handleKey(key);
+    };
+  });
 }
 
 // ------------------------------

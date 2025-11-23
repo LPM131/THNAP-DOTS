@@ -171,35 +171,6 @@ body, html {
     animation: flip 0.5s ease-in-out;
 }
 
-@keyframes flip {
-    0% { transform: rotateX(0deg); }
-    50% { transform: rotateX(90deg); }
-    100% { transform: rotateX(0deg); }
-}
-
-
-
-.key {
-    height: 58px;                    /* ← this is the NYT height */
-    min-width: 0;
-    padding: 0 4px;
-    font-size: 15px;                 /* ← reduced from 20px → perfect on small screens */
-    font-weight: bold;
-    background: #d3d6da;
-    border-radius: 5px;
-    flex: 1;
-    max-width: 70px;
-}
-
-.key.large {
-    flex: 1.6;                       /* makes ENTER and backspace just right */
-    font-size: 13px;                 /* smaller text on big keys */
-}
-
-/* Colors — exact NYT */
-.key.correct  { background:#6aaa64; color:white; }
-.key.present  { background:#c9b458; color:white; }
-.key.absent   { background:#787c7e; color:white; }
 
 /* GEN BUTTONS */
 .gen-filter {
@@ -564,4 +535,3 @@ body, html {
 .nyt-key.correct  { background:#6aaa64 !important; color:white !important; }
 .nyt-key.present  { background:#c9b458 !important; color:white !important; }
 .nyt-key.absent   { background:#787c7e !important; color:white !important; }
-
