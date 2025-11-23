@@ -29,53 +29,55 @@ h1 {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); /* Auto-adjusts columns */
+  grid-gap: 10px;
+}
 
 /* Each dot */
 .dot {
   width: 100%;
   aspect-ratio: 1;
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 100px;  /* Limit max size of dots */
+  max-height: 100px; /* Limit max height */
   background: rgba(255, 255, 255, 0.07);
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
 }
 
 .dot:hover {
-  transform: scale(1.08);
-  filter: brightness(1.25);
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1); /* Subtle scale increase */
 }
 
-/* ICONS */
-.dot .icon {
-  width: 38px;
-  height: 38px;
-  stroke-width: 2.4;
-  filter: drop-shadow(0 0 10px currentColor);
+.icon {
+  width: 36px;
+  height: 36px;
+  stroke: #0ff;
+  filter: drop-shadow(0 0 5px #0ff);
 }
 
 /* Row colors */
 .dot[data-id="1"] .icon { color: #4cffb7; stroke: #4cffb7; }
 .dot[data-id="2"] .icon { color: #ffd84d; stroke: #ffd84d; }
 .dot[data-id="3"] .icon { color: #ff4d4d; stroke: #ff4d4d; }
-
 .dot[data-id="4"] .icon { color: #58b2ff; stroke: #58b2ff; }
 .dot[data-id="5"] .icon { color: #b28dff; stroke: #b28dff; }
 .dot[data-id="6"] .icon { color: #ff9f40; stroke: #ff9f40; }
-
 .dot[data-id="7"] .icon { color: #ffaa33; stroke: #ffaa33; }
 .dot[data-id="8"] .icon { color: #cc66ff; stroke: #cc66ff; }
 .dot[data-id="9"] .icon { color: #42c0ff; stroke: #42c0ff; }
-
 .dot[data-id="10"] .icon { color: #41ff79; stroke: #41ff79; }
 .dot[data-id="11"] .icon { color: #ff4d7a; stroke: #ff4d7a; }
 .dot[data-id="12"] .icon { color: #379aff; stroke: #379aff; }
-
 .dot[data-id="13"] .icon { color: #ffae42; stroke: #ffae42; }
 .dot[data-id="14"] .icon { color: #5ab2ff; stroke: #5ab2ff; }
 .dot[data-id="15"] .icon { color: #ff9533; stroke: #ff9533; }
@@ -89,25 +91,46 @@ h1 {
 /* MODALS */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: white;
+  inset: 0;
+  background: #fff;
   z-index: 99;
   display: flex;
   flex-direction: column;
+  padding: 20px;
+  overflow: auto;
 }
 
 .hidden {
-  display: none !important;
+  display: none;
 }
 
-/* HEADERS */
 .header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 20px;
+  background: #2d2d2d;
+  border-radius: 8px;
+}
+
+.header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.header button {
+  border: none;
+  background: none;
+  color: #ff9533;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.header button:hover {
+  color: #f4a261;
 }
 
 /* CHAT */
@@ -149,6 +172,14 @@ h1 {
   padding: 10px;
 }
 
+.input-section input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  font-size: 1rem;
+}
+
 /* WORDLE */
 .wordle-area {
   display: flex;
@@ -164,7 +195,6 @@ h1 {
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
   width: 330px;
-  height: 397px;
   margin: 10px auto 0;
 }
 
