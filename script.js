@@ -36,7 +36,29 @@ document.querySelectorAll(".dot").forEach(dot => {
     });
 });
 
+// New: Back button inside individual chat → back to floating dots
+function backToThreadList() {
+    threadArea.classList.remove("hidden");
+    chatArea.classList.add("hidden");
+    renderThreadDots(); // Refresh unread badges
+}
+
+// Override the main back button only when inside chat
 function backToMain() {
+    // If we're inside an individual chat → go to thread list first
+    if (!chatArea.classList.contains("hidden")) {
+        backToThreadList();
+        return;
+    }
+
+    // If we're in thread list → go to main grid
+    if (!threadArea.classList.contains("hidden")) {
+        chatModal.classList.add("hidden");
+        mainGrid.classList.remove("hidden");
+        return;
+    }
+
+    // Fallback: any other modal → main grid
     chatModal.classList.add("hidden");
     wordleModal.classList.add("hidden");
     document.getElementById("pokemon-modal").classList.add("hidden");
@@ -205,16 +227,17 @@ function addLongPress(el, callback) {
     el.addEventListener('mouseleave', endPress);  // Mouse wander
 }
 
-// Rest of functions unchanged (openThread, sendMessage, etc.)
+// Updated openThread to set chat name in header
 function openThread(name) {
     currentThread = name;
     threadsData[name].unread = 0;
     saveChatData();
-    renderThreadDots();
+
+    document.getElementById("current-chat-name").textContent = name;
 
     threadArea.classList.add("hidden");
     chatArea.classList.remove("hidden");
-    messages.innerHTML = `<div class="thread-header">${name} <span id="typing"></span></div>`;
+    messages.innerHTML = `<div id="typing"></div>`; // Remove chat name, now in header
 
     threads[name].forEach(msg => addMessageBubble(msg));
     messages.scrollTop = messages.scrollHeight;
@@ -369,9 +392,15 @@ function formatTime(date) {
     return d.toLocaleDateString();
 }
 
-// Open chat
+// ---------------------------
+// CHAT NAVIGATION – FIXED
+// ---------------------------
+
 function openChat() {
     chatModal.classList.remove("hidden");
+    // Always start at the floating dots view
+    threadArea.classList.remove("hidden");
+    chatArea.classList.add("hidden");
     renderThreadDots();
 }
 

@@ -38,8 +38,8 @@
     <div id="chat-modal" class="modal hidden">
         <div class="header">
             <button class="back" onclick="backToMain()">Back</button>
-            <h2>Chats</h2>
-            <div></div> <!-- spacer -->
+            <h2 id="chat-title">Chats</h2>
+            <div></div>
         </div>
 
         <!-- THREAD LIST (floating dots) -->
@@ -47,6 +47,11 @@
 
         <!-- INDIVIDUAL CHAT -->
         <div id="chat-area" class="chat-area hidden">
+            <div class="header">
+                <button class="back" onclick="backToThreadList()">Back</button>
+                <h2 id="current-chat-name"></h2>
+                <div></div>
+            </div>
             <div id="messages" class="messages"></div>
 
             <div class="input-section">
