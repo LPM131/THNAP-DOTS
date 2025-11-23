@@ -1,19 +1,46 @@
 #game {
-    flex: 1;                      /* Takes all remaining space */
+    flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 0 8px;
     max-width: 500px;
     margin: 0 auto;
     width: 100%;
-    /* NO height: 100vh — that's what was breaking it! */
+    padding: 0 8px 0;
+    overflow: hidden;
 }
 
-.wordle-container {
+.wordle-header {
     display: flex;
-    flex-direction: column;
-    flex: 1;                      /* Takes all modal space */
-    height: 100vh;
-    height: 100dvh;               /* iPhone notch fix */
-    overflow: hidden;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px 10px;
+    background: white;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 32px;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #333;
+    border-radius: 8px;
+}
+
+.back-btn:active {
+    background: #eee;
+}
+
+.wordle-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#keyboard {
+    margin-top: auto;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    user-select: none;
 }
