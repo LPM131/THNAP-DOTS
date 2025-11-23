@@ -1,309 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOTS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Dots Hub</title>
+  <style>
+  /* ===== /* ==========================
+     RESET & BASE STYLES
+  =========================== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
+  body {
+    background: #000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #fff;
+    min-height: 100vh;
+  }
 
-    <script defer src="script.js"></script>
+  h1 {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 2rem;
+    font-weight: 300;
+  }
+
+  /* ==========================
+     MAIN GRID (DOTS)
+  =========================== */
+  .main-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 12px;
+    max-width: 380px;
+    margin: 20px auto;
+    padding: 16px;
+    background: #121212;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+  }
+
+  .dot {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 6px rgba(255, 255, 255, 0.12),
+      0 4px 8px rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    user-select: none;
+  }
+
+  .dot:hover {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 8px 16px rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+  }
+
+  .dot .icon {
+    width: 36px;
+    height: 36px;
+    stroke: #0ff;
+    filter: drop-shadow(0 0 5px #0ff);
+    transition: filter 0.3s ease, stroke 0.3s ease;
+  }
+
+  .dot:hover .icon {
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+
+  .dot svg text {
+    pointer-events: none;
+    user-select: none;
+    font-weight: 700;
+  }
+
+  /* Neon colors for each dot */
+  :root {
+    --dot1: #00f0b7; --dot2: #4ecdc4; --dot3: #45b7d1; --dot4: #96ceb4;
+    --dot5: #feca57; --dot6: #ff9ff3; --dot7: #54a0ff; --dot8: #5f27cd;
+    --dot9: #00d2d3; --dot10: #ff9f43; --dot11: #ffec3d; --dot12: #26de81;
+    --dot13: #ff2d55; --dot14: #a29bfe; --dot15: #fd79a8;
+  }
+
+  .dot[data-id="1"] .icon { stroke: var(--dot1); filter: drop-shadow(0 0 6px var(--dot1)); }
+  .dot[data-id="2"] .icon { stroke: var(--dot2); filter: drop-shadow(0 0 6px var(--dot2)); }
+  .dot[data-id="3"] .icon { stroke: var(--dot3); filter: drop-shadow(0 0 6px var(--dot3)); }
+  .dot[data-id="4"] .icon { stroke: var(--dot4); filter: drop-shadow(0 0 6px var(--dot4)); }
+  .dot[data-id="5"] .icon { stroke: var(--dot5); filter: drop-shadow(0 0 6px var(--dot5)); }
+  .dot[data-id="6"] .icon { stroke: var(--dot6); filter: drop-shadow(0 0 6px var(--dot6)); }
+  .dot[data-id="7"] .icon { stroke: var(--dot7); filter: drop-shadow(0 0 6px var(--dot7)); }
+  .dot[data-id="8"] .icon { stroke: var(--dot8); filter: drop-shadow(0 0 6px var(--dot8)); }
+  .dot[data-id="9"] .icon { stroke: var(--dot9); filter: drop-shadow(0 0 6px var(--dot9)); }
+  .dot[data-id="10"] .icon { stroke: var(--dot10); filter: drop-shadow(0 0 6px var(--dot10)); }
+  .dot[data-id="11"] .icon { stroke: var(--dot11); filter: drop-shadow(0 0 6px var(--dot11)); }
+  .dot[data-id="12"] .icon { stroke: var(--dot12); filter: drop-shadow(0 0 6px var(--dot12)); }
+  .dot[data-id="13"] .icon { stroke: var(--dot13); filter: drop-shadow(0 0 6px var(--dot13)); }
+  .dot[data-id="14"] .icon { stroke: var(--dot14); filter: drop-shadow(0 0 6px var(--dot14)); }
+  .dot[data-id="15"] .icon { stroke: var(--dot15); filter: drop-shadow(0 0 6px var(--dot15)); }
+
+  /* ==========================
+     RESPONSIVE
+  =========================== */
+  @media (max-width: 400px) {
+    .main-grid { max-width: 320px; grid-gap: 12px; }
+    .dot { width: 64px; height: 64px; }
+    .dot .icon { width: 32px; height: 32px; }
+  }
+
+  /* ==========================
+     MODALS
+  =========================== */
+  .modal { position: fixed; inset: 0; background: #fff; z-index: 99; display: flex; flex-direction: column; }
+  .hidden { display: none !important; }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    flex-grow: 1;
+  }
+
+  .header button {
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  /* ==========================
+     CHAT
+  =========================== */
+  .thread-area { flex: 1; position: relative; background: #f1f1f1; overflow: hidden; }
+  .thread-dot { position: absolute; width: 50px; height: 50px; border-radius: 50%; background: #ffcc80; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; }
+  .chat-area { flex: 1; display: flex; flex-direction: column; }
+  .messages { flex: 1; overflow-y: auto; padding: 10px; }
+  .input-section { display: flex; gap: 10px; padding: 10px; }
+  .input-section input { flex: 1; padding: 10px 14px; border-radius: 6px; border: 1px solid #aaa; font-size: 1rem; }
+
+  /* ==========================
+     WORDLE
+  =========================== */
+  .wordle-area { display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 1; padding: 10px; }
+  #game-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 330px; margin: 0 auto; }
+  .tile { display: flex; justify-content: center; align-items: center; font-weight: bold; text-transform: uppercase; border: 2px solid #d3d6da; border-radius: 4px; font-size: clamp(16px, 4vw, 28px); position: relative; }
+  .tile.correct { background: #6aaa64; border-color: #6aaa64; color: #fff; }
+  .tile.present { background: #c9b458; border-color: #c9b458; color: #fff; }
+  .tile.absent { background: #787c7e; border-color: #787c7e; color: #fff; }
+
+  /* Keyboard */
+  #keyboard { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+  .keyboard-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 6px; }
+  .key { background: #d3d6da; padding: 14px 6px; border-radius: 6px; font-weight: bold; text-align: center; cursor: pointer; font-size: clamp(12px, 3vw, 18px); }
+  .key:active { background: #bbb; }
+
+  /* ==========================
+     POKEMON
+  =========================== */
+  .pokemon-area { display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 1; padding: 20px; }
+  #pokemon-silhouette { width: 160px; height: 160px; filter: brightness(0); object-fit: contain; }
+  .input-wrapper { position: relative; width: 80%; }
+  #pokemon-guess { width: 100%; padding: 12px 16px; font-size: 18px; border-radius: 8px; border: 2px solid #aaa; }
+  .pokemon-suggestions { position: absolute; top: 100%; width: 100%; background: #fff; border: 1px solid #ccc; border-radius: 6px; max-height: 180px; overflow-y: auto; display: none; list-style: none; padding: 0; z-index: 20; }
+  .pokemon-suggestions li { padding: 8px; cursor: pointer; }
+  .pokemon-suggestions li:hover { background: #f2f2f2; }
+  .poke-buttons { display: flex; gap: 20px; }
+  .guess-btn, .hint-btn { padding: 14px 20px; font-size: 18px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #fff; }
+  .guess-btn { background: #007aff; }
+  .hint-btn { background: #ffb700; }
+  #pokemon-feedback { font-size: 1.2rem; font-weight: bold; color: #333; }
+
+  /* ==========================
+     CROSSWORD (DOT #12)
+  =========================== */
+  #crossword-modal { position: fixed; inset: 0; background: #f7f7f7; display: flex; flex-direction: column; z-index: 999; overflow: hidden; }
+  #crossword-grid { display: grid; width: 95vw; max-width: 460px; aspect-ratio: 1 / 1; background: #fff; border: 2px solid #000; touch-action: manipulation; }
+  .cross-cell { display: flex; justify-content: center; align-items: center; font-weight: bold; text-transform: uppercase; user-select: none; position: relative; border: 1px solid #aaa; background: #fff; font-size: min(4vw, 20px); }
+  .cross-cell.black { background: #000; border-color: #000; }
+  .cross-cell.selected { background: #d8ebff; }
+  .cross-cell.word-highlight:not(.black):not(.selected) { background: #eef6ff; }
+  .cross-cell .clue-number { position: absolute; top: 2px; left: 3px; font-size: 0.45em; font-weight: 700; color: #333; pointer-events: none; }
+
+  #crossword-clue { width: 95%; max-width: 460px; background: #fff; border-radius: 8px; border: 1px solid #ccc; padding: 12px 14px; font-size: 18px; min-height: 48px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+  #crossword-clue span.clue-direction { font-weight: bold; color: #0077ff; }
+  #crossword-clue span.clue-number { font-weight: bold; margin-right: 6px; }
+
+  #crossword-keyboard { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; margin-top: auto; }
+  .ck-row { display: flex; gap: 6px; justify-content: center; }
+  .ck-key { background: #e9e9e9; border-radius: 6px; padding: 14px 10px; min-width: 9%; text-align: center; font-size: 18px; font-weight: 600; user-select: none; border: 1px solid #bbb; touch-action: manipulation; }
+  .ck-key:active { background: #d5d5d5; }
+  .ck-key.wide { min-width: 18%; }
+  .ck-key.function { background: #cddfff; border-color: #8bb4ff; }
+  .ck-key.function:active { background: #b5ceff; }
+
+  @media (max-width: 450px) {
+    .cross-cell { font-size: min(6vw, 24px); }
+    #crossword-clue { font-size: 16px; }
+    .ck-key { padding: 12px 8px; font-size: 16px; }
+   </style>
 </head>
-
 <body>
 
-    <h1>DOTS</h1>
+<h1>Neon Dots Hub</h1>
 
-    <!-- ======================
-         MAIN DOT GRID (Matches Reference Image)
-         ====================== -->
-    <div class="main-grid">
+<!-- MAIN GRID -->
+<div class="main-grid">
+  <div class="dot" data-id="1"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="2"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="3"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="4"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="5"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="6"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="7"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="8"><svg class="icon"><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle">A</text></svg></div>
+  <div class="dot" data-id="9"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="10"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="11"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="12"><svg class="icon"><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle">X</text></svg></div>
+  <div class="dot" data-id="13"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="14"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+  <div class="dot" data-id="15"><svg class="icon"><circle cx="18" cy="18" r="16" /></svg></div>
+</div>
 
-        <!-- Row 1 -->
-        <div class="dot" data-id="1" title="Chat">
-            <svg class="icon" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="14" rx="3" />
-            </svg>
-        </div>
+<!-- MODALS PLACEHOLDER -->
+<div id="modal-container"></div>
 
-        <div class="dot" data-id="2" title="Wordle">
-            <svg class="icon" viewBox="0 0 24 24">
-                <text x="50%" y="55%" text-anchor="middle" font-size="18">W</text>
-            </svg>
-        </div>
+<script>
+// =====================
+// BASIC DOT MODAL LOGIC
+// =====================
+const dots = document.querySelectorAll('.dot');
+const modalContainer = document.getElementById('modal-container');
 
-        <div class="dot" data-id="3" title="Pokémon">
-            <svg class="icon" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <circle cx="12" cy="12" r="3"/>
-                <line x1="2" y1="12" x2="22" y2="12"/>
-            </svg>
-        </div>
+dots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    const id = dot.dataset.id;
+    openModal(id);
+  });
+});
 
-        <!-- Row 2 -->
-        <div class="dot" data-id="4" title="Music">
-            <svg class="icon" viewBox="0 0 24 24">
-                <path d="M9 18V6l10-2v12" />
-                <circle cx="9" cy="18" r="3" />
-                <circle cx="19" cy="16" r="3" />
-            </svg>
-        </div>
+function openModal(id) {
+  let content = '';
+  switch(id) {
+    case '1':
+      content = '<div class="chat-area"><div class="messages"></div><div class="input-section"><input type="text" placeholder="Type a message..."><button>Send</button></div></div>';
+      break;
+    case '11':
+      content = '<div class="wordle-area"><div id="game-board"></div></div>';
+      break;
+    case '12':
+      content = '<div class="crossword-area"><div id="crossword-grid"></div><div id="crossword-clue">Select a cell</div></div>';
+      break;
+    case '13':
+      content = '<div class="pokemon-area"><img id="pokemon-silhouette" src="" alt="Pokemon"><div class="input-wrapper"><input id="pokemon-guess" placeholder="Guess Pokemon"><ul class="pokemon-suggestions"></ul></div><div class="poke-buttons"><button class="guess-btn">Guess</button><button class="hint-btn">Hint</button></div><div id="pokemon-feedback"></div></div>';
+      break;
+    default:
+      content = `<div class="modal"><div class="header"><button class="back">←</button><h2>Dot ${id}</h2></div><div style="flex:1;display:flex;justify-content:center;align-items:center;">Content for Dot ${id}</div></div>`;
+      break;
+  }
 
-        <div class="dot" data-id="5" title="Search">
-            <svg class="icon" viewBox="0 0 24 24">
-                <circle cx="10" cy="10" r="6"/>
-                <line x1="14" y1="14" x2="20" y2="20"/>
-            </svg>
-        </div>
+  modalContainer.innerHTML = `<div class="modal">${content}<button class="back" onclick="closeModal()">← Back</button></div>`;
+}
 
-        <div class="dot" data-id="6" title="Settings">
-            <svg class="icon" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.6 1.6 0 0 1 .3 1.8l.1.1a2 2 0 0 1 0 2.8 2 2 0 0 1-2.8 0l-.1-.1a1.6 1.6 0 0 0-1.8-.3c-.8.3-1.4 1-1.4 1.9V21a2 2 0 0 1-4 0v-.1c0-.9-.6-1.6-1.4-1.9a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8 0 2 2 0 0 1 0-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8c-.3-.8-1-1.4-1.9-1.4H3a2 2 0 0 1 0-4h.1c.9 0 1.6-.6 1.9-1.4a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1c.8-.3 1.4-1 1.4-1.9V3a2 2 0 0 1 4 0v.1c0 .9.6 1.6 1.4 1.9a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8c.3.8 1 1.4 1.9 1.4H21a2 2 0 0 1 0 4h-.1c-.9 0-1.6.6-1.9 1.4z"/>
-            </svg>
-        </div>
-
-        <!-- Row 3 -->
-        <div class="dot" data-id="7" title="Utilities">
-            <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 2v10l4 2" />
-            </svg>
-        </div>
-
-        <div class="dot" data-id="8" title="Mask">
-            <svg class="icon" viewBox="0 0 24 24">
-                <circle cx="8" cy="12" r="3"/>
-                <circle cx="16" cy="12" r="3"/>
-                <path d="M5 12c0 6 14 6 14 0"/>
-            </svg>
-        </div>
-
-        <div class="dot" data-id="9" title="Cloud">
-            <svg class="icon" viewBox="0 0 24 24">
-                <path d="M5 16a4 4 0 0 1 0-8 6 6 0 0 1 12 1 4 4 0 0 1 0 7H5z" />
-            </svg>
-        </div>
-
-        <!-- Row 4 -->
-        <div class="dot" data-id="10" title="Play">
-            <svg class="icon" viewBox="0 0 24 24">
-                <polygon points="8,5 19,12 8,19" />
-            </svg>
-        </div>
-
-        <div class="dot" data-id="11" title="Heart">
-            <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 21s-7-4.3-7-10a4 4 0 0 1 8 0 4 4 0 0 1 8 0c0 5.7-7 10-7 10z" />
-            </svg>
-        </div>
-
-        <div class="dot" data-id="12" title="Location">
-            <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 22s7-8 7-13a7 7 0 0 0-14 0c0 5 7 13 7 13z" />
-                <circle cx="12" cy="9" r="2.5"/>
-            </svg>
-        </div>
-
-        <!-- Row 5 -->
-        <div class="dot" data-id="13" title="Bell">
-            <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z"/>
-            </svg>
-        </div>
-
-        <div class="dot" data-id="14" title="Star">
-            <svg class="icon" viewBox="0 0 24 24">
-                <polygon points="12 3 15 9 22 9 17 13 19 20 12 16 5 20 7 13 2 9 9 9" />
-            </svg>
-        </div>
-
-        <div class="dot" data-id="15" title="Checklist">
-            <svg class="icon" viewBox="0 0 24 24">
-                <polyline points="4 12 9 17 20 6"/>
-            </svg>
-        </div>
-
-    </div>
-
-    <!-- CHAT MODAL -->
-    <div id="chat-modal" class="modal hidden">
-        <div class="header">
-            <button class="back" onclick="backToMain()">⬅ Back</button>
-            <h2>Chats</h2>
-        </div>
-
-        <div id="thread-area" class="thread-area"></div>
-
-        <div id="chat-area" class="chat-area hidden">
-            <div id="messages" class="messages"></div>
-
-            <div class="input-section">
-                <input id="chat-input" type="text" placeholder="Type...">
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- WORDLE MODAL -->
-    <div id="wordle-modal" class="modal hidden">
-        <div class="header">
-            <button class="back" onclick="backToMain()">⬅ Back</button>
-            <h2>WORD OF THE DAY</h2>
-        </div>
-
-        <div id="wordle-area" class="wordle-area">
-            <div id="game-board"></div>
-            <div id="keyboard"></div>
-
-            <div id="game-message" class="game-message"></div>
-        </div>
-    </div>
-
-    <!-- POKEMON MODAL -->
-    <div id="pokemon-modal" class="modal hidden">
-        <div class="header">
-            <button class="back" onclick="backToMain()">⬅ Back</button>
-            <h2>Guess That Pokémon</h2>
-        </div>
-
-        <div id="pokemon-area" class="pokemon-area">
-
-            <!-- GENERATION FILTER -->
-            <div id="gen-filter" class="gen-filter">
-                <div class="gen-row">
-                    <button onclick="setGeneration(1)">Gen 1</button>
-                    <button onclick="setGeneration(2)">Gen 2</button>
-                    <button onclick="setGeneration(3)">Gen 3</button>
-                    <button onclick="setGeneration(4)">Gen 4</button>
-                    <button onclick="setGeneration(5)">Gen 5</button>
-                </div>
-                <div class="gen-row">
-                    <button onclick="setGeneration(6)">Gen 6</button>
-                    <button onclick="setGeneration(7)">Gen 7</button>
-                    <button onclick="setGeneration(8)">Gen 8</button>
-                    <button onclick="setGeneration(9)">Gen 9</button>
-                    <button onclick="setGeneration('all')">All</button>
-                </div>
-            </div>
-
-            <!-- SILHOUETTE -->
-            <img id="pokemon-silhouette" src="" alt="Pokemon silhouette">
-
-            <!-- INPUT + AUTOCOMPLETE -->
-            <div class="input-wrapper">
-                <input id="pokemon-guess" type="text" placeholder="Start typing..." autocomplete="off">
-                <ul id="pokemon-suggestions" class="pokemon-suggestions"></ul>
-            </div>
-
-            <!-- GUESS + HINT BUTTONS -->
-            <div class="poke-buttons">
-                <button onclick="guessPokemon()" class="guess-btn">Guess</button>
-                <button onclick="giveHint()" class="hint-btn">Hint</button>
-            </div>
-
-            <!-- FEEDBACK -->
-            <p id="pokemon-feedback"></p>
-        </div>
-    </div>
-
-    <!-- =============================
-         DOT #12 — CROSSWORD MODAL
-         ============================= -->
-    <div id="crossword-modal" class="hidden">
-        <div class="header">
-            <button class="back" onclick="backToMain()">←</button>
-            <h2>Crossword Puzzle</h2>
-        </div>
-
-        <div class="crossword-area">
-
-            <!-- Clue display -->
-            <div id="crossword-clue">
-                <span class="clue-direction">Across</span>
-                <span class="clue-number">1.</span>
-                <span class="clue-text">Loading…</span>
-            </div>
-
-            <!-- Crossword Grid -->
-            <div id="crossword-grid"></div>
-
-            <!-- On-Screen Keyboard -->
-            <div id="crossword-keyboard">
-                <div class="ck-row">
-                    <div class="ck-key">Q</div><div class="ck-key">W</div><div class="ck-key">E</div>
-                    <div class="ck-key">R</div><div class="ck-key">T</div><div class="ck-key">Y</div>
-                    <div class="ck-key">U</div><div class="ck-key">I</div><div class="ck-key">O</div>
-                    <div class="ck-key">P</div>
-                </div>
-                <div class="ck-row">
-                    <div class="ck-key">A</div><div class="ck-key">S</div><div class="ck-key">D</div>
-                    <div class="ck-key">F</div><div class="ck-key">G</div><div class="ck-key">H</div>
-                    <div class="ck-key">J</div><div class="ck-key">K</div><div class="ck-key">L</div>
-                </div>
-                <div class="ck-row">
-                    <div class="ck-key wide function" data-key="BACK">⌫</div>
-                    <div class="ck-key">Z</div><div class="ck-key">X</div><div class="ck-key">C</div>
-                    <div class="ck-key">V</div><div class="ck-key">B</div><div class="ck-key">N</div>
-                    <div class="ck-key">M</div>
-                    <div class="ck-key wide function" data-key="NEXT">Next</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-    const grid = document.querySelector('.main-grid');
-    let dots = document.querySelectorAll('.dot');
-
-    function layoutDots() {
-      const totalDots = dots.length;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-
-      let cols = Math.ceil(Math.sqrt(totalDots * (w / h)));
-      let rows = Math.ceil(totalDots / cols);
-
-      grid.style.display = 'grid';
-      grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-      grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-      grid.style.width = '100vw';
-      grid.style.height = '100vh';
-      grid.style.justifyItems = 'center';
-      grid.style.alignItems = 'center';
-      grid.style.gap = '6px';
-
-      const dotSize = Math.min(
-        (w - (cols - 1) * 6) / cols,
-        (h - (rows - 1) * 6) / rows
-      );
-
-      dots.forEach(dot => {
-        dot.style.width = `${dotSize}px`;
-        dot.style.height = `${dotSize}px`;
-      });
-    }
-
-    // Preserve click functionality
-    function attachDotEvents() {
-      dots.forEach(dot => {
-        dot.onclick = () => {
-          alert(`Dot ${dot.dataset.id} clicked!`);
-          // Replace with your modal or app logic
-        }
-      });
-    }
-
-    // Initial layout & event binding
-    layoutDots();
-    attachDotEvents();
-
-    // Re-layout on resize
-    window.addEventListener('resize', () => {
-      layoutDots();
-      attachDotEvents();
-    });
-    </script>
+function closeModal() {
+  modalContainer.innerHTML = '';
+}
+</script>
 
 </body>
 </html>
