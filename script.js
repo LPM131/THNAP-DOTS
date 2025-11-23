@@ -9,23 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
   }
 
-  // Map dot IDs to modal elements
-  const dotMap = {
-    1: 'chat-modal',
-    11: 'wordle-modal',
-    12: 'crossword-modal',
-    13: 'pokemon-modal'
+  // Map dot IDs to feature functions
+  const featureMap = {
+    1: openChat,
+    11: openWordle,
+    12: openCrossword,
+    13: openPokemon
   };
 
-  // Show modal by dot ID
+  // Show feature/modal by dot ID
   function showFeature(dotId) {
     if (mainGrid) mainGrid.style.display = 'none';
     if (title) title.textContent = '';
-    const modalId = dotMap[dotId];
-    if (modalId) {
-      const modal = document.getElementById(modalId);
-      if (modal) modal.classList.remove('hidden');
-    }
+    const feature = featureMap[dotId];
+    if (feature) feature();
   }
 
   // Handle dot clicks
@@ -43,6 +40,32 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', showMainGrid);
   });
 
-  // Initialize
+  // Initialize main grid
   showMainGrid();
 });
+
+/* Add your existing feature functions below (openChat, openWordle, openCrossword, openPokemon) */
+
+function openChat() {
+  const chatModal = document.getElementById('chat-modal');
+  if (chatModal) chatModal.classList.remove('hidden');
+  // Init chat module here...
+}
+
+function openWordle() {
+  const wordleModal = document.getElementById('wordle-modal');
+  if (wordleModal) wordleModal.classList.remove('hidden');
+  // Init Wordle module here...
+}
+
+function openCrossword() {
+  const crosswordModal = document.getElementById('crossword-modal');
+  if (crosswordModal) crosswordModal.classList.remove('hidden');
+  // Init crossword module here...
+}
+
+function openPokemon() {
+  const pokemonModal = document.getElementById('pokemon-modal');
+  if (pokemonModal) pokemonModal.classList.remove('hidden');
+  // Init Pokemon module here...
+}
