@@ -109,80 +109,17 @@ body, html {
     padding: 10px;
 }
 
-/* =============================== */
-/* UNIVERSAL PERFECT WORDLE LAYOUT */
-/* Works on: iPhone SE → 15 Pro Max */
-/* =============================== */
-
-.wordle-area {
+/* ONLY these three lines — nothing more, nothing less */
+.wordle-area {                    /* only the Wordle screen */
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex: 1;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 0 env(safe-area-inset-left) env(safe-area-inset-bottom);
-    overflow: hidden;
 }
 
-/* ----- BOARD: AUTOMATICALLY SCALES ----- */
-#game-board {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-
-    /* The magic: board never exceeds half the screen on any phone */
-    max-height: 55dvh;
-
-    /* Prevents distortion */
-    margin-top: 12px;
-    padding: 0 6px;
-}
-
-/* Tile scales with screen width */
-.tile {
-    aspect-ratio: 1 / 1;
-    font-size: clamp(18px, 4vw, 36px);
-    border-radius: 4px;
-}
-
-/* ----- KEYBOARD: ALWAYS FULLY VISIBLE ----- */
 #keyboard {
-    flex-shrink: 0;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.kb-row {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    padding: 4px 0;
-}
-
-/* Keys auto-resize */
-.key {
-    flex: 1;
-    max-width: 45px;
-    height: 58px;
-    font-size: clamp(16px, 4vw, 20px);
-}
-
-.key.large {
-    max-width: 70px;
-}
-
-/* ----- MODAL FIX FOR ALL iPHONES ----- */
-@supports (-webkit-touch-callout: none) {
-    .modal {
-        height: 100dvh; /* dynamic viewport — iPhone safe */
-        padding-bottom: env(safe-area-inset-bottom);
-        overflow: hidden;
-    }
+    margin-top: auto;             /* pushes keyboard to bottom */
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
 }
 
 /* GEN BUTTONS */
