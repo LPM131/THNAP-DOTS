@@ -98,19 +98,67 @@ function renderThreadDots() {
     document.querySelector('.add-thread-dot')?.addEventListener('click', createNewThread);
 }
 
-// Draggable with position save
+// ─────── PERFECT DRAG + CLICK (works on phone & desktop) ───────
 function makeDraggable(el, name) {
-    let longPressTimer;
-    el.draggable = true;
-    el.addEventListener('dragstart', e => e.dataTransfer.setDragImage(new Image(),0,0));
-    el.addEventListener('dragend', e => {
+    let pos = { x: threadsData[name].x, y: threadsData[name].y };
+    let isDragging = false;
+    let startX, startY;
+
+    const move = (clientX, clientY) => {
+        if (!isDragging) return;
         const rect = threadArea.getBoundingClientRect();
-        threadsData[name].x = e.clientX - rect.left - 35;
-        threadsData[name].y = e.clientY - rect.top - 35;
-        el.style.left = threadsData[name].x + 'px';
-        el.style.top = threadsData[name].y + 'px';
-        saveChatData();
-    });
+        pos.x = clientX - rect.left - 35;
+        pos.y = clientY - rect.top - 35;
+
+        // Keep inside bounds
+        pos.x = Math.max(0, Math.min(pos.x, rect.width - 70));
+        pos.y = Math.max(0, Math.min(pos.y, rect.height - 70));
+
+        el.style.left = pos.x + 'px';
+        el.style.top = pos.y + 'px';
+    };
+
+    const startDrag = (e) => {
+        e.preventDefault();
+        isDragging = false;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        startX = clientX;
+        startY = clientY;
+
+        const onMove = (e) => {
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const delta = Math.hypot(clientX - startX, clientY - startY);
+            if (delta > 10) isDragging = true; // 10px threshold = real drag
+            move(clientX, clientY);
+        };
+
+        const onEnd = () => {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('mouseup', onEnd);
+            document.removeEventListener('touchend', onEnd);
+
+            if (isDragging) {
+                threadsData[name].x = pos.x;
+                threadsData[name].y = pos.y;
+                saveChatData();
+            }
+            // if NOT dragged → it's a click → open thread
+            else if (!isDragging) {
+                openThread(name);
+            }
+        };
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('mouseup', onEnd);
+        document.addEventListener('touchend', onEnd);
+    };
+
+    el.addEventListener('mousedown', startDrag);
+    el.addEventListener('touchstart', startDrag, { passive: false });
 }
 
 // Long press handler

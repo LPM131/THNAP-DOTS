@@ -350,3 +350,8 @@ body, html {
 .reactions { background:white; border:1px solid #ddd; border-radius:12px; padding:2px 6px; font-size:18px; position:absolute; bottom:-10px; left:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
 #reply-banner { background:#f0f0f0; padding:10px; font-size:14px; border-top:1px solid #ddd; }
 .reaction-picker { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:white; border-radius:12px; padding:8px; box-shadow:0 4px 20px rgba(0,0,0,0.2); display:flex; gap:10px; z-index:100; }
+
+.thread-dot {
+    user-select: none;
+    -webkit-user-drag: none;
+    touch-action: pan-x pan-y;
