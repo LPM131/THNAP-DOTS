@@ -119,14 +119,7 @@ body, html {
     padding: 10px;
 }
 
-/* Large Wordle title */
-#wordle-title {
-    font-size: 36px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
-    color: #1a1a1a;
-}
+
 
 #keyboard {
     margin-top: auto;             /* pushes keyboard to bottom */
@@ -185,43 +178,53 @@ body, html {
     100% { transform: rotateX(0deg); }
 }
 
-/* Keyboard keys: larger, rounded like Wordle */
+/* Keyboard: exact Wordle dimensions */
+#keyboard {
+    text-align: center;
+    margin-top: auto;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+.kb-row {
+    display: block;
+}
+
+/* Exact Wordle key sizes */
 .key {
-    min-height: 50px;
-    padding: 0 8px;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 6px;
-    border: none;
-    background: #d3d6da;
-    color: black;
-    margin: 3px;
+    width: 38px;
+    height: 52px;
+    border: 0;
+    border-radius: 4px;
+    background-color: #d3d6da;
+    color: #3a3a3c;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 2px;
     cursor: pointer;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
+    line-height: 52px;
+    text-align: center;
+    box-sizing: border-box;
 }
 
 .key.large {
-    min-width: 55px;
-    padding: 0 14px;
+    width: 68px;
 }
 
-/* Keyboard key states: match tile colors */
+/* Key states: exact Wordle colors */
 .key.correct {
-    background: #6aaa64;
-    color: white;
+    background-color: #6aaa64;
+    color: #ffffff;
 }
 
 .key.present {
-    background: #c9b458;
-    color: white;
+    background-color: #c9b458;
+    color: #ffffff;
 }
 
 .key.absent {
-    background: #787c7e;
-    color: white;
+    background-color: #787c7e;
+    color: #ffffff;
 }
 
 /* GEN BUTTONS */
