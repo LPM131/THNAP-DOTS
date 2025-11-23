@@ -543,30 +543,38 @@ body, html {
     padding: 0 10px;
 }
 
-/* FIX iPhone modal height problems */
-.modal {
-    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    padding-bottom: env(safe-area-inset-bottom);
-    overflow: hidden;
-}
+/* ------------------------------ */
+/* iPHONE FIX — SAFE AREA & KEYBOARD VISIBILITY */
+/* ------------------------------ */
 
-/* FIX Wordle container scaling so keyboard NEVER overflows */
-.wordle-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding-bottom: env(safe-area-inset-bottom);
-}
+@supports (-webkit-touch-callout: none) {
 
-/* Keyboard stays visible on iPhone screens */
-#keyboard {
-    padding-bottom: env(safe-area-inset-bottom);
-    flex-shrink: 0;
-}
+    /* Fix modal height so it accounts for home indicator */
+    .modal {
+        height: calc(100vh - env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
+        overflow: hidden;
+    }
 
-/* Allow board to scale safely */
-#game-board {
-    max-height: 50vh;
-    max-width: 90vw;
+    /* Wordle area must flex correctly */
+    .wordle-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-bottom: env(safe-area-inset-bottom);
+        overflow: hidden;
+    }
+
+    /* Board must shrink slightly on small iPhones (SE / Mini) */
+    #game-board {
+        max-width: 90vw;
+        max-height: 52vh;      /* ← this is the magic number */
+    }
+
+    /* Keep keyboard ABOVE the home bar */
+    #keyboard {
+        padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+        flex-shrink: 0;
+    }
 }
