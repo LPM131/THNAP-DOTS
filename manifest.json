@@ -1,9 +1,10 @@
 {
   "name": "DOTS",
   "short_name": "DOTS",
+  "description": "Innovative dots-based messaging platform with games",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f0f0f0",
-  "theme_color": "#007bff",
+  "background_color": "#0d0d0f",
+  "theme_color": "#0d0d0f",
   "orientation": "any"
 }
