@@ -19,6 +19,31 @@ function backToMain() {
     hideAllModals();
 }
 
+// Dynamic grid sizing
+const grid = document.getElementById("main-grid");
+const dots = document.querySelectorAll(".dot");
+
+function resizeDots() {
+  const totalDots = dots.length;
+  const cols = Math.ceil(Math.sqrt(totalDots * (window.innerWidth / window.innerHeight)));
+  const rows = Math.ceil(totalDots / cols);
+
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+  const dotWidth = Math.floor((window.innerWidth - (cols - 1) * 8) / cols);
+  const dotHeight = Math.floor((window.innerHeight - (rows - 1) * 8) / rows);
+  const size = Math.min(dotWidth, dotHeight);
+
+  dots.forEach(dot => {
+    dot.style.width = `${size}px`;
+    dot.style.height = `${size}px`;
+  });
+}
+
+window.addEventListener("resize", resizeDots);
+resizeDots();
+
 // Add click listeners to all dots
 document.querySelectorAll(".dot").forEach(dot => {
     dot.addEventListener("click", () => {
