@@ -394,7 +394,7 @@ function initBoard() {
 
 function initKeyboard() {
     // Keyboard is now statically in HTML, just attach event listeners
-    document.querySelectorAll('.key').forEach(button => {
+    document.querySelectorAll('.nyt-key').forEach(button => {
         const letter = button.textContent;
         if (letter === 'ENTER') {
             button.onclick = () => handleKey('ENTER');

@@ -519,3 +519,49 @@ body, html {
     color: #007AFF;
     padding: 0 10px;
 }
+
+/* ——— NYT EXACT KEYBOARD (2025) ——— */
+#keyboard {
+  margin-top: auto;
+  padding: 0 8px max(8px, env(safe-area-inset-bottom));
+  user-select: none;
+}
+
+.nyt-row {
+  display: flex;
+  width: 100%;
+  margin: 0 auto 7px;
+  justify-content: center;
+}
+
+.nyt-key {
+  flex: 1;
+  height: 58px;
+  margin: 0 3px;
+  background: #d3d6da;
+  border: 0;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #000;
+  max-width: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nyt-large {
+  flex: 1.5;
+  font-size: 12px;
+}
+
+.nyt-spacer {
+  flex: 0.5;
+}
+
+/* Colors — exact NYT */
+.nyt-key.correct  { background:#6aaa64 !important; color:white !important; }
+.nyt-key.present  { background:#c9b458 !important; color:white !important; }
+.nyt-key.absent   { background:#787c7e !important; color:white !important; }
+
