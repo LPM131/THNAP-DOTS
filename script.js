@@ -398,14 +398,8 @@ function initBoard() {
 function initKeyboard() {
     // Keyboard is now statically in HTML, just attach event listeners
     document.querySelectorAll('.key').forEach(button => {
-        const letter = button.textContent;
-        if (letter === 'ENTER') {
-            button.onclick = () => handleKey('ENTER');
-        } else if (letter === '⌫') {
-            button.onclick = () => handleKey('⌫');
-        } else {
-            button.onclick = () => handleKey(letter);
-        }
+        const dataKey = button.getAttribute('data-key');
+        button.onclick = () => handleKey(dataKey);
     });
 }
 
@@ -413,7 +407,7 @@ function initKeyboard() {
 // Key handling
 // ------------------------------
 function handleKey(k) {
-    if (k === "⌫") {
+    if (k === "BACKSPACE") {
         currentGuess = currentGuess.slice(0, -1);
         updateBoard();
         return;

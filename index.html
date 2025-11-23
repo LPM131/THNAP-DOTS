@@ -55,17 +55,42 @@
         <div id="wordle-area" class="wordle-area">
             <div id="game-board"></div>
             <div id="game-message" class="game-message"></div>
-            <div id="keyboard">
-                <div class="kb-row">
-                    <button class="key" data-key="Q">Q</button><button class="key" data-key="W">W</button><button class="key" data-key="E">E</button><button class="key" data-key="R">R</button><button class="key" data-key="T">T</button><button class="key" data-key="Y">Y</button><button class="key" data-key="U">U</button><button class="key" data-key="I">I</button><button class="key" data-key="O">O</button><button class="key" data-key="P">P</button>
+            <div id="keyboard-cont" role="region" aria-label="Keyboard">
+                <div class="keyboard-row">
+                    <button class="key" data-key="Q">Q</button>
+                    <button class="key" data-key="W">W</button>
+                    <button class="key" data-key="E">E</button>
+                    <button class="key" data-key="R">R</button>
+                    <button class="key" data-key="T">T</button>
+                    <button class="key" data-key="Y">Y</button>
+                    <button class="key" data-key="U">U</button>
+                    <button class="key" data-key="I">I</button>
+                    <button class="key" data-key="O">O</button>
+                    <button class="key" data-key="P">P</button>
                 </div>
-                <div class="kb-row">
-                    <button class="key" data-key="A">A</button><button class="key" data-key="S">S</button><button class="key" data-key="D">D</button><button class="key" data-key="F">F</button><button class="key" data-key="G">G</button><button class="key" data-key="H">H</button><button class="key" data-key="J">J</button><button class="key" data-key="K">K</button><button class="key" data-key="L">L</button>
+                <div class="keyboard-row">
+                    <div class="spacer-half"></div>
+                    <button class="key" data-key="A">A</button>
+                    <button class="key" data-key="S">S</button>
+                    <button class="key" data-key="D">D</button>
+                    <button class="key" data-key="F">F</button>
+                    <button class="key" data-key="G">G</button>
+                    <button class="key" data-key="H">H</button>
+                    <button class="key" data-key="J">J</button>
+                    <button class="key" data-key="K">K</button>
+                    <button class="key" data-key="L">L</button>
+                    <div class="spacer-half"></div>
                 </div>
-                <div class="kb-row">
-                    <button class="key large" data-key="ENTER">ENTER</button>
-                    <button class="key" data-key="Z">Z</button><button class="key" data-key="X">X</button><button class="key" data-key="C">C</button><button class="key" data-key="V">V</button><button class="key" data-key="B">B</button><button class="key" data-key="N">N</button><button class="key" data-key="M">M</button>
-                    <button class="key large" data-key="BACK">⌫</button>
+                <div class="keyboard-row">
+                    <button class="key big" data-key="ENTER">ENTER</button>
+                    <button class="key" data-key="Z">Z</button>
+                    <button class="key" data-key="X">X</button>
+                    <button class="key" data-key="C">C</button>
+                    <button class="key" data-key="V">V</button>
+                    <button class="key" data-key="B">B</button>
+                    <button class="key" data-key="N">N</button>
+                    <button class="key" data-key="M">M</button>
+                    <button class="key big" data-key="BACKSPACE">BACKSPACE</button>
                 </div>
             </div>
         </div>
