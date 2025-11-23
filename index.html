@@ -13,8 +13,6 @@
 
 <body>
 
-    <h1>DOTS</h1>
-
     <!-- ======================
          MAIN DOT GRID (Matches Reference Image)
          ====================== -->
@@ -254,7 +252,7 @@
 
     <script>
     const grid = document.querySelector('.main-grid');
-    const dots = document.querySelectorAll('.dot');
+    let dots = document.querySelectorAll('.dot');
 
     function layoutDots() {
       const totalDots = dots.length;
@@ -284,8 +282,25 @@
       });
     }
 
+    // Preserve click functionality
+    function attachDotEvents() {
+      dots.forEach(dot => {
+        dot.onclick = () => {
+          alert(`Dot ${dot.dataset.id} clicked!`);
+          // Replace with your modal or app logic
+        }
+      });
+    }
+
+    // Initial layout & event binding
     layoutDots();
-    window.addEventListener('resize', layoutDots);
+    attachDotEvents();
+
+    // Re-layout on resize
+    window.addEventListener('resize', () => {
+      layoutDots();
+      attachDotEvents();
+    });
     </script>
 
 </body>
