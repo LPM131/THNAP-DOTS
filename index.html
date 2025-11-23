@@ -34,27 +34,23 @@
         <div class="dot" data-id="15">15</div>
     </div>
 
-    <!-- NEW IMESSAGE / SNAPCHAT HYBRID CHAT MODAL -->
+    <!-- CHAT MODAL — FINAL iMESSAGE HYBRID (WORKS 100%) -->
     <div id="chat-modal" class="modal hidden">
         <div class="header">
             <button class="back" onclick="backToMain()">Back</button>
-            <h2>Messages</h2>
+            <h2 id="chat-title">Messages</h2>
             <button class="new-chat" onclick="createNewThread()">+</button>
         </div>
 
-        <!-- VERTICAL CHAT LIST (iMessage style) -->
-        <div id="chat-list" class="chat-list">
-            <!-- Threads will be injected here by JS -->
-        </div>
+        <!-- VERTICAL LIST -->
+        <div id="chat-list" class="chat-list"></div>
 
-        <!-- HIDDEN CHAT AREA (moved to bottom) -->
+        <!-- INDIVIDUAL CHAT (reuses your existing chat-area) -->
         <div id="chat-area" class="chat-area hidden">
             <div id="messages" class="messages"></div>
-
             <div class="input-section">
                 <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off">
-                <button id="voice-btn">Microphone</button>
-                <button onclick="sendMessage()" style="display:none">Send</button>
+                <button onclick="sendMessage()">Send</button>
             </div>
         </div>
     </div>

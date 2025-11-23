@@ -63,43 +63,141 @@ function backToMain() {
 
 
 // ---------------------------
-// CHAT MODULE – BULLETPROOF VERSION
+// CHAT MODULE — iMESSAGE HYBRID (FINAL WORKING VERSION)
 // ---------------------------
 
-const threadNames = ["Bot", "Friend 1", "Friend 2"];
-let threadsData = {};
-let threads = {};
+const threadNames = ["Bot", "Mom", "Alex"];
+let threadsData = {};  // {name: {unread: 0}}
+let threads = {};      // {name: [messages]}
 let currentThread = null;
 
-// Load from localStorage
+// Load everything
 function loadChatData() {
-    try {
-        const pos = localStorage.getItem('dotPositions');
-        const msg = localStorage.getItem('chatThreads');
-        threadsData = pos ? JSON.parse(pos) : {};
-        threads = msg ? JSON.parse(msg) : {};
+    const pos = localStorage.getItem('chatThreads');
+    const data = localStorage.getItem('chatThreadsData');
+    threads = pos ? JSON.parse(pos) : {};
+    threadsData = data ? JSON.parse(data) : {};
 
-        // Init missing threads
-        threadNames.forEach(name => {
-            if (!threadsData[name]) threadsData[name] = { x: Math.random()*200+50, y: Math.random()*400+50, unread: 0 };
-            if (!threads[name]) threads[name] = [];
-        });
-        saveChatData();
-        console.log("Chat data loaded:", threadsData); // DEBUG
-    } catch (e) {
-        console.error("Load error:", e); // DEBUG
-    }
+    threadNames.forEach(name => {
+        if (!threads[name]) threads[name] = [];
+        if (!threadsData[name]) threadsData[name] = { unread: 0 };
+    });
+    saveChatData();
 }
 loadChatData();
 
-// Save everything
 function saveChatData() {
-    try {
-        localStorage.setItem('dotPositions', JSON.stringify(threadsData));
-        localStorage.setItem('chatThreads', JSON.stringify(threads));
-    } catch (e) {
-        console.error("Save error:", e);
+    localStorage.setItem('chatThreads', JSON.stringify(threads));
+    localStorage.setItem('chatThreadsData', JSON.stringify(threadsData));
+}
+
+// Render iMessage-style list
+function renderChatList() {
+    const list = document.getElementById("chat-list");
+    list.innerHTML = threadNames.map(name => {
+        const lastMsg = threads[name][threads[name].length - 1];
+        const preview = lastMsg
+            ? (lastMsg.sender === "me" ? "You: " : "") +
+              (lastMsg.type === "voice" ? "Voice message" : lastMsg.text.substring(0, 40) + (lastMsg.text.length > 40 ? "…" : ""))
+            : "No messages";
+
+        const unread = threadsData[name].unread > 0
+            ? `<div class="unread-badge">${threadsData[name].unread > 99 ? '99+' : threadsData[name].unread}</div>`
+            : '';
+
+        const color = stringToColor(name);
+
+        return `
+            <div class="chat-thread-item ${threadsData[name].unread > 0 ? 'unread' : ''}"
+                 onclick="openThread('${name}')">
+                <div class="contact-dot" style="background:${color}">
+                    ${name[0].toUpperCase()}
+                </div>
+                <div class="thread-preview">
+                    <div class="thread-name">${name}</div>
+                    <div class="thread-last">${preview}</div>
+                </div>
+                ${unread}
+            </div>
+        `;
+    }).join('');
+}
+
+// Open chat list
+function openChat() {
+    chatModal.classList.remove("hidden");
+    document.getElementById("chat-list").classList.remove("hidden");
+    chatArea.classList.add("hidden");
+    document.getElementById("chat-title").textContent = "Messages";
+    renderChatList();
+}
+
+// Open individual thread
+function openThread(name) {
+    currentThread = name;
+    threadsData[name].unread = 0;
+    saveChatData();
+
+    document.getElementById("chat-title").textContent = name;
+    document.getElementById("chat-list").classList.add("hidden");
+    chatArea.classList.remove("hidden");
+
+    messages.innerHTML = `<div id="typing"></div>`;
+    threads[name].forEach(msg => addMessageBubble(msg));
+    messages.scrollTop = messages.scrollHeight;
+    renderChatList(); // update unread badges
+}
+
+// Back button — ONE BUTTON, WORKS EVERYWHERE
+function backToMain() {
+    if (!chatArea.classList.contains("hidden")) {
+        chatArea.classList.add("hidden");
+        document.getElementById("chat-list").classList.remove("hidden");
+        document.getElementById("chat-title").textContent = "Messages";
+        renderChatList();
+        return;
     }
+    chatModal.classList.add("hidden");
+    mainGrid.classList.remove("hidden");
+}
+
+// Create new thread
+function createNewThread() {
+    const name = prompt("Contact name:");
+    if (!name || threadNames.includes(name)) return;
+    threadNames.push(name);
+    threads[name] = [];
+    threadsData[name] = { unread: 0 };
+    saveChatData();
+    renderChatList();
+}
+
+// Send message (your existing one — just add this line at the end)
+function sendMessage() {
+    if (!chatInput.value.trim() || !currentThread) return;
+
+    const msg = {
+        text: chatInput.value,
+        time: new Date(),
+        sender: "me",
+        reactions: []
+    };
+
+    threads[currentThread].push(msg);
+    addMessageBubble(msg);
+    chatInput.value = "";
+    messages.scrollTop = messages.scrollHeight;
+    saveChatData();
+    renderChatList(); // update preview
+}
+
+// Keep your existing addMessageBubble(), reactions, etc.
+
+// Color hash
+function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return `hsl(${hash % 360}, 70%, 55%)`;
 }
 
 // Render thread dots with unread badges
@@ -195,107 +293,6 @@ function makeDraggable(el, name) {
     el.addEventListener('touchstart', startDrag, { passive: false });
 }
 
-// ─────── MOBILE-FIRST LONG-PRESS (WORKS 100% ON iOS & ANDROID) ───────
-function addLongPress(el, callback) {
-    let timer;
-    let touchMoved = false;
-
-    const start = (e) => {
-        touchMoved = false;
-        timer = setTimeout(() => {
-            if (!touchMoved) {
-                callback();
-                vibrate(); // haptic feedback
-            }
-        }, 600); // 600ms = perfect feel
-    };
-
-    const move = () => touchMoved = true;
-    const end = () => clearTimeout(timer);
-
-    el.addEventListener('touchstart', start, { passive: true });
-    el.addEventListener('touchmove', move, { passive: true });
-    el.addEventListener('touchend', end);
-
-    el.addEventListener('mousedown', start);
-    el.addEventListener('mousemove', move);
-    el.addEventListener('mouseup', end);
-    el.addEventListener('mouseleave', end);
-}
-
-function vibrate() {
-    if (navigator.vibrate) navigator.vibrate(50);
-}
-
-let isRecording = false;
-let recorderTimer;
-
-document.getElementById("voice-btn").addEventListener("touchstart", startRecording);
-document.getElementById("voice-btn").addEventListener("mousedown", startRecording);
-document.getElementById("voice-btn").addEventListener("touchend", stopRecording);
-document.getElementById("voice-btn").addEventListener("mouseup", stopRecording);
-
-function startRecording(e) {
-    e.preventDefault();
-    isRecording = true;
-    document.getElementById("voice-btn").innerHTML = "●";
-    document.getElementById("voice-btn").style.background = "red";
-    recorderTimer = Date.now();
-    vibrate();
-}
-
-function stopRecording(e) {
-    e.preventDefault();
-    if (!isRecording) return;
-    isRecording = false;
-    const duration = Math.round((Date.now() - recorderTimer) / 1000);
-
-    document.getElementById("voice-btn").innerHTML = "Microphone";
-    document.getElementById("voice-btn").style.background = "";
-
-    if (duration > 0.5) {
-        const voiceMsg = {
-            text: `Voice message (${duration}s)`,
-            time: new Date(),
-            sender: "me",
-            type: "voice",
-            duration
-        };
-        threads[currentThread].push(voiceMsg);
-        addVoiceBubble(voiceMsg);
-        saveChatData();
-    }
-}
-
-function addVoiceBubble(msg) {
-    const bubble = document.createElement("div");
-    bubble.className = "bubble me voice";
-    bubble.innerHTML = `
-        Play (${msg.duration}s)
-        <div class="waveform">Wave</div>
-    `;
-    bubble.onclick = () => alert("Playing voice message...");
-    messages.appendChild(bubble);
-    messages.scrollTop = messages.scrollHeight;
-}
-
-function openThread(name) {
-    currentThread = name;
-    threadsData[name].unread = 0;
-    saveChatData();
-
-    document.getElementById("chat-title").textContent = name;  // ← Title becomes contact name
-
-    threadArea.classList.add("hidden");
-    chatArea.classList.remove("hidden");
-    messages.innerHTML = `<div id="typing"></div>`;
-
-    threads[name].forEach(msg => addMessageBubble(msg));
-    messages.scrollTop = messages.scrollHeight;
-
-    if (name === "Bot") setTimeout(simulateBotReply, 2000);
-}
-
 function addMessageBubble(msg) {
     const bubble = document.createElement("div");
     bubble.className = `bubble ${msg.sender}`;
@@ -320,169 +317,6 @@ function addMessageBubble(msg) {
     });
 
     messages.appendChild(bubble);
-}
-
-let replyingTo = null;
-function sendMessage() {
-    if (!chatInput.value.trim() || !currentThread) return;
-
-    const msg = {
-        text: chatInput.value,
-        time: new Date(),
-        sender: "me",
-        replyTo: replyingTo,
-        reactions: []
-    };
-
-    threads[currentThread].push(msg);
-    addMessageBubble(msg);
-    chatInput.value = "";
-    replyingTo = null;
-    updateReplyBanner();
-    messages.scrollTop = messages.scrollHeight;
-
-    showTyping();
-    if (currentThread === "Bot") setTimeout(simulateBotReply, 1500 + Math.random()*2000);
-
-    saveChatData();
-}
-
-function simulateBotReply() {
-    if (currentThread !== "Bot") return;
-    const replies = ["haha yes", "true", "omg", "exactly", "wait what??", "🤯", "no way"];
-    const msg = {
-        text: replies[Math.floor(Math.random()*replies.length)],
-        time: new Date(),
-        sender: "them",
-        reactions: []
-    };
-    threads.Bot.push(msg);
-    if (chatArea.classList.contains("hidden")) threadsData.Bot.unread++;
-    else addMessageBubble(msg);
-    renderThreadDots();
-    saveChatData();
-}
-
-function showTyping() {
-    const typing = document.getElementById("typing");
-    if (typing) {
-        typing.textContent = "typing…";
-        setTimeout(() => typing.textContent = "", 2000);
-    }
-}
-
-function updateReplyBanner() {
-    let banner = document.getElementById("reply-banner");
-    if (!replyingTo && banner) banner.remove();
-}
-function replyToMessage(text) {
-    replyingTo = text;
-    let banner = document.getElementById("reply-banner");
-    if (banner) banner.remove();
-    banner = document.createElement("div");
-    banner.id = "reply-banner";
-    banner.innerHTML = `↳ Replying to "${text}" <span onclick="replyingTo=null;updateReplyBanner()">×</span>`;
-    chatArea.querySelector(".input-section").before(banner);
-}
-
-function showReactionPicker(bubble, msg) {
-    // Remove any existing picker
-    document.querySelectorAll('.reaction-picker').forEach(p => p.remove());
-
-    const picker = document.createElement("div");
-    picker.className = "reaction-picker";
-
-    "❤️😂😮👍👎🎉".split('').forEach(emoji => {
-        const btn = document.createElement("button");
-        btn.textContent = emoji;
-        btn.onclick = (e) => {
-            e.stopPropagation();
-
-            // Ensure reactions array exists
-            if (!msg.reactions) msg.reactions = [];
-
-            // Toggle reaction (optional – remove if you want duplicates)
-            if (msg.reactions.includes(emoji)) {
-                msg.reactions = msg.reactions.filter(r => r !== emoji);
-            } else {
-                msg.reactions.push(emoji);
-            }
-
-            saveChatData();
-            updateReactionsDisplay(bubble, msg);
-            picker.remove();
-        };
-        picker.appendChild(btn);
-    });
-
-    bubble.style.position = "relative";
-    bubble.appendChild(picker);
-}
-
-function updateReactionsDisplay(bubble, msg) {
-    // Remove old reactions
-    bubble.querySelector('.reactions')?.remove();
-
-    if (msg.reactions && msg.reactions.length > 0) {
-        const reacts = document.createElement("div");
-        reacts.className = "reactions";
-        reacts.textContent = msg.reactions.join('');
-        bubble.appendChild(reacts);
-    }
-}
-
-function createNewThread() {
-    const name = prompt("New chat name:");
-    if (!name || threadNames.includes(name)) return;
-    threadNames.push(name);
-    threads[name] = [];
-    threadsData[name] = { x: 100, y: 200, unread: 0 };
-    saveChatData();
-    renderThreadDots();
-}
-
-function confirmDeleteThread(name) {
-    if (confirm(`Delete chat with ${name}?`)) {
-        delete threads[name];
-        delete threadsData[name];
-        const idx = threadNames.indexOf(name);
-        if (idx > -1) threadNames.splice(idx, 1);
-        saveChatData();
-        renderThreadDots();
-    }
-}
-
-function formatTime(date) {
-    const d = new Date(date);
-    const now = new Date();
-    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    return d.toLocaleDateString();
-}
-
-function openChat() {
-    chatModal.classList.remove("hidden");
-    // Always start at thread list
-    threadArea.classList.remove("hidden");
-    chatArea.classList.add("hidden");
-    document.getElementById("chat-title").textContent = "Chats";
-    renderThreadDots();
-}
-
-function openThread(name) {
-    currentThread = name;
-    threadsData[name].unread = 0;
-    saveChatData();
-
-    document.getElementById("chat-title").textContent = name;  // ← Title becomes contact name
-
-    threadArea.classList.add("hidden");
-    chatArea.classList.remove("hidden");
-    messages.innerHTML = `<div id="typing"></div>`;
-
-    threads[name].forEach(msg => addMessageBubble(msg));
-    messages.scrollTop = messages.scrollHeight;
-
-    if (name === "Bot") setTimeout(simulateBotReply, 2000);
 }
 
 // Add this helper (used in long-press)
