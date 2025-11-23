@@ -392,9 +392,6 @@ function initBoard() {
     }
 }
 
-// ------------------------------
-// Init Keyboard - NYTimes style
-// ------------------------------
 function initKeyboard() {
     // Keyboard is now statically in HTML, just attach event listeners
     document.querySelectorAll('.key').forEach(button => {
@@ -402,7 +399,7 @@ function initKeyboard() {
         if (letter === 'ENTER') {
             button.onclick = () => handleKey('ENTER');
         } else if (letter === '⌫') {
-            button.onclick = () => handleKey('⌫');
+            button.onclick = () => handleKey('BACKSPACE');
         } else {
             button.onclick = () => handleKey(letter);
         }
@@ -413,7 +410,7 @@ function initKeyboard() {
 // Key handling
 // ------------------------------
 function handleKey(k) {
-    if (k === "⌫") {
+    if (k === "BACKSPACE" || k === "backspace") {
         currentGuess = currentGuess.slice(0, -1);
         updateBoard();
         return;
