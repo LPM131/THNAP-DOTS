@@ -1,615 +1,449 @@
-// Declare global DOM references (will be assigned inside event listener)
-let threadArea, chatArea, messages;
+// ---------------------------
+// DOM ELEMENTS
+// ---------------------------
+const mainGrid = document.getElementById("main-grid");
+const chatModal = document.getElementById("chat-modal");
+const wordleModal = document.getElementById("wordle-modal");
 
-// ====================================
-// APPLICATION ENTRY POINT
-// ====================================
+// Chat DOM
+const threadArea = document.getElementById("thread-area");
+const chatArea = document.getElementById("chat-area");
+const messages = document.getElementById("messages");
+const chatInput = document.getElementById("chat-input");
 
-document.addEventListener('DOMContentLoaded', () => {
-  // DOM cache
-  const mainGrid = document.querySelector('.main-grid');
-  const title = document.querySelector('h1');
-  const threadArea = document.getElementById('thread-area');
-  const chatArea = document.getElementById('chat-area');
-  const messagesDiv = document.getElementById('messages');
-  const chatInput = document.getElementById('chat-input');
-  const sendBtn = document.getElementById('chat-send-btn');
+// Wordle DOM
+const board = document.getElementById("game-board");
+const keyboard = document.getElementById("keyboard");
+const gameMsg = document.getElementById("game-message");
 
-  // ===================================
-  // UNIVERSAL NAVIGATION
-  // ===================================
-  function showMain() {
-    title.textContent = 'DOTS';
-    mainGrid.style.display = 'grid';
-    document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-  }
 
-  document.querySelectorAll('.back').forEach(btn => {
-    btn.addEventListener('click', showMain);
-  });
+// ---------------------------
+// NAVIGATION
+// ---------------------------
+document.querySelectorAll(".dot").forEach(dot => {
+    dot.addEventListener("click", () => {
+        const id = parseInt(dot.dataset.id);
 
-  // ===================================
-  // MAIN GRID → FEATURES
-  // ===================================
-  mainGrid.addEventListener('click', e => {
-    const dot = e.target.closest('.dot');
-    if (!dot) return;
-    const id = dot.dataset.id;
-    mainGrid.style.display = 'none';
-    title.textContent = '';
+        mainGrid.classList.add("hidden");
 
-    if (id === '1') openChatFeature();
-    if (id === '2') openWordle();
-    if (id === '3') openPokemon();
-    if (id === '12') openCrossword();
-  });
-
-  // ===================================
-  // 1. CHAT – FULLY FIXED & MAGICAL
-  // ===================================
-  function openChatFeature() {
-    document.getElementById('chat-modal').classList.remove('hidden');
-    threadArea.innerHTML = '';
-    loadThreads();
-    createPlusButton();
-  }
-
-  function loadThreads() {
-    const threads = JSON.parse(localStorage.getItem('dots_threads') || '[]');
-    if (threads.length === 0) {
-      // Create first demo thread
-      createThread({ id: Date.now(), name: 'Demo', emoji: 'Hello', x: 60, y: 120 });
-    } else {
-      threads.forEach(createThread);
-    }
-  }
-
-  function createThread(thread) {
-    const dot = document.createElement('div');
-    dot.className = 'thread-dot';
-    dot.textContent = thread.emoji || thread.name[0];
-    dot.dataset.id = thread.id;
-    dot.style.left = (thread.x || Math.random() * 200 + 50) + 'px';
-    dot.style.top = (thread.y || Math.random() * 300 + 80) + 'px';
-
-    // Unread badge (optional future use)
-    if (thread.unread > 0) {
-      const badge = document.createElement('div');
-      badge.className = 'unread-badge';
-      badge.textContent = thread.unread > 9 ? '9+' : thread.unread;
-      dot.appendChild(badge);
-    }
-
-    makeDraggable(dot, thread.id);
-    dot.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openConversation(thread.id, thread.name || thread.emoji);
-    });
-
-    threadArea.appendChild(dot);
-  }
-
-  function createPlusButton() {
-    if (document.getElementById('plus-btn')) return;
-    const plus = document.createElement('div');
-    plus.id = 'plus-btn';
-    plus.className = 'thread-dot';
-    plus.textContent = '+';
-    plus.style.fontSize = '48px';
-    plus.style.fontWeight = '300';
-    plus.style.background = 'rgba(255,255,255,0.15)';
-    plus.style.left = '24px';
-    plus.style.top = '24px';
-
-    plus.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const input = prompt('Chat name or emoji:', 'New Chat')?.trim();
-      if (!input) return;
-
-      const id = Date.now();
-      const newThread = { id, name: input, emoji: input.length <= 3 ? input : null, x: 100, y: 200 };
-      const threads = JSON.parse(localStorage.getItem('dots_threads') || '[]');
-      threads.push(newThread);
-      localStorage.setItem('dots_threads', JSON.stringify(threads));
-
-      createThread(newThread);
-    });
-
-    threadArea.appendChild(plus);
-  }
-
-  function makeDraggable(el, threadId) {
-    let startX, startY, initX, initY;
-    el.addEventListener('pointerdown', e => {
-      e.preventDefault();
-      startX = e.clientX;
-      startY = e.clientY;
-      initX = el.offsetLeft;
-      initY = el.offsetTop;
-      el.style.transition = 'none';
-
-      const move = (e) => {
-        const x = initX + (e.clientX - startX);
-        const y = initY + (e.clientY - startY);
-        const rect = threadArea.getBoundingClientRect();
-        el.style.left = Math.max(0, Math.min(x, rect.width - 60)) + 'px';
-        el.style.top = Math.max(0, Math.min(y, rect.height - 60)) + 'px';
-      };
-      const up = () => {
-        document.removeEventListener('pointermove', move);
-        document.removeEventListener('pointerup', up);
-        // Save position
-        const threads = JSON.parse(localStorage.getItem('dots_threads') || '[]');
-        const t = threads.find(t => t.id == threadId);
-        if (t) {
-          t.x = el.offsetLeft;
-          t.y = el.offsetTop;
-          localStorage.setItem('dots_threads', JSON.stringify(threads));
+        if (id === 1) openChat();
+        else if (id === 11) openWordle();
+        else if (id === 13) openPokemon();
+        else {
+            alert(`Dot ${id} clicked`);
+            backToMain();
         }
-      };
-      document.addEventListener('pointermove', move);
-      document.addEventListener('pointerup', up);
     });
-  }
-
-  function openConversation(id, name) {
-    document.querySelector('#chat-modal h2').textContent = name;
-    threadArea.classList.add('hidden');
-    chatArea.classList.remove('hidden');
-    messagesDiv.innerHTML = '';
-    const msgs = JSON.parse(localStorage.getItem(`dots_msgs_${id}`) || '[]');
-    msgs.forEach(m => addMessage(m.text, m.time));
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  }
-
-  sendBtn.addEventListener('click', () => {
-    if (!chatInput.value.trim()) return;
-    const text = chatInput.value.trim();
-    const name = document.querySelector('#chat-modal h2').textContent;
-    const threads = JSON.parse(localStorage.getItem('dots_threads') || '[]');
-    const thread = threads.find(t => (t.name || t.emoji) === name);
-    if (!thread) return;
-
-    const msgs = JSON.parse(localStorage.getItem(`dots_msgs_${thread.id}`) || '[]');
-    msgs.push({ text, time: Date.now() });
-    localStorage.setItem(`dots_msgs_${thread.id}`, JSON.stringify(msgs));
-
-    addMessage(text);
-    chatInput.value = '';
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
-
-  // ===================================
-  // WORDLE, POKEMON, CROSSWORD – untouched & working
-  // ===================================
-  function openWordle() {
-    document.getElementById('wordle-modal').classList.remove('hidden');
-    initWordle(); // your existing initWordle() works perfectly
-  }
-  function openPokemon() {
-    document.getElementById('pokemon-modal').classList.remove('hidden');
-    initPokemonGame(); // your existing init works
-  }
-  function openCrossword() {
-    document.getElementById('crossword-modal').classList.remove('hidden');
-    initCrossword(); // your existing init works
-  }
-
-  // Your existing initWordle(), initPokemonGame(), initCrossword() etc. stay exactly as you wrote them
-  // Just make sure they are still in this file below this line (they already are in your code)
-
-  // ===================================
-  // START
-  // ===================================
-  showMain();
 });
 
-// Declare global DOM references (will be assigned inside event listener)
-let boardEl, keyboardEl, messageEl;
+function backToMain() {
+    chatModal.classList.add("hidden");
+    wordleModal.classList.add("hidden");
+    document.getElementById("pokemon-modal").classList.add("hidden");
+    mainGrid.classList.remove("hidden");
+}
 
-// ====================================
-// WORDLE GAME
-// ====================================
 
-const wordleWords = ['APPLE', 'BRAIN', 'CLOUD', 'DREAM', 'EARTH', 'FLAME', 'GRAPE', 'HEART', 'IVORY', 'JUMBO'];
-let currentWord = '';
-let currentGuess = [];
-let currentRow = 0;
-let gameWon = false;
-let gameOver = false;
+// ---------------------------
+// CHAT MODULE
+// ---------------------------
+const threadNames = ["Bot", "Friend 1", "Friend 2"];
+let threadsData = {
+    "Bot": { x: 40, y: 40 },
+    "Friend 1": { x: 160, y: 200 },
+    "Friend 2": { x: 100, y: 350 }
+};
+let velocities = {};
 
-function initWordle() {
-  currentWord = wordleWords[Math.floor(Math.random() * wordleWords.length)];
-  currentGuess = [];
-  currentRow = 0;
-  gameWon = false;
-  gameOver = false;
-  boardEl.innerHTML = '';
-  keyboardEl.innerHTML = '';
-  messageEl.textContent = '';
+function openChat() {
+    chatModal.classList.remove("hidden");
+    renderThreadDots();
+    initPhysics();
+}
 
-  for (let i = 0; i < 30; i++) {
-    const tile = document.createElement('div');
-    tile.className = 'tile';
-    tile.innerHTML = '<span></span>';
-    boardEl.appendChild(tile);
-  }
+function renderThreadDots() {
+    threadArea.innerHTML = "";
 
-  const rows = [
-    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-    ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BACK']
-  ];
+    threadNames.forEach(name => {
+        const dot = document.createElement("div");
+        dot.classList.add("thread-dot");
+        dot.textContent = name[0];
+        dot.style.left = threadsData[name].x + "px";
+        dot.style.top = threadsData[name].y + "px";
 
-  rows.forEach(rowKeys => {
-    const row = document.createElement('div');
-    row.className = 'keyboard-row';
-    keyboardEl.appendChild(row);
+        dot.addEventListener("click", () => openThread(name));
 
-    rowKeys.forEach(key => {
-      const btn = document.createElement('div');
-      btn.className = key === 'ENTER' || key === 'BACK' ? 'key wide' : 'key';
-      btn.textContent = key;
-      btn.dataset.key = key;
-      btn.addEventListener('click', () => handleKey(key));
-      row.appendChild(btn);
+        threadArea.appendChild(dot);
     });
-  });
 }
 
-function handleKey(key) {
-  if (gameWon || gameOver) return;
-
-  if (key === 'ENTER') {
-    if (currentGuess.length === 5) {
-      checkGuess();
-    }
-  } else if (key === 'BACK') {
-    currentGuess.pop();
-    updateBoard();
-  } else if (currentGuess.length < 5) {
-    currentGuess.push(key.toUpperCase());
-    updateBoard();
-  }
+function openThread(name) {
+    threadArea.classList.add("hidden");
+    chatArea.classList.remove("hidden");
+    messages.innerHTML = `<p>Chat with ${name}</p>`;
 }
 
-function updateBoard() {
-  const tiles = boardEl.querySelectorAll('.tile');
-  for (let i = 0; i < 30; i++) {
-    const row = Math.floor(i / 5);
-    const col = i % 5;
-    const tile = tiles[i];
-    const span = tile.querySelector('span');
-    if (row === currentRow && col < currentGuess.length) {
-      span.textContent = currentGuess[col];
-    } else if (row === currentRow) {
-      span.textContent = '';
-    }
-  }
+function sendMessage() {
+    if (!chatInput.value.trim()) return;
+
+    const bubble = document.createElement("div");
+    bubble.textContent = chatInput.value;
+    messages.appendChild(bubble);
+    chatInput.value = "";
 }
 
-function checkGuess() {
-  const guessStr = currentGuess.join('');
-  const tiles = boardEl.querySelectorAll('.tile');
-  const rowTiles = Array.from(tiles).slice(currentRow * 5, (currentRow + 1) * 5);
-  let wordLetters = currentWord.split('');
-  let correct = 0;
 
-  currentGuess.forEach((letter, i) => {
-    const tile = rowTiles[i];
-    tile.style.backgroundColor = '#787c7e';
-    if (letter === wordLetters[i]) {
-      tile.style.backgroundColor = '#6aaa64';
-      correct++;
-      wordLetters[i] = null;
-      updateKeyboard(letter, 'correct');
-    }
-  });
+// ---------------------------
+// FLOATING DOT PHYSICS
+// ---------------------------
+function initPhysics() {
+    threadNames.forEach(name => {
+        velocities[name] = {
+            vx: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1),
+            vy: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1)
+        };
+    });
 
-  currentGuess.forEach((letter, i) => {
-    const tile = rowTiles[i];
-    if (tile.style.backgroundColor === '#6aaa64') return;
-    const index = wordLetters.indexOf(letter);
-    if (index !== -1) {
-      tile.style.backgroundColor = '#c9b458';
-      wordLetters[index] = null;
-      updateKeyboard(letter, 'present');
-    } else {
-      updateKeyboard(letter, 'absent');
-    }
-  });
-
-  if (correct === 5) {
-    gameWon = true;
-    messageEl.textContent = 'Congratulations!';
-  } else if (currentRow === 5) {
-    gameOver = true;
-    messageEl.textContent = `Game over! Word: ${currentWord}`;
-  } else {
-    currentRow++;
-    currentGuess = [];
-  }
-
-  requestAnimationFrame(() => {
-    rowTiles.forEach(tile => tile.classList.add('flip'));
-  });
+    requestAnimationFrame(updateDots);
 }
 
-function updateKeyboard(letter, status) {
-  const keys = keyboardEl.querySelectorAll(`[data-key="${letter}"]`);
-  keys.forEach(key => {
-    if (status === 'correct') {
-      key.classList.add('correct');
-    } else if (status === 'present' && !key.classList.contains('correct')) {
-      key.classList.add('present');
-    } else if (status === 'absent' && !key.classList.contains('correct') && !key.classList.contains('present')) {
-      key.classList.add('absent');
-    }
-  });
+function updateDots() {
+    const dots = document.querySelectorAll(".thread-dot");
+    const bounds = threadArea.getBoundingClientRect();
+
+    dots.forEach(dot => {
+        const name = threadNames[[...dots].indexOf(dot)];
+        const pos = threadsData[name];
+        const vel = velocities[name];
+
+        pos.x += vel.vx;
+        pos.y += vel.vy;
+
+        if (pos.x <= 0 || pos.x >= bounds.width - 60) vel.vx *= -1;
+        if (pos.y <= 0 || pos.y >= bounds.height - 60) vel.vy *= -1;
+
+        dot.style.left = pos.x + "px";
+        dot.style.top = pos.y + "px";
+    });
+
+    requestAnimationFrame(updateDots);
 }
 
-// ====================================
-// POKEMON GAME
-// ====================================
+/* --------------------------- */
+/* POKEMON GAME MODULE */
+/* ----------------------------- */
 
-const pokemonByGen = {
-  1: ['Bulbasaur', 'Ivysaur', 'Venusaur', 'Charmander', 'Charmeleon', 'Charizard', 'Squirtle', 'Wartortle', 'Blastoise', 'Pikachu', 'Raichu'],
-  2: ['Chikorita', 'Bayleef', 'Meganium', 'Cyndaquil', 'Quilava', 'Typhlosion', 'Totodile', 'Croconaw', 'Feraligatr'],
-  3: ['Treecko', 'Grovyle', 'Sceptile', 'Torchic', 'Combusken', 'Blaziken', 'Mudkip', 'Marshtomp', 'Swampert'],
-  4: ['Turtwig', 'Grotle', 'Torterra', 'Chimchar', 'Monferno', 'Infernape', 'Piplup', 'Prinplup', 'Empoleon'],
-  5: ['Snivy', 'Servine', 'Serperior', 'Tepig', 'Pignite', 'Emboar', 'Oshawott', 'Dewott', 'Samurott'],
-  6: ['Chespin', 'Quilladin', 'Chesnaught', 'Fennekin', 'Braixen', 'Delphox', 'Froakie', 'Frogadier', 'Greninja'],
-  7: ['Rowlet', 'Decidueye', 'Litten', 'Torracat', 'Incineroar', 'Popplio', 'Brionne', 'Primarina'],
-  8: ['Grookey', 'Thwackey', 'Rillaboom', 'Scorbunny', 'Raboot', 'Cinderace', 'Sobble', 'Drizzile', 'Inteleon'],
-  9: ['Sprigatito', 'Floragato', 'Meowscarada', 'Fuecoco', 'Crocalor', 'Skeledirge', 'Quaxly', 'Quaxwell', 'Quaquaval'],
-  all: []
+let pokemonNames = [];
+let fullPokemonData = [];
+let filteredList = [];
+let currentPokemonName = "";
+let currentPokemonSprite = "";
+
+/* GENERATION RANGES */
+const GEN_RANGES = {
+    "Gen 1": [1, 151],
+    "Gen 2": [152, 251],
+    "Gen 3": [252, 386],
+    "Gen 4": [387, 493],
+    "Gen 5": [494, 649],
+    "Gen 6": [650, 721],
+    "Gen 7": [722, 809],
+    "Gen 8": [810, 898],
+    "Gen 9": [899, 1025]
 };
 
-let currentPokemon = '';
-let currentGen = 'all';
-let hintShown = false;
+/* LOAD ALL NAMES */
+async function loadAllPokemonNames() {
+    if (pokemonNames.length > 0) return;
 
-function initPokemonGame() {
-  pokemonByGen.all = Object.values(pokemonByGen).flat().filter(x => Array.isArray(x)).flat();
-  resetPokemonGame();
-  setGeneration('all');
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=1025`);
+    const data = await res.json();
+
+    pokemonNames = data.results.map(p => p.name);
+    fullPokemonData = data.results;
 }
 
-function resetPokemonGame() {
-  document.getElementById('pokemon-silhouette').src = '';
-  document.getElementById('pokemon-guess').value = '';
-  document.getElementById('pokemon-feedback').textContent = '';
-  hideSuggestions();
-  hintShown = false;
-  currentPokemon = '';
-}
+/* OPEN GAME */
+function openPokemon() {
+    document.getElementById("pokemon-modal").classList.remove("hidden");
 
-function setGeneration(gen) {
-  currentGen = gen;
-  resetPokemonGame();
-  const pokemonList = pokemonByGen[gen];
-  const randomPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)] || pokemonList[0];
-  currentPokemon = randomPokemon;
-  loadPokemonSilhouette(randomPokemon);
-}
-
-function loadPokemonSilhouette(name) {
-  const silhouetteUrl = `https://play.pokemonshowdown.com/sprites/gen5/${name.toLowerCase()}.png`;
-  document.getElementById('pokemon-silhouette').src = silhouetteUrl;
-}
-
-function guessPokemon() {
-  const guess = document.getElementById('pokemon-guess').value.trim();
-  if (!guess) return;
-
-  const feedbackEl = document.getElementById('pokemon-feedback');
-  const pokemonList = pokemonByGen[currentGen];
-
-  if (guess.toLowerCase() === currentPokemon.toLowerCase()) {
-    feedbackEl.textContent = `Correct! It was ${currentPokemon}!`;
-    feedbackEl.style.color = 'green';
-    revealPokemon();
-    setTimeout(() => setGeneration(currentGen), 2000);
-  } else {
-    feedbackEl.textContent = 'Wrong! Try again.';
-    feedbackEl.style.color = 'red';
-  }
-}
-
-function giveHint() {
-  if (hintShown) return;
-  hintShown = true;
-  const hint = currentPokemon[0] + ' with ' + currentPokemon.length + ' letters.';
-  document.getElementById('pokemon-feedback').textContent = `Hint: ${hint}`;
-}
-
-function spellingAssist() {
-  const input = document.getElementById('pokemon-guess');
-  const query = input.value.trim().toLowerCase();
-  const suggestionsEl = document.getElementById('pokemon-suggestions');
-
-  if (query.length < 2) {
-    suggestionsEl.style.display = 'none';
-    return;
-  }
-
-  const pokemonList = pokemonByGen[currentGen];
-  const matches = pokemonList.filter(p => p.toLowerCase().startsWith(query)).slice(0, 5);
-
-  suggestionsEl.innerHTML = '';
-  if (matches.length > 0) {
-    matches.forEach(pokemon => {
-      const li = document.createElement('li');
-      li.textContent = pokemon;
-      li.addEventListener('click', () => selectSuggestion(pokemon));
-      suggestionsEl.appendChild(li);
+    loadAllPokemonNames().then(() => {
+        document.querySelector('.gen-row button:first-child').classList.add('active');
+        loadPokemon();
     });
-    suggestionsEl.style.display = 'block';
-  } else {
-    suggestionsEl.style.display = 'none';
-  }
+
+    const input = document.getElementById("pokemon-guess");
+    input.addEventListener("input", spellingAssist);
 }
 
-function selectSuggestion(pokemon) {
-  document.getElementById('pokemon-guess').value = pokemon;
-  hideSuggestions();
-  guessPokemon();
-}
+// ---------------------------
+// GENERATION FILTER
+// ---------------------------
+function setGeneration(gen) {
+    document.querySelectorAll('.gen-row button').forEach(btn => btn.classList.remove('active'));
 
-function hideSuggestions() {
-  document.getElementById('pokemon-suggestions').style.display = 'none';
-}
+    if (gen === 'all') {
+        filteredList = fullPokemonData;
+        document.querySelector('.gen-row:nth-child(2) button:last-child').classList.add('active');
+    } else {
+        const start = GEN_RANGES[`Gen ${gen}`][0] - 1;
+        const end = GEN_RANGES[`Gen ${gen}`][1];
+        filteredList = fullPokemonData.slice(start, end);
 
-function revealPokemon() {
-  document.getElementById('pokemon-silhouette').style.filter = 'none';
-}
-
-// ====================================
-// CROSSWORD PUZZLE
-// ====================================
-
-let crosswordGrid = [];
-let crosswordClues = {};
-let currentDirection = 'across';
-let currentClue = 1;
-
-function initCrossword() {
-  crosswordGrid = Array.from({ length: 15 }, () => Array(15).fill(''));
-  setCrosswordData();
-  renderCrosswordGrid();
-  renderCrosswordKeyboard();
-  updateClueDisplay();
-}
-
-function setCrosswordData() {
-  const blacks = [
-    [2, 2], [2, 12], [5, 5], [5, 9], [9, 5], [9, 9], [12, 2], [12, 12]
-  ];
-  blacks.forEach(([r, c]) => crosswordGrid[r][c] = 'black');
-
-  crosswordGrid[0][4] = 'C';
-  crosswordGrid[0][5] = 'L';
-  crosswordGrid[0][6] = 'O';
-  crosswordGrid[0][7] = 'U';
-  crosswordGrid[0][8] = 'D';
-
-  crosswordClues = {
-    across: { 1: 'Weather formation' },
-    down: { 1: 'Sky covering' }
-  };
-}
-
-function renderCrosswordGrid() {
-  const gridEl = document.getElementById('crossword-grid');
-  gridEl.innerHTML = '';
-  gridEl.style.gridTemplateColumns = 'repeat(15, 1fr)';
-  gridEl.style.gridTemplateRows = 'repeat(15, 1fr)';
-
-  for (let r = 0; r < 15; r++) {
-    for (let c = 0; c < 15; c++) {
-      const cell = document.createElement('div');
-      cell.className = 'cross-cell';
-      if (crosswordGrid[r][c] === 'black') {
-        cell.classList.add('black');
-      } else {
-        cell.textContent = crosswordGrid[r][c];
-        cell.addEventListener('click', () => selectCell(r, c));
-      }
-      gridEl.appendChild(cell);
+        // Highlight the clicked gen
+        const row = gen <= 5 ? 1 : 2;
+        const index = gen <= 5 ? gen - 1 : gen - 6;
+        document.querySelector(`.gen-row:nth-child(${row}) button:nth-child(${index + 1})`).classList.add('active');
     }
-  }
+    loadPokemon();
 }
 
-function renderCrosswordKeyboard() {
-  const keyboardEl = document.getElementById('crossword-keyboard');
-  keyboardEl.innerHTML = '';
+/* LOAD RANDOM POKEMON */
+async function loadPokemon() {
+    const pool = filteredList.length ? filteredList : fullPokemonData;
 
-  const ckRow1 = document.createElement('div');
-  ckRow1.className = 'ck-row';
-  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].forEach(key => {
-    const btn = document.createElement('div');
-    btn.className = 'ck-key';
-    btn.textContent = key;
-    btn.dataset.key = key;
-    btn.addEventListener('click', () => handleCrosswordKey(key));
-    ckRow1.appendChild(btn);
-  });
-  keyboardEl.appendChild(ckRow1);
+    const choice = pool[Math.floor(Math.random() * pool.length)];
+    const res = await fetch(choice.url);
+    const data = await res.json();
 
-  const ckRow2 = document.createElement('div');
-  ckRow2.className = 'ck-row';
-  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].forEach(key => {
-    const btn = document.createElement('div');
-    btn.className = 'ck-key';
-    btn.textContent = key;
-    btn.dataset.key = key;
-    btn.addEventListener('click', () => handleCrosswordKey(key));
-    ckRow2.appendChild(btn);
-  });
-  keyboardEl.appendChild(ckRow2);
+    currentPokemonName = data.name;
+    currentPokemonSprite = data.sprites.front_default;
 
-  const ckRow3 = document.createElement('div');
-  ckRow3.className = 'ck-row';
+    const img = document.getElementById("pokemon-silhouette");
+    img.src = currentPokemonSprite;
+    img.style.filter = "brightness(0)";
 
-  const backBtn = document.createElement('div');
-  backBtn.className = 'ck-key wide function';
-  backBtn.textContent = '⌫';
-  backBtn.dataset.key = 'BACK';
-  backBtn.addEventListener('click', () => handleCrosswordKey('BACK'));
-  ckRow3.appendChild(backBtn);
-
-  ['Z', 'X', 'C', 'V', 'B', 'N', 'M'].forEach(key => {
-    const btn = document.createElement('div');
-    btn.className = 'ck-key';
-    btn.textContent = key;
-    btn.dataset.key = key;
-    btn.addEventListener('click', () => handleCrosswordKey(key));
-    ckRow3.appendChild(btn);
-  });
-
-  const nextBtn = document.createElement('div');
-  nextBtn.className = 'ck-key wide function';
-  nextBtn.textContent = 'Next';
-  nextBtn.dataset.key = 'NEXT';
-  nextBtn.addEventListener('click', () => toggleDirection());
-  ckRow3.appendChild(nextBtn);
-
-  keyboardEl.appendChild(ckRow3);
+    document.getElementById("pokemon-feedback").textContent = "";
+    document.getElementById("pokemon-guess").value = "";
+    document.getElementById("pokemon-suggestions").style.display = "none";
 }
 
-function selectCell(r, c) {
-  document.querySelectorAll('.cross-cell.selected').forEach(cell => cell.classList.remove('selected'));
-  const cell = document.getElementById('crossword-grid').children[r * 15 + c];
-  cell.classList.add('selected');
+/* GUESS */
+function guessPokemon() {
+    const guess = document.getElementById("pokemon-guess").value.trim().toLowerCase();
+    if (!guess) return;
+
+    const feedback = document.getElementById("pokemon-feedback");
+
+    if (guess === currentPokemonName) {
+        feedback.textContent = "🎉 Correct!";
+        document.getElementById("pokemon-silhouette").style.filter = "none";
+
+        setTimeout(loadPokemon, 1500);
+    } else {
+        feedback.textContent = "❌ Wrong. Try again!";
+    }
 }
 
-function handleCrosswordKey(key) {
-  if (!document.querySelector('.cross-cell.selected')) return;
-
-  const selected = document.querySelector('.cross-cell.selected');
-  const r = Math.floor(Array.from(selected.parentNode.children).indexOf(selected) / 15);
-  const c = Array.from(selected.parentNode.children).indexOf(selected) % 15;
-
-  if (key === 'BACK') {
-    crosswordGrid[r][c] = '';
-  } else {
-    crosswordGrid[r][c] = key;
-  }
-  selected.textContent = crosswordGrid[r][c];
+/* HINT */
+function giveHint() {
+    const feedback = document.getElementById("pokemon-feedback");
+    feedback.textContent = `Hint: Starts with \"${currentPokemonName[0].toUpperCase()}\"`;
 }
 
-function toggleDirection() {
-  currentDirection = currentDirection === 'across' ? 'down' : 'across';
-  updateClueDisplay();
+// SPELLING ASSIST DROPDOWN
+function spellingAssist() {
+    const q = document.getElementById("pokemon-guess").value.toLowerCase();
+    const list = document.getElementById("pokemon-suggestions");
+
+    if (!q) { list.style.display = "none"; return; }
+
+    const matches = pokemonNames
+        .filter(n => n.startsWith(q))
+        .slice(0, 12);
+
+    list.innerHTML = "";
+    matches.forEach(name => {
+        const li = document.createElement("li");
+        li.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+        li.onclick = () => {
+            document.getElementById("pokemon-guess").value = li.textContent;
+            list.style.display = "none";
+        };
+        list.appendChild(li);
+    });
+
+    list.style.display = matches.length ? "block" : "none";
 }
 
-function updateClueDisplay() {
-  const clueEl = document.getElementById('crossword-clue');
-  const directionEl = clueEl.querySelector('.clue-direction');
-  const numberEl = clueEl.querySelector('.clue-number');
-  const textEl = clueEl.querySelector('.clue-text');
+// Load input event listener
+document.getElementById("pokemon-guess").addEventListener("input", spellingAssist);
 
-  directionEl.textContent = currentDirection.charAt(0).toUpperCase() + currentDirection.slice(1);
-  numberEl.textContent = currentClue + '.';
-  textEl.textContent = crosswordClues[currentDirection][currentClue] || 'Loading…';
+// ------------------------------
+// WORDLE 100% CLEAN MODULE
+// ------------------------------
+const WORD_LIST = ["APPLE", "BANJO", "CRANE", "DANCE", "ELITE", "FLAME", "GRAPE"];
+
+function getWordOfTheDay() {
+    const start = new Date("2025-01-01");
+    const today = new Date();
+    const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+    return WORD_LIST[diff % WORD_LIST.length];
+}
+
+let WORD = getWordOfTheDay();
+let guesses = [];
+let currentGuess = "";
+
+// Elements
+const boardEl = document.getElementById("game-board");
+const keyboardEl = document.getElementById("keyboard");
+const messageEl = document.getElementById("game-message");
+
+// ------------------------------
+// Init board (30 tiles)
+// ------------------------------
+function initBoard() {
+    boardEl.innerHTML = "";
+    for (let i = 0; i < 30; i++) {
+        const tile = document.createElement("div");
+        tile.classList.add("tile");
+        const span = document.createElement("span");
+        tile.appendChild(span);
+        boardEl.appendChild(tile);
+    }
+}
+
+// ------------------------------
+// Init Keyboard
+// ------------------------------
+function initKeyboard() {
+    keyboardEl.innerHTML = "";
+
+    const keys = [
+        "QWERTYUIOP",
+        "ASDFGHJKL",
+        "ZXCVBNM"
+    ];
+
+    keys.forEach(row => {
+        const rowDiv = document.createElement("div");
+        rowDiv.classList.add("keyboard-row");
+
+        if (row === "ZXCVBNM") {
+            addKey(rowDiv, "ENTER", "wide");
+        }
+
+        [...row].forEach(k => addKey(rowDiv, k));
+
+        if (row === "ZXCVBNM") {
+            addKey(rowDiv, "⌫", "wide");
+        }
+
+        keyboardEl.appendChild(rowDiv);
+    });
+}
+
+function addKey(rowDiv, char, wide = "") {
+    const key = document.createElement("div");
+    key.classList.add("key");
+    if (wide) key.classList.add(wide);
+    key.textContent = char;
+    key.onclick = () => handleKey(char);
+    rowDiv.appendChild(key);
+}
+
+// ------------------------------
+// Key handling
+// ------------------------------
+function handleKey(k) {
+    if (k === "⌫") {
+        currentGuess = currentGuess.slice(0, -1);
+        updateBoard();
+        return;
+    }
+
+    if (k === "ENTER") {
+        submitGuess();
+        return;
+    }
+
+    if (currentGuess.length < 5) {
+        currentGuess += k;
+        updateBoard();
+    }
+}
+
+// ------------------------------
+// Update Board
+// ------------------------------
+function updateBoard() {
+    const tiles = [...document.querySelectorAll(".tile span")];
+
+    for (let i = 0; i < 30; i++) {
+        let row = Math.floor(i / 5);
+
+        if (row < guesses.length) {
+            tiles[i].textContent = guesses[row][i % 5];
+        } else if (row === guesses.length) {
+            tiles[i].textContent = currentGuess[i % 5] || "";
+        } else {
+            tiles[i].textContent = "";
+        }
+    }
+}
+
+// ------------------------------
+// Submit guess
+// ------------------------------
+function submitGuess() {
+    if (currentGuess.length < 5) {
+        messageEl.textContent = "Not enough letters.";
+        return;
+    }
+
+    const guess = currentGuess;
+    guesses.push(guess);
+    currentGuess = "";
+    messageEl.textContent = "";
+
+    revealGuess(guess, guesses.length - 1);
+}
+
+// ------------------------------
+// Reveal animation & coloring
+// ------------------------------
+function revealGuess(guess, row) {
+    const tiles = [...document.querySelectorAll(".tile")];
+    const rowTiles = tiles.slice(row * 5, row * 5 + 5);
+
+    [...guess].forEach((char, i) => {
+        setTimeout(() => {
+            rowTiles[i].classList.add("flip");
+
+            if (WORD[i] === char) rowTiles[i].classList.add("correct");
+            else if (WORD.includes(char)) rowTiles[i].classList.add("present");
+            else rowTiles[i].classList.add("absent");
+
+            rowTiles[i].querySelector("span").textContent = char;
+
+            if (i === 4) checkEndGame(guess);
+
+        }, i * 300);
+    });
+}
+
+function checkEndGame(guess) {
+    if (guess === WORD) {
+        messageEl.textContent = "🎉 You got it!";
+    } else if (guesses.length === 6) {
+        messageEl.textContent = `The word was: ${WORD}`;
+    }
+}
+
+// ------------------------------
+// Initialize on modal open
+// ------------------------------
+function initGame() {
+    guesses = [];
+    currentGuess = "";
+    WORD = getWordOfTheDay();
+    initBoard();
+    initKeyboard();
+    updateBoard();
+}
+
+function openWordle() {
+    wordleModal.classList.remove("hidden");
+    initGame();
 }
