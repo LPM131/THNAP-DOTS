@@ -44,14 +44,17 @@ function updateKeyboard(guess, answer) {
     }
   }
 
-  // Now repaint the actual keyboard keys
-  document.querySelectorAll('.key').forEach(key => {
-    const letter = key.textContent;
+  // Now repaint the actual keyboard keys — FIXED SELECTOR
+  document.querySelectorAll('[data-key]').forEach(keyEl => {
+    const letter = keyEl.textContent.trim();
+    const dataKey = keyEl.getAttribute('data-key');
+
+    // Only color letter keys (not ENTER/delete)
     if (letter.length === 1 && letterStatus[letter] !== undefined) {
-      key.className = 'key'; // reset
-      if (letterStatus[letter] === 2) key.classList.add('correct');
-      else if (letterStatus[letter] === 1) key.classList.add('present');
-      else if (letterStatus[letter] === 0) key.classList.add('absent');
+      keyEl.classList.remove('correct', 'present', 'absent');
+      if (letterStatus[letter] === 2) keyEl.classList.add('correct');
+      else if (letterStatus[letter] === 1) keyEl.classList.add('present');
+      else if (letterStatus[letter] === 0) keyEl.classList.add('absent');
     }
   });
 }
@@ -399,11 +402,12 @@ function initBoard() {
 // Init Keyboard - Production NYT style
 // ------------------------------
 function initKeyboard() {
-    // Use the original working selector
-    document.querySelectorAll('.key').forEach(button => {
-        const dataKey = button.getAttribute('data-key');
-        button.onclick = () => handleKey(dataKey);
+  document.querySelectorAll('[data-key]').forEach(button => {
+    button.addEventListener('click', () => {
+      const key = button.getAttribute('data-key');
+      handleKey(key);
     });
+  });
 }
 
 // ------------------------------
