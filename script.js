@@ -45,7 +45,7 @@ function updateKeyboard(guess, answer) {
   }
 
   // Now repaint the actual keyboard keys
-  document.querySelectorAll('.key').forEach(key => {
+  document.querySelectorAll('.nyt-key').forEach(key => {
     const letter = key.textContent;
     if (letter.length === 1 && letterStatus[letter] !== undefined) {
       key.className = 'key'; // reset
