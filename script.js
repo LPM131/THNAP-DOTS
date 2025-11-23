@@ -1,26 +1,21 @@
-// ---------------------------
-// DOM ELEMENTS
-// ---------------------------
-const mainGrid = document.getElementById("main-grid");
-const chatModal = document.getElementById("chat-modal");
-const wordleModal = document.getElementById("wordle-modal");
+// ——————————————————————
+// DOTS — FINAL WORKING SCRIPT (MOBILE + DESKTOP)
+// ——————————————————————
 
-// Wordle DOM
-const board = document.getElementById("game-board");
-const keyboard = document.getElementById("keyboard");
-const gameMsg = document.getElementById("game-message");
+const mainGrid     = document.getElementById("main-grid");
+const chatModal    = document.getElementById("chat-modal");
+const chatList     = document.getElementById("chat-list");
+const chatArea     = document.getElementById("chat-area");
+const messages     = document.getElementById("messages");
+const chatInput    = document.getElementById("chat-input");
+const wordleModal  = document.getElementById("wordle-modal");
 
-
-// ————— MAIN GRID DOT CLICK — THIS IS THE ONLY THING THAT OPENS CHAT —————
+// ————— DOT CLICK HANDLER —————
 document.querySelectorAll(".dot").forEach(dot => {
     dot.addEventListener("click", () => {
-        const id = parseInt(dot.dataset.id);
-
         mainGrid.classList.add("hidden");
-
-        if (id === 1) {
-            openChat();                 // ← THIS IS THE ONLY LINE THAT MATTERS
-        }
+        const id = parseInt(dot.dataset.id);
+        if (id === 1) openChat();
         else if (id === 11) openWordle();
         else if (id === 13) openPokemon();
         else {
@@ -30,33 +25,19 @@ document.querySelectorAll(".dot").forEach(dot => {
     });
 });
 
-
-// ——————————————————————
-// CHAT SYSTEM — GUARANTEED WORKING (MOBILE + DESKTOP)
-// ——————————————————————
-
-const chatModal  = document.getElementById("chat-modal");
-const chatList   = document.getElementById("chat-list");
-const chatArea   = document.getElementById("chat-area");
-const messages   = document.getElementById("messages");
-const chatInput  = document.getElementById("chat-input");
-const mainGrid   = document.getElementById("main-grid");
-
+// ————— CHAT SYSTEM —————
 let threadNames = ["Bot", "Mom", "Alex"];
-let threads = {};        // {name: [msg]}
-let threadsData = {};    // {name: {unread:0}}
+let threads = {};
+let threadsData = {};
 let currentThread = null;
 
-// Load data
 function initChat() {
-    const n = localStorage.getItem("dot_threadNames");
-    const t = localStorage.getItem("dot_threads");
-    const d = localStorage.getItem("dot_threadsData");
-
+    const n = localStorage.getItem("threads_names");
+    const t = localStorage.getItem("threads");
+    const d = localStorage.getItem("threads_data");
     threadNames = n ? JSON.parse(n) : threadNames;
-    threads     = t ? JSON.parse(t) : {};
+    threads = t ? JSON.parse(t) : {};
     threadsData = d ? JSON.parse(d) : {};
-
     threadNames.forEach(name => {
         if (!threads[name]) threads[name] = [];
         if (!threadsData[name]) threadsData[name] = { unread: 0 };
@@ -66,9 +47,9 @@ function initChat() {
 initChat();
 
 function saveChat() {
-    localStorage.setItem("dot_threadNames", JSON.stringify(threadNames));
-    localStorage.setItem("dot_threads", JSON.stringify(threads));
-    localStorage.setItem("dot_threadsData", JSON.stringify(threadsData));
+    localStorage.setItem("threads_names", JSON.stringify(threadNames));
+    localStorage.setItem("threads", JSON.stringify(threads));
+    localStorage.setItem("threads_data", JSON.stringify(threadsData));
 }
 
 function renderChatList() {
@@ -76,15 +57,14 @@ function renderChatList() {
         const last = threads[name][threads[name].length - 1];
         const preview = last ? (last.sender === "me" ? "You: " : "") + (last.text || "Voice") : "No messages";
         const unread = threadsData[name].unread > 0 ? `<div class="unread-badge">${threadsData[name].unread}</div>` : "";
-        return `
-            <div class="chat-thread-item ${threadsData[name].unread ? "unread" : ""}" onclick="openThread('${name}')">
-                <div class="contact-dot" style="background:${strToColor(name)}">${name[0]}</div>
-                <div class="thread-preview">
-                    <div class="thread-name">${name}</div>
-                    <div class="thread-last">${preview}</div>
-                </div>
-                ${unread}
-            </div>`;
+        return `<div class="chat-thread-item ${threadsData[name].unread > 0 ? "unread" : ""}" onclick="openThread('${name}')">
+            <div class="contact-dot" style="background:${strToColor(name)}">${name[0]}</div>
+            <div class="thread-preview">
+                <div class="thread-name">${name}</div>
+                <div class="thread-last">${preview}</div>
+            </div>
+            ${unread}
+        </div>`;
     }).join("");
 }
 
@@ -103,12 +83,11 @@ function openThread(name) {
     document.getElementById("chat-title").textContent = name;
     chatList.classList.add("hidden");
     chatArea.classList.remove("hidden");
-    messages.innerHTML = "<div id='typing'></div>";
+    messages.innerHTML = "";
     threads[name].forEach(msg => {
         const b = document.createElement("div");
-        b.className = "bubble " + (msg.sender || "me");
+        b.className = `bubble ${msg.sender === "me" ? "me" : "them"}`;
         b.textContent = msg.text || "Voice message";
-        if (msg.sender === "me") b.style.cssText = "background:#007AFF;color:white;margin-left:auto;border-bottom-right-radius:4px;";
         messages.appendChild(b);
     });
     messages.scrollTop = messages.scrollHeight;
@@ -124,6 +103,8 @@ function backToMain() {
         return;
     }
     chatModal.classList.add("hidden");
+    wordleModal.classList.add("hidden");
+    document.getElementById("pokemon-modal").classList.add("hidden");
     mainGrid.classList.remove("hidden");
 }
 
@@ -158,14 +139,7 @@ function strToColor(str) {
     return `hsl(${hash % 360}, 70%, 55%)`;
 }
 
-
-
-
-
-/* --------------------------- */
-/* POKEMON GAME MODULE */
-/* ----------------------------- */
-
+// ————— POKEMON GAME —————
 let pokemonNames = [];
 let fullPokemonData = [];
 let filteredList = [];
