@@ -251,12 +251,7 @@ function addMessageBubble(msg) {
         <div class="time">${formatTime(msg.time)}</div>
     `;
 
-    if (msg.reactions?.length) {
-        const reacts = document.createElement("div");
-        reacts.className = "reactions";
-        reacts.textContent = msg.reactions.join('');
-        bubble.appendChild(reacts);
-    }
+    updateReactionsDisplay(bubble, msg);
 
     addLongPress(bubble, () => showReactionPicker(bubble, msg));
 
@@ -335,28 +330,49 @@ function replyToMessage(text) {
 }
 
 function showReactionPicker(bubble, msg) {
+    // Remove any existing picker
+    document.querySelectorAll('.reaction-picker').forEach(p => p.remove());
+
     const picker = document.createElement("div");
     picker.className = "reaction-picker";
+
     "❤️😂😮👍👎🎉".split('').forEach(emoji => {
         const btn = document.createElement("button");
         btn.textContent = emoji;
-        btn.onclick = () => {
-            msg.reactions = msg.reactions || [];
-            if (!msg.reactions.includes(emoji)) msg.reactions.push(emoji);
-            saveChatData();
-            const reacts = bubble.querySelector('.reactions');
-            if (reacts) reacts.textContent = msg.reactions.join('');
-            else {
-                const newReacts = document.createElement("div");
-                newReacts.className = "reactions";
-                newReacts.textContent = msg.reactions.join('');
-                bubble.appendChild(newReacts);
+        btn.onclick = (e) => {
+            e.stopPropagation();
+
+            // Ensure reactions array exists
+            if (!msg.reactions) msg.reactions = [];
+
+            // Toggle reaction (optional – remove if you want duplicates)
+            if (msg.reactions.includes(emoji)) {
+                msg.reactions = msg.reactions.filter(r => r !== emoji);
+            } else {
+                msg.reactions.push(emoji);
             }
+
+            saveChatData();
+            updateReactionsDisplay(bubble, msg);
             picker.remove();
         };
         picker.appendChild(btn);
     });
+
+    bubble.style.position = "relative";
     bubble.appendChild(picker);
+}
+
+function updateReactionsDisplay(bubble, msg) {
+    // Remove old reactions
+    bubble.querySelector('.reactions')?.remove();
+
+    if (msg.reactions && msg.reactions.length > 0) {
+        const reacts = document.createElement("div");
+        reacts.className = "reactions";
+        reacts.textContent = msg.reactions.join('');
+        bubble.appendChild(reacts);
+    }
 }
 
 function createNewThread() {
