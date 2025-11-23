@@ -1,6 +1,4 @@
-/* ==========================
-   RESET & BASE STYLES
-========================== */
+/* RESET */
 * {
   margin: 0;
   padding: 0;
@@ -8,202 +6,584 @@
 }
 
 body {
-  background: #000;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0d0d0f; /* deep matte black */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro", sans-serif;
   color: #fff;
   min-height: 100vh;
 }
 
 h1 {
   text-align: center;
-  margin: 20px 0;
-  font-size: 2rem;
-  font-weight: 300;
+  margin: 26px 0;
+  font-size: 2.4rem;
+  font-weight: 500;
+  color: #b9b9c4;
+  letter-spacing: 2px;
 }
 
-/* ==========================
-   MAIN GRID (DOTS)
-========================== */
+/* Main grid container */
 .main-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-gap: 12px;
-  max-width: 380px;
-  margin: 20px auto;
-  padding: 16px;
-  background: #121212;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
+/* Each dot */
 .dot {
-  position: relative;
-  width: 72px;
-  height: 72px;
+  width: 100%;
+  aspect-ratio: 1; /* makes it perfectly square, scales with container */
+  max-width: 100%;
+  max-height: 100%;
   background: rgba(255, 255, 255, 0.07);
   border-radius: 50%;
-  box-shadow:
-    inset 0 0 6px rgba(255, 255, 255, 0.12),
-    0 4px 8px rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-  user-select: none;
+  transition: transform 0.2s ease, background 0.3s ease;
 }
 
+/* Hover = enlarge + brighten */
 .dot:hover {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 8px 16px rgba(0, 0, 0, 0.8);
-  transform: scale(1.1);
+  transform: scale(1.08);
+  filter: brightness(1.25);
 }
 
+/* ICONS (THIN, NEON, GLOW) */
 .dot .icon {
-  width: 36px;
-  height: 36px;
-  stroke: #0ff;
-  filter: drop-shadow(0 0 5px #0ff);
-  transition: stroke 0.3s ease, filter 0.3s ease;
-}
-
-.dot:hover .icon {
+  width: 38px;
+  height: 38px;
+  stroke-width: 2.4;
   filter: drop-shadow(0 0 10px currentColor);
 }
 
+/* ---- MATCHED NEON COLORS (Closest to the reference image) ---- */
+
+/* Row 1 */
+.dot[data-id="1"] .icon { color: #4cffb7; stroke: #4cffb7; }   /* Green-teal */
+.dot[data-id="2"] .icon { color: #ffd84d; stroke: #ffd84d; }   /* Warm yellow */
+.dot[data-id="3"] .icon { color: #ff4d4d; stroke: #ff4d4d; }   /* Red */
+
+/* Row 2 */
+.dot[data-id="4"] .icon { color: #58b2ff; stroke: #58b2ff; }   /* Blue */
+.dot[data-id="5"] .icon { color: #b28dff; stroke: #b28dff; }   /* Purple */
+.dot[data-id="6"] .icon { color: #ff9f40; stroke: #ff9f40; }   /* Orange */
+
+/* Row 3 */
+.dot[data-id="7"] .icon { color: #ffaa33; stroke: #ffaa33; }   /* Amber lightning */
+.dot[data-id="8"] .icon { color: #cc66ff; stroke: #cc66ff; }   /* Magenta-mask */
+.dot[data-id="9"] .icon { color: #42c0ff; stroke: #42c0ff; }   /* Sky-blue cloud */
+
+/* Row 4 */
+.dot[data-id="10"] .icon { color: #41ff79; stroke: #41ff79; }  /* Mint play */
+.dot[data-id="11"] .icon { color: #ff4d7a; stroke: #ff4d7a; }  /* Pink heart */
+.dot[data-id="12"] .icon { color: #379aff; stroke: #379aff; }  /* Light blue pin */
+
+/* Row 5 */
+.dot[data-id="13"] .icon { color: #ffae42; stroke: #ffae42; }  /* Yellow bell */
+.dot[data-id="14"] .icon { color: #5ab2ff; stroke: #5ab2ff; }  /* Blue star */
+.dot[data-id="15"] .icon { color: #ff9533; stroke: #ff9533; }  /* Checkmark orange */
+
+/* Text inside SVG */
 .dot svg text {
+  fill: currentColor;
+  font-weight: 700;
   pointer-events: none;
-  user-select: none;
-  font-weight: 700;
 }
 
-/* Neon colors for each dot */
-:root {
-  --dot1: #00f0b7; --dot2: #4ecdc4; --dot3: #45b7d1; --dot4: #96ceb4;
-  --dot5: #feca57; --dot6: #ff9ff3; --dot7: #54a0ff; --dot8: #5f27cd;
-  --dot9: #00d2d3; --dot10: #ff9f43; --dot11: #ffec3d; --dot12: #26de81;
-  --dot13: #ff2d55; --dot14: #a29bfe; --dot15: #fd79a8;
+
+
+/* MODALS */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
 }
 
-.dot[data-id="1"] .icon { stroke: var(--dot1); filter: drop-shadow(0 0 6px var(--dot1)); }
-.dot[data-id="2"] .icon { stroke: var(--dot2); filter: drop-shadow(0 0 6px var(--dot2)); }
-.dot[data-id="3"] .icon { stroke: var(--dot3); filter: drop-shadow(0 0 6px var(--dot3)); }
-.dot[data-id="4"] .icon { stroke: var(--dot4); filter: drop-shadow(0 0 6px var(--dot4)); }
-.dot[data-id="5"] .icon { stroke: var(--dot5); filter: drop-shadow(0 0 6px var(--dot5)); }
-.dot[data-id="6"] .icon { stroke: var(--dot6); filter: drop-shadow(0 0 6px var(--dot6)); }
-.dot[data-id="7"] .icon { stroke: var(--dot7); filter: drop-shadow(0 0 6px var(--dot7)); }
-.dot[data-id="8"] .icon { stroke: var(--dot8); filter: drop-shadow(0 0 6px var(--dot8)); }
-.dot[data-id="9"] .icon { stroke: var(--dot9); filter: drop-shadow(0 0 6px var(--dot9)); }
-.dot[data-id="10"] .icon { stroke: var(--dot10); filter: drop-shadow(0 0 6px var(--dot10)); }
-.dot[data-id="11"] .icon { stroke: var(--dot11); filter: drop-shadow(0 0 6px var(--dot11)); }
-.dot[data-id="12"] .icon { stroke: var(--dot12); filter: drop-shadow(0 0 6px var(--dot12)); }
-.dot[data-id="13"] .icon { stroke: var(--dot13); filter: drop-shadow(0 0 6px var(--dot13)); }
-.dot[data-id="14"] .icon { stroke: var(--dot14); filter: drop-shadow(0 0 6px var(--dot14)); }
-.dot[data-id="15"] .icon { stroke: var(--dot15); filter: drop-shadow(0 0 6px var(--dot15)); }
-
-/* ==========================
-   RESPONSIVE
-========================== */
-@media (max-width: 400px) {
-  .main-grid { max-width: 320px; grid-gap: 12px; }
-  .dot { width: 64px; height: 64px; }
-  .dot .icon { width: 32px; height: 32px; }
+.hidden {
+    display: none !important;
 }
 
-/* ==========================
-   MODALS
-========================== */
-.modal { position: fixed; inset: 0; background: #fff; z-index: 99; display: flex; flex-direction: column; }
-.hidden { display: none !important; }
-
+/* HEADERS */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
 }
 
-.header h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-align: center;
-  flex-grow: 1;
+/* CHAT */
+.thread-area {
+    flex: 1;
+    position: relative;
+    background: #f1f1f1;
+    overflow: hidden;
 }
 
-.header button {
-  border: none;
-  background: none;
-  font-size: 1.2rem;
-  cursor: pointer;
+.thread-dot {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #ffcc80;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-/* ==========================
-   CHAT
-========================== */
-.thread-area { flex: 1; position: relative; background: #f1f1f1; overflow: hidden; }
-.thread-dot { position: absolute; width: 50px; height: 50px; border-radius: 50%; background: #ffcc80; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; }
-.chat-area { flex: 1; display: flex; flex-direction: column; }
-.messages { flex: 1; overflow-y: auto; padding: 10px; }
-.input-section { display: flex; gap: 10px; padding: 10px; }
-.input-section input { flex: 1; padding: 10px 14px; border-radius: 6px; border: 1px solid #aaa; font-size: 1rem; }
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
 
-/* ==========================
-   WORDLE
-========================== */
-.wordle-area { display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 1; padding: 10px; }
-#game-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 330px; margin: 0 auto; }
-.tile { display: flex; justify-content: center; align-items: center; font-weight: bold; text-transform: uppercase; border: 2px solid #d3d6da; border-radius: 4px; font-size: clamp(16px, 4vw, 28px); position: relative; }
-.tile.correct { background: #6aaa64; border-color: #6aaa64; color: #fff; }
-.tile.present { background: #c9b458; border-color: #c9b458; color: #fff; }
-.tile.absent { background: #787c7e; border-color: #787c7e; color: #fff; }
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
 
-/* Keyboard */
-#keyboard { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
-.keyboard-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 6px; }
-.key { background: #d3d6da; padding: 14px 6px; border-radius: 6px; font-weight: bold; text-align: center; cursor: pointer; font-size: clamp(12px, 3vw, 18px); }
-.key:active { background: #bbb; }
+.input-section {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+}
 
-/* ==========================
-   POKEMON
-========================== */
-.pokemon-area { display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 1; padding: 20px; }
-#pokemon-silhouette { width: 160px; height: 160px; filter: brightness(0); object-fit: contain; }
-.input-wrapper { position: relative; width: 80%; }
-#pokemon-guess { width: 100%; padding: 12px 16px; font-size: 18px; border-radius: 8px; border: 2px solid #aaa; }
-.pokemon-suggestions { position: absolute; top: 100%; width: 100%; background: #fff; border: 1px solid #ccc; border-radius: 6px; max-height: 180px; overflow-y: auto; display: none; list-style: none; padding: 0; z-index: 20; }
-.pokemon-suggestions li { padding: 8px; cursor: pointer; }
-.pokemon-suggestions li:hover { background: #f2f2f2; }
-.poke-buttons { display: flex; gap: 20px; }
-.guess-btn, .hint-btn { padding: 14px 20px; font-size: 18px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #fff; }
-.guess-btn { background: #007aff; }
-.hint-btn { background: #ffb700; }
-#pokemon-feedback { font-size: 1.2rem; font-weight: bold; color: #333; }
+/* --- WORDLE --- */
+.wordle-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding-bottom: 20px;
+    flex: 1;
+}
 
-/* ==========================
-   CROSSWORD (DOT #12)
-========================== */
-#crossword-modal { position: fixed; inset: 0; background: #f7f7f7; display: flex; flex-direction: column; z-index: 999; overflow: hidden; }
-#crossword-grid { display: grid; width: 95vw; max-width: 460px; aspect-ratio: 1 / 1; background: #fff; border: 2px solid #000; touch-action: manipulation; }
-.cross-cell { display: flex; justify-content: center; align-items: center; font-weight: bold; text-transform: uppercase; user-select: none; position: relative; border: 1px solid #aaa; background: #fff; font-size: min(4vw, 20px); }
-.cross-cell.black { background: #000; border-color: #000; }
-.cross-cell.selected { background: #d8ebff; }
-.cross-cell.word-highlight:not(.black):not(.selected) { background: #eef6ff; }
-.cross-cell .clue-number { position: absolute; top: 2px; left: 3px; font-size: 0.45em; font-weight: 700; color: #333; pointer-events: none; }
+/* --- WORDLE BOARD LAYOUT (Official Style) --- */
 
-#crossword-clue { width: 95%; max-width: 460px; background: #fff; border-radius: 8px; border: 1px solid #ccc; padding: 12px 14px; font-size: 18px; min-height: 48px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-#crossword-clue span.clue-direction { font-weight: bold; color: #0077ff; }
-#crossword-clue span.clue-number { font-weight: bold; margin-right: 6px; }
+#game-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: calc(100vh - 80px); /* fit inside modal */
+    padding: 10px 0;
+}
 
-#crossword-keyboard { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; margin-top: auto; }
-.ck-row { display: flex; gap: 6px; justify-content: center; }
-.ck-key { background: #e9e9e9; border-radius: 6px; padding: 14px 10px; min-width: 9%; text-align: center; font-size: 18px; font-weight: 600; user-select: none; border: 1px solid #bbb; touch-action: manipulation; }
-.ck-key:active { background: #d5d5d5; }
-.ck-key.wide { min-width: 18%; }
-.ck-key.function { background: #cddfff; border-color: #8bb4ff; }
-.ck-key.function:active { background: #b5ceff; }
+/* Perfect Wordle Board Scaling */
+/* The secret:
+   Board total height = 6 rows * tile-size + spacing
+*/
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    width: 330px;
+    height: 397px;
+    margin: 0 auto;
+    margin-top: 10px;
+}
+
+.tile {
+    background: #ffffff;
+    border: 2px solid #d3d6da;
+    border-radius: 4px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;   /* THIS fixes vertical centering */
+
+    font-size: clamp(16px, 4vw, 28px);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.tile span {
+    position: absolute;
+}
+
+/* Flip animation */
+.tile.flip {
+    animation: flip 0.6s ease forwards;
+}
+
+@keyframes flip {
+    0% { transform: rotateX(0deg); }
+    50% { transform: rotateX(90deg); background:#fff; }
+    100% { transform: rotateX(0deg); }
+}
+
+/* Tile colors (Wordle correct palette) */
+.correct { background: #6aaa64 !important; border-color: #6aaa64 !important; color: white !important; }
+.present { background: #c9b458 !important; border-color: #c9b458 !important; color: white !important; }
+.absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
+
+/* --- KEYBOARD --- */
+
+#keyboard {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+    height: auto;
+    margin-top: auto;
+}
+
+.keyboard-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.key {
+    background: #d3d6da;
+    padding: 14px 6px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    font-size: clamp(12px, 3vw, 18px);
+}
+
+.key.wide {
+    grid-column: span 2;
+}
+
+.key:active {
+    background: #bbb;
+}
+
+/* Message */
+#game-message {
+    margin-top: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* GEN BUTTONS */
+.gen-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    width: 100%;
+    align-items: center;
+}
+
+.gen-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.gen-row button {
+    padding: 8px 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #007aff;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.gen-row button:active {
+    transform: scale(0.95);
+    background: #005ec9;
+}
+
+/* IMAGE */
+#pokemon-silhouette {
+    width: 160px;
+    height: 160px;
+    filter: brightness(0);
+    object-fit: contain;
+}
+
+/* INPUT */
+.input-wrapper {
+    position: relative;
+    width: 80%;
+}
+
+#pokemon-guess {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 2px solid #aaa;
+}
+
+/* AUTO-SUGGEST LIST */
+.pokemon-suggestions {
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: none;
+    max-height: 180px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    z-index: 20;
+}
+.pokemon-suggestions li {
+    padding: 8px;
+    cursor: pointer;
+}
+.pokemon-suggestions li:hover {
+    background: #f2f2f2;
+}
+
+/* BUTTON ROW */
+.poke-buttons {
+    display: flex;
+    gap: 20px;
+}
+.guess-btn, .hint-btn {
+    padding: 14px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    background: #007aff;
+    color: white;
+}
+.hint-btn {
+    background: #ffb700;
+}
+/* --------------------------- */
+/* POKEMON AREA */
+/* --------------------------- */
+.pokemon-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    padding: 20px;
+}
+
+#pokemon-feedback {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* ================================
+   CROSSWORD: FULL UI CSS
+   DOT #12 MODULE
+   ================================ */
+
+/* --- Modal Layout --- */
+#crossword-modal {
+    position: fixed;
+    inset: 0;
+    background: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+    z-index: 999;
+    overflow: hidden;
+}
+
+#crossword-modal.hidden {
+    display: none;
+}
+
+#crossword-modal .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: #ffffff;
+    border-bottom: 1px solid #ddd;
+}
+
+#crossword-modal .header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 auto;
+    text-align: center;
+    flex-grow: 1;
+}
+
+#crossword-modal .header .back {
+    border: none;
+    background: none;
+    font-size: 22px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+/* --- Crossword Layout --- */
+.crossword-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 10px;
+    width: 100%;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+}
+
+/* ===============================
+   GRID STYLING
+   =============================== */
+#crossword-grid {
+    display: grid;
+    width: 95vw;
+    max-width: 460px;
+    aspect-ratio: 1 / 1;
+    background: white;
+    border: 2px solid #000;
+    touch-action: manipulation;
+}
+
+/* Default: 15×15 grid, auto-scaled by JS */
+.cross-cell {
+    border: 1px solid #aaa;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: min(4vw, 20px);
+    font-weight: bold;
+    text-transform: uppercase;
+    user-select: none;
+    position: relative;
+}
+
+/* Black squares */
+.cross-cell.black {
+    background: #000;
+    border-color: #000;
+}
+
+/* Selected cell */
+.cross-cell.selected {
+    background: #d8ebff !important;
+}
+
+/* Whole word highlight */
+.cross-cell.word-highlight:not(.black):not(.selected) {
+    background: #eef6ff;
+}
+
+/* Small clue numbers (NYT style) */
+.cross-cell .clue-number {
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    font-size: 0.45em;
+    font-weight: 700;
+    color: #333;
+    pointer-events: none;
+}
+
+/* ===============================
+   CLUE PANEL
+   =============================== */
+
+#crossword-clue {
+    width: 95%;
+    max-width: 460px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 12px 14px;
+    font-size: 18px;
+    min-height: 48px;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.08);
+}
+
+#crossword-clue span.clue-direction {
+    font-weight: bold;
+    color: #0077ff;
+}
+
+#crossword-clue span.clue-number {
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+/* ===============================
+   ON-SCREEN KEYBOARD
+   (touch-friendly)
+   =============================== */
+
+#crossword-keyboard {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+    margin-top: auto;
+}
+
+.ck-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.ck-key {
+    background: #e9e9e9;
+    border-radius: 6px;
+    padding: 14px 10px;
+    min-width: 9%;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    user-select: none;
+    border: 1px solid #bbb;
+    touch-action: manipulation;
+}
+
+.ck-key:active {
+    background: #d5d5d5;
+}
+
+.ck-key.wide {
+    min-width: 18%;
+}
+
+.ck-key.function {
+    background: #cddfff;
+    border-color: #8bb4ff;
+}
+
+.ck-key.function:active {
+    background: #b5ceff;
+}
+
+/* ===============================
+   RESPONSIVE TUNING
+   =============================== */
 
 @media (max-width: 450px) {
-  .cross-cell { font-size: min(6vw, 24px); }
-  #crossword-clue { font-size: 16px; }
-  .ck-key { padding: 12px 8px; font-size: 16px; }
+    .cross-cell {
+        font-size: min(6vw, 24px);
+    }
+    #crossword-clue {
+        font-size: 16px;
+    }
+    .ck-key {
+        padding: 12px 8px;
+        font-size: 16px;
+    }
 }
