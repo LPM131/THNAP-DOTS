@@ -400,3 +400,84 @@ body, html {
 .voice { background: #ff3b30 !important; color: white; }
 
 .waveform { width: 100px; height: 30px; background: rgba(255,255,255,0.3); border-radius: 15px; margin-top: 8px; }
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+    background: #f2f2f7;
+}
+
+.chat-thread-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    background: white;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.chat-thread-item:active {
+    background: #e5e5ea;
+}
+
+.chat-thread-item.unread {
+    font-weight: bold;
+}
+
+.contact-dot {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #007AFF;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.thread-preview {
+    flex: 1;
+    min-width: 0;
+}
+
+.thread-name {
+    font-weight: 600;
+    font-size: 17px;
+    margin-bottom: 4px;
+}
+
+.thread-last {
+    color: #888;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unread-badge {
+    background: #ff2d55;
+    color: white;
+    font-size: 12px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.new-chat {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #007AFF;
+    padding: 0 10px;
+}

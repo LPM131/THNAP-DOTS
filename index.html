@@ -34,18 +34,20 @@
         <div class="dot" data-id="15">15</div>
     </div>
 
-    <!-- CHAT MODAL – ONLY ONE BACK BUTTON EVER -->
+    <!-- NEW IMESSAGE / SNAPCHAT HYBRID CHAT MODAL -->
     <div id="chat-modal" class="modal hidden">
         <div class="header">
             <button class="back" onclick="backToMain()">Back</button>
-            <h2 id="chat-title">Chats</h2>
-            <div></div>
+            <h2>Messages</h2>
+            <button class="new-chat" onclick="createNewThread()">+</button>
         </div>
 
-        <!-- THREAD LIST (floating dots) -->
-        <div id="thread-area" class="thread-area"></div>
+        <!-- VERTICAL CHAT LIST (iMessage style) -->
+        <div id="chat-list" class="chat-list">
+            <!-- Threads will be injected here by JS -->
+        </div>
 
-        <!-- INDIVIDUAL CHAT (no extra header!) -->
+        <!-- HIDDEN CHAT AREA (moved to bottom) -->
         <div id="chat-area" class="chat-area hidden">
             <div id="messages" class="messages"></div>
 
