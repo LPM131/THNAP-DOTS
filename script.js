@@ -45,108 +45,123 @@ function backToMain() {
 
 
 // ---------------------------
-// CHAT MODULE – FULLY UPGRADED
+// CHAT MODULE – BULLETPROOF VERSION
 // ---------------------------
 
 const threadNames = ["Bot", "Friend 1", "Friend 2"];
-let threadsData = {};           // { name: { x, y, unread: 3 } }
-let threads = {};               // { name: [{text, time, sender: "me"|"them", replyTo?, reactions:[]}] }
+let threadsData = {};
+let threads = {};
 let currentThread = null;
 
 // Load from localStorage
 function loadChatData() {
-    const pos = localStorage.getItem('dotPositions');
-    const msg = localStorage.getItem('chatThreads');
-    threadsData = pos ? JSON.parse(pos) : {};
-    threads = msg ? JSON.parse(msg) : {};
+    try {
+        const pos = localStorage.getItem('dotPositions');
+        const msg = localStorage.getItem('chatThreads');
+        threadsData = pos ? JSON.parse(pos) : {};
+        threads = msg ? JSON.parse(msg) : {};
 
-    // Init missing threads
-    threadNames.forEach(name => {
-        if (!threadsData[name]) threadsData[name] = { x: Math.random()*200+50, y: Math.random()*400+50, unread: 0 };
-        if (!threads[name]) threads[name] = [];
-    });
-    saveChatData();
+        // Init missing threads
+        threadNames.forEach(name => {
+            if (!threadsData[name]) threadsData[name] = { x: Math.random()*200+50, y: Math.random()*400+50, unread: 0 };
+            if (!threads[name]) threads[name] = [];
+        });
+        saveChatData();
+        console.log("Chat data loaded:", threadsData); // DEBUG
+    } catch (e) {
+        console.error("Load error:", e); // DEBUG
+    }
 }
 loadChatData();
 
 // Save everything
 function saveChatData() {
-    localStorage.setItem('dotPositions', JSON.stringify(threadsData));
-    localStorage.setItem('chatThreads', JSON.stringify(threads));
+    try {
+        localStorage.setItem('dotPositions', JSON.stringify(threadsData));
+        localStorage.setItem('chatThreads', JSON.stringify(threads));
+    } catch (e) {
+        console.error("Save error:", e);
+    }
 }
 
 // Render thread dots with unread badges
 function renderThreadDots() {
     threadArea.innerHTML = `
-        <div class="add-thread-dot">+</div>
+        <div class="add-thread-dot" style="bottom:30px;right:30px;">+</div>
         ${threadNames.map(name => {
             const t = threadsData[name];
-            const unread = t.unread > 0 ? `<span class="unread-badge">${t.unread}</span>` : '';
+            const unread = t.unread > 0 ? `<span class="unread-badge">${t.unread > 99 ? '99+' : t.unread}</span>` : '';
             return `<div class="thread-dot" data-name="${name}" style="left:${t.x}px;top:${t.y}px;">
-                        ${name[0]}${unread}
+                        ${name[0].toUpperCase()}${unread}
                     </div>`;
         }).join('')}
     `;
 
-    // Draggable + long-press delete
-    document.querySelectorAll('.thread-dot').forEach(dot => {
-        const name = dot.dataset.name;
-        makeDraggable(dot, name);
-        addLongPress(dot, () => confirmDeleteThread(name));
-    });
+    // Bind events AFTER render
+    setTimeout(() => {  // Tiny delay = DOM ready
+        document.querySelectorAll('.thread-dot').forEach(dot => {
+            const name = dot.dataset.name;
+            console.log("Binding dot:", name); // DEBUG
+            makeDraggable(dot, name);
+            addLongPress(dot, () => confirmDeleteThread(name));
+        });
 
-    document.querySelector('.add-thread-dot')?.addEventListener('click', createNewThread);
+        const addDot = document.querySelector('.add-thread-dot');
+        if (addDot) addDot.addEventListener('click', createNewThread);
+    }, 50);
 }
 
-// ─────── PERFECT DRAG + CLICK (works on phone & desktop) ───────
+// ─────── FIXED DRAG (15px threshold + click fallback) ───────
 function makeDraggable(el, name) {
-    let pos = { x: threadsData[name].x, y: threadsData[name].y };
+    let startPos = { x: 0, y: 0 };
+    let currentPos = { x: threadsData[name].x, y: threadsData[name].y };
     let isDragging = false;
-    let startX, startY;
 
-    const move = (clientX, clientY) => {
-        if (!isDragging) return;
-        const rect = threadArea.getBoundingClientRect();
-        pos.x = clientX - rect.left - 35;
-        pos.y = clientY - rect.top - 35;
-
-        // Keep inside bounds
-        pos.x = Math.max(0, Math.min(pos.x, rect.width - 70));
-        pos.y = Math.max(0, Math.min(pos.y, rect.height - 70));
-
-        el.style.left = pos.x + 'px';
-        el.style.top = pos.y + 'px';
-    };
+    const getEventPos = (e) => ({
+        x: e.touches ? e.touches[0].clientX : e.clientX,
+        y: e.touches ? e.touches[0].clientY : e.clientY
+    });
 
     const startDrag = (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        const pos = getEventPos(e);
+        startPos = pos;
         isDragging = false;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        startX = clientX;
-        startY = clientY;
+
+        console.log("Drag start on", name); // DEBUG
 
         const onMove = (e) => {
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const delta = Math.hypot(clientX - startX, clientY - startY);
-            if (delta > 10) isDragging = true; // 10px threshold = real drag
-            move(clientX, clientY);
+            e.preventDefault();
+            const pos = getEventPos(e);
+            const delta = Math.hypot(pos.x - startPos.x, pos.y - startPos.y);
+
+            if (delta > 15) {  // 15px = real drag
+                isDragging = true;
+                const rect = threadArea.getBoundingClientRect();
+                currentPos.x = Math.max(0, Math.min(pos.x - rect.left - 35, rect.width - 70));
+                currentPos.y = Math.max(0, Math.min(pos.y - rect.top - 35, rect.height - 70));
+
+                el.style.left = currentPos.x + 'px';
+                el.style.top = currentPos.y + 'px';
+            }
         };
 
-        const onEnd = () => {
+        const onEnd = (e) => {
+            e.preventDefault();
             document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchmove', onMove, { passive: false });
             document.removeEventListener('mouseup', onEnd);
             document.removeEventListener('touchend', onEnd);
 
             if (isDragging) {
-                threadsData[name].x = pos.x;
-                threadsData[name].y = pos.y;
+                threadsData[name].x = currentPos.x;
+                threadsData[name].y = currentPos.y;
                 saveChatData();
-            }
-            // if NOT dragged → it's a click → open thread
-            else if (!isDragging) {
+                console.log("Drag saved for", name, currentPos); // DEBUG
+            } else {
+                // NO DRAG = CLICK → open thread
+                console.log("TAP DETECTED on", name); // DEBUG
                 openThread(name);
             }
         };
@@ -157,20 +172,40 @@ function makeDraggable(el, name) {
         document.addEventListener('touchend', onEnd);
     };
 
-    el.addEventListener('mousedown', startDrag);
+    // Bind events
+    el.addEventListener('mousedown', startDrag, { passive: false });
     el.addEventListener('touchstart', startDrag, { passive: false });
 }
 
-// Long press handler
+// ─────── FIXED LONG-PRESS (separate from drag) ───────
 function addLongPress(el, callback) {
     let timer;
-    el.addEventListener('mousedown', () => timer = setTimeout(callback, 800));
-    el.addEventListener('touchstart', () => timer = setTimeout(callback, 800));
-    el.addEventListener('mouseup', () => clearTimeout(timer));
-    el.addEventListener('touchend', () => clearTimeout(timer));
+    let pressPos = { x: 0, y: 0 };
+
+    const startPress = (e) => {
+        const pos = getEventPos(e);  // Reuse from above
+        pressPos = pos;
+        timer = setTimeout(() => {
+            const delta = Math.hypot(e.clientX - pressPos.x, e.clientY - pressPos.y);
+            if (delta < 10) {  // Still finger on spot
+                callback();
+                console.log("LONG-PRESS on", el.dataset.name); // DEBUG
+            }
+        }, 1000);  // 1 second
+    };
+
+    const endPress = (e) => {
+        clearTimeout(timer);
+    };
+
+    el.addEventListener('mousedown', startPress);
+    el.addEventListener('touchstart', startPress, { passive: false });
+    el.addEventListener('mouseup', endPress);
+    el.addEventListener('touchend', endPress);
+    el.addEventListener('mouseleave', endPress);  // Mouse wander
 }
 
-// Open thread
+// Rest of functions unchanged (openThread, sendMessage, etc.)
 function openThread(name) {
     currentThread = name;
     threadsData[name].unread = 0;
@@ -184,11 +219,9 @@ function openThread(name) {
     threads[name].forEach(msg => addMessageBubble(msg));
     messages.scrollTop = messages.scrollHeight;
 
-    // Simulate replies for Bot only
     if (name === "Bot") setTimeout(simulateBotReply, 2000);
 }
 
-// Add message bubble
 function addMessageBubble(msg) {
     const bubble = document.createElement("div");
     bubble.className = `bubble ${msg.sender}`;
@@ -200,7 +233,6 @@ function addMessageBubble(msg) {
         <div class="time">${formatTime(msg.time)}</div>
     `;
 
-    // Reactions
     if (msg.reactions?.length) {
         const reacts = document.createElement("div");
         reacts.className = "reactions";
@@ -208,10 +240,8 @@ function addMessageBubble(msg) {
         bubble.appendChild(reacts);
     }
 
-    // Long press → react
     addLongPress(bubble, () => showReactionPicker(bubble, msg));
 
-    // Swipe to reply
     let startX;
     bubble.addEventListener('touchstart', e => startX = e.touches[0].clientX);
     bubble.addEventListener('touchend', e => {
@@ -223,10 +253,9 @@ function addMessageBubble(msg) {
     messages.appendChild(bubble);
 }
 
-// Send message
 let replyingTo = null;
 function sendMessage() {
-    if (!chatInput.value.trim()) return;
+    if (!chatInput.value.trim() || !currentThread) return;
 
     const msg = {
         text: chatInput.value,
@@ -243,14 +272,12 @@ function sendMessage() {
     updateReplyBanner();
     messages.scrollTop = messages.scrollHeight;
 
-    // Typing indicator + fake reply
     showTyping();
     if (currentThread === "Bot") setTimeout(simulateBotReply, 1500 + Math.random()*2000);
 
     saveChatData();
 }
 
-// Simulate bot reply
 function simulateBotReply() {
     if (currentThread !== "Bot") return;
     const replies = ["haha yes", "true", "omg", "exactly", "wait what??", "🤯", "no way"];
@@ -267,27 +294,28 @@ function simulateBotReply() {
     saveChatData();
 }
 
-// Typing indicator
 function showTyping() {
     const typing = document.getElementById("typing");
-    typing.textContent = "typing…";
-    setTimeout(() => typing.textContent = "", 2000);
+    if (typing) {
+        typing.textContent = "typing…";
+        setTimeout(() => typing.textContent = "", 2000);
+    }
 }
 
-// Reply banner
 function updateReplyBanner() {
     let banner = document.getElementById("reply-banner");
     if (!replyingTo && banner) banner.remove();
 }
 function replyToMessage(text) {
     replyingTo = text;
-    let banner = document.createElement("div");
+    let banner = document.getElementById("reply-banner");
+    if (banner) banner.remove();
+    banner = document.createElement("div");
     banner.id = "reply-banner";
     banner.innerHTML = `↳ Replying to "${text}" <span onclick="replyingTo=null;updateReplyBanner()">×</span>`;
     chatArea.querySelector(".input-section").before(banner);
 }
 
-// Reaction picker
 function showReactionPicker(bubble, msg) {
     const picker = document.createElement("div");
     picker.className = "reaction-picker";
@@ -298,11 +326,14 @@ function showReactionPicker(bubble, msg) {
             msg.reactions = msg.reactions || [];
             if (!msg.reactions.includes(emoji)) msg.reactions.push(emoji);
             saveChatData();
-            bubble.querySelector('.reactions')?.remove();
-            const reacts = document.createElement("div");
-            reacts.className = "reactions";
-            reacts.textContent = msg.reactions.join('');
-            bubble.appendChild(reacts);
+            const reacts = bubble.querySelector('.reactions');
+            if (reacts) reacts.textContent = msg.reactions.join('');
+            else {
+                const newReacts = document.createElement("div");
+                newReacts.className = "reactions";
+                newReacts.textContent = msg.reactions.join('');
+                bubble.appendChild(newReacts);
+            }
             picker.remove();
         };
         picker.appendChild(btn);
@@ -310,10 +341,9 @@ function showReactionPicker(bubble, msg) {
     bubble.appendChild(picker);
 }
 
-// New thread
 function createNewThread() {
     const name = prompt("New chat name:");
-    if (!name) return;
+    if (!name || threadNames.includes(name)) return;
     threadNames.push(name);
     threads[name] = [];
     threadsData[name] = { x: 100, y: 200, unread: 0 };
@@ -321,18 +351,17 @@ function createNewThread() {
     renderThreadDots();
 }
 
-// Delete thread
 function confirmDeleteThread(name) {
     if (confirm(`Delete chat with ${name}?`)) {
         delete threads[name];
         delete threadsData[name];
-        threadNames.splice(threadNames.indexOf(name), 1);
+        const idx = threadNames.indexOf(name);
+        if (idx > -1) threadNames.splice(idx, 1);
         saveChatData();
         renderThreadDots();
     }
 }
 
-// Utils
 function formatTime(date) {
     const d = new Date(date);
     const now = new Date();
@@ -340,10 +369,18 @@ function formatTime(date) {
     return d.toLocaleDateString();
 }
 
-// Open chat → refresh
+// Open chat
 function openChat() {
     chatModal.classList.remove("hidden");
     renderThreadDots();
+}
+
+// Add this helper (used in long-press)
+function getEventPos(e) {
+    return {
+        x: e.touches ? e.touches[0].clientX : e.clientX,
+        y: e.touches ? e.touches[0].clientY : e.clientY
+    };
 }
 
 /* --------------------------- */
