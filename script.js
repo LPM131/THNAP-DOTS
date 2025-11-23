@@ -403,7 +403,8 @@ function initBoard() {
 // ------------------------------
 function initKeyboard() {
   document.querySelectorAll('[data-key]').forEach(button => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();       /* Prevents mobile zoom/scroll */
       const key = button.getAttribute('data-key');
       handleKey(key);
     });
