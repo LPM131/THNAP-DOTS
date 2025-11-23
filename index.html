@@ -34,7 +34,7 @@
         <div class="dot" data-id="15">15</div>
     </div>
 
-    <!-- CHAT MODAL -->
+    <!-- CHAT MODAL – ONLY ONE BACK BUTTON EVER -->
     <div id="chat-modal" class="modal hidden">
         <div class="header">
             <button class="back" onclick="backToMain()">Back</button>
@@ -45,13 +45,8 @@
         <!-- THREAD LIST (floating dots) -->
         <div id="thread-area" class="thread-area"></div>
 
-        <!-- INDIVIDUAL CHAT -->
+        <!-- INDIVIDUAL CHAT (no extra header!) -->
         <div id="chat-area" class="chat-area hidden">
-            <div class="header">
-                <button class="back" onclick="backToThreadList()">Back</button>
-                <h2 id="current-chat-name"></h2>
-                <div></div>
-            </div>
             <div id="messages" class="messages"></div>
 
             <div class="input-section">
