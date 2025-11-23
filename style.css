@@ -1,46 +1,33 @@
+/* ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← */
+/* FIX 1 – Make modal + game play nice together */
+/* ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← */
+.modal {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;            /* iPhone notch fix */
+}
+
+/* ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← */
+/* FIX 2 – This is the only rule that was breaking everything */
+/* ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← */
 #game {
-    flex: 1;
+    flex: 1;                   /* ← THIS is the magic line */
     display: flex;
     flex-direction: column;
     max-width: 500px;
     margin: 0 auto;
     width: 100%;
-    padding: 0 8px 0;
-    overflow: hidden;
+    padding: 0 8px;
+    /* ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← */
+    /* DELETE any "height: 100vh" line that might still be here */
+    /* ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← */
 }
 
-.wordle-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 20px 10px;
-    background: white;
-    flex-shrink: 0;
-    z-index: 10;
-}
-
-.back-btn {
-    background: none;
-    border: none;
-    font-size: 32px;
-    padding: 8px 12px;
-    cursor: pointer;
-    color: #333;
-    border-radius: 8px;
-}
-
-.back-btn:active {
-    background: #eee;
-}
-
-.wordle-header h2 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: bold;
-}
-
+/* ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← */
+/* FIX 3 – Keyboard stays at bottom, never cut off */
+/* ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←← */
 #keyboard {
     margin-top: auto;
     padding-bottom: max(20px, env(safe-area-inset-bottom));
-    user-select: none;
 }
