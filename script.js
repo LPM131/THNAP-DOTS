@@ -45,88 +45,257 @@ function backToMain() {
 
 
 // ---------------------------
-// CHAT MODULE
+// CHAT MODULE – FULLY UPGRADED
 // ---------------------------
-const threadNames = ["Bot", "Friend 1", "Friend 2"];
-let threadsData = {
-    "Bot": { x: 40, y: 40 },
-    "Friend 1": { x: 160, y: 200 },
-    "Friend 2": { x: 100, y: 350 }
-};
-let velocities = {};
 
-function openChat() {
-    chatModal.classList.remove("hidden");
-    renderThreadDots();
-    initPhysics();
+const threadNames = ["Bot", "Friend 1", "Friend 2"];
+let threadsData = {};           // { name: { x, y, unread: 3 } }
+let threads = {};               // { name: [{text, time, sender: "me"|"them", replyTo?, reactions:[]}] }
+let currentThread = null;
+
+// Load from localStorage
+function loadChatData() {
+    const pos = localStorage.getItem('dotPositions');
+    const msg = localStorage.getItem('chatThreads');
+    threadsData = pos ? JSON.parse(pos) : {};
+    threads = msg ? JSON.parse(msg) : {};
+
+    // Init missing threads
+    threadNames.forEach(name => {
+        if (!threadsData[name]) threadsData[name] = { x: Math.random()*200+50, y: Math.random()*400+50, unread: 0 };
+        if (!threads[name]) threads[name] = [];
+    });
+    saveChatData();
+}
+loadChatData();
+
+// Save everything
+function saveChatData() {
+    localStorage.setItem('dotPositions', JSON.stringify(threadsData));
+    localStorage.setItem('chatThreads', JSON.stringify(threads));
 }
 
+// Render thread dots with unread badges
 function renderThreadDots() {
-    threadArea.innerHTML = "";
+    threadArea.innerHTML = `
+        <div class="add-thread-dot">+</div>
+        ${threadNames.map(name => {
+            const t = threadsData[name];
+            const unread = t.unread > 0 ? `<span class="unread-badge">${t.unread}</span>` : '';
+            return `<div class="thread-dot" data-name="${name}" style="left:${t.x}px;top:${t.y}px;">
+                        ${name[0]}${unread}
+                    </div>`;
+        }).join('')}
+    `;
 
-    threadNames.forEach(name => {
-        const dot = document.createElement("div");
-        dot.classList.add("thread-dot");
-        dot.textContent = name[0];
-        dot.style.left = threadsData[name].x + "px";
-        dot.style.top = threadsData[name].y + "px";
+    // Draggable + long-press delete
+    document.querySelectorAll('.thread-dot').forEach(dot => {
+        const name = dot.dataset.name;
+        makeDraggable(dot, name);
+        addLongPress(dot, () => confirmDeleteThread(name));
+    });
 
-        dot.addEventListener("click", () => openThread(name));
+    document.querySelector('.add-thread-dot')?.addEventListener('click', createNewThread);
+}
 
-        threadArea.appendChild(dot);
+// Draggable with position save
+function makeDraggable(el, name) {
+    let longPressTimer;
+    el.draggable = true;
+    el.addEventListener('dragstart', e => e.dataTransfer.setDragImage(new Image(),0,0));
+    el.addEventListener('dragend', e => {
+        const rect = threadArea.getBoundingClientRect();
+        threadsData[name].x = e.clientX - rect.left - 35;
+        threadsData[name].y = e.clientY - rect.top - 35;
+        el.style.left = threadsData[name].x + 'px';
+        el.style.top = threadsData[name].y + 'px';
+        saveChatData();
     });
 }
 
-function openThread(name) {
-    threadArea.classList.add("hidden");
-    chatArea.classList.remove("hidden");
-    messages.innerHTML = `<p>Chat with ${name}</p>`;
+// Long press handler
+function addLongPress(el, callback) {
+    let timer;
+    el.addEventListener('mousedown', () => timer = setTimeout(callback, 800));
+    el.addEventListener('touchstart', () => timer = setTimeout(callback, 800));
+    el.addEventListener('mouseup', () => clearTimeout(timer));
+    el.addEventListener('touchend', () => clearTimeout(timer));
 }
 
+// Open thread
+function openThread(name) {
+    currentThread = name;
+    threadsData[name].unread = 0;
+    saveChatData();
+    renderThreadDots();
+
+    threadArea.classList.add("hidden");
+    chatArea.classList.remove("hidden");
+    messages.innerHTML = `<div class="thread-header">${name} <span id="typing"></span></div>`;
+
+    threads[name].forEach(msg => addMessageBubble(msg));
+    messages.scrollTop = messages.scrollHeight;
+
+    // Simulate replies for Bot only
+    if (name === "Bot") setTimeout(simulateBotReply, 2000);
+}
+
+// Add message bubble
+function addMessageBubble(msg) {
+    const bubble = document.createElement("div");
+    bubble.className = `bubble ${msg.sender}`;
+    if (msg.replyTo) bubble.classList.add('reply');
+
+    bubble.innerHTML = `
+        ${msg.replyTo ? `<div class="reply-to">↳ ${msg.replyTo}</div>` : ''}
+        <div class="text">${msg.text}</div>
+        <div class="time">${formatTime(msg.time)}</div>
+    `;
+
+    // Reactions
+    if (msg.reactions?.length) {
+        const reacts = document.createElement("div");
+        reacts.className = "reactions";
+        reacts.textContent = msg.reactions.join('');
+        bubble.appendChild(reacts);
+    }
+
+    // Long press → react
+    addLongPress(bubble, () => showReactionPicker(bubble, msg));
+
+    // Swipe to reply
+    let startX;
+    bubble.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+    bubble.addEventListener('touchend', e => {
+        if (startX && Math.abs(e.changedTouches[0].clientX - startX) > 80) {
+            replyToMessage(msg.text);
+        }
+    });
+
+    messages.appendChild(bubble);
+}
+
+// Send message
+let replyingTo = null;
 function sendMessage() {
     if (!chatInput.value.trim()) return;
 
-    const bubble = document.createElement("div");
-    bubble.textContent = chatInput.value;
-    messages.appendChild(bubble);
+    const msg = {
+        text: chatInput.value,
+        time: new Date(),
+        sender: "me",
+        replyTo: replyingTo,
+        reactions: []
+    };
+
+    threads[currentThread].push(msg);
+    addMessageBubble(msg);
     chatInput.value = "";
+    replyingTo = null;
+    updateReplyBanner();
+    messages.scrollTop = messages.scrollHeight;
+
+    // Typing indicator + fake reply
+    showTyping();
+    if (currentThread === "Bot") setTimeout(simulateBotReply, 1500 + Math.random()*2000);
+
+    saveChatData();
 }
 
+// Simulate bot reply
+function simulateBotReply() {
+    if (currentThread !== "Bot") return;
+    const replies = ["haha yes", "true", "omg", "exactly", "wait what??", "🤯", "no way"];
+    const msg = {
+        text: replies[Math.floor(Math.random()*replies.length)],
+        time: new Date(),
+        sender: "them",
+        reactions: []
+    };
+    threads.Bot.push(msg);
+    if (chatArea.classList.contains("hidden")) threadsData.Bot.unread++;
+    else addMessageBubble(msg);
+    renderThreadDots();
+    saveChatData();
+}
 
-// ---------------------------
-// FLOATING DOT PHYSICS
-// ---------------------------
-function initPhysics() {
-    threadNames.forEach(name => {
-        velocities[name] = {
-            vx: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1),
-            vy: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1)
+// Typing indicator
+function showTyping() {
+    const typing = document.getElementById("typing");
+    typing.textContent = "typing…";
+    setTimeout(() => typing.textContent = "", 2000);
+}
+
+// Reply banner
+function updateReplyBanner() {
+    let banner = document.getElementById("reply-banner");
+    if (!replyingTo && banner) banner.remove();
+}
+function replyToMessage(text) {
+    replyingTo = text;
+    let banner = document.createElement("div");
+    banner.id = "reply-banner";
+    banner.innerHTML = `↳ Replying to "${text}" <span onclick="replyingTo=null;updateReplyBanner()">×</span>`;
+    chatArea.querySelector(".input-section").before(banner);
+}
+
+// Reaction picker
+function showReactionPicker(bubble, msg) {
+    const picker = document.createElement("div");
+    picker.className = "reaction-picker";
+    "❤️😂😮👍👎🎉".split('').forEach(emoji => {
+        const btn = document.createElement("button");
+        btn.textContent = emoji;
+        btn.onclick = () => {
+            msg.reactions = msg.reactions || [];
+            if (!msg.reactions.includes(emoji)) msg.reactions.push(emoji);
+            saveChatData();
+            bubble.querySelector('.reactions')?.remove();
+            const reacts = document.createElement("div");
+            reacts.className = "reactions";
+            reacts.textContent = msg.reactions.join('');
+            bubble.appendChild(reacts);
+            picker.remove();
         };
+        picker.appendChild(btn);
     });
-
-    requestAnimationFrame(updateDots);
+    bubble.appendChild(picker);
 }
 
-function updateDots() {
-    const dots = document.querySelectorAll(".thread-dot");
-    const bounds = threadArea.getBoundingClientRect();
+// New thread
+function createNewThread() {
+    const name = prompt("New chat name:");
+    if (!name) return;
+    threadNames.push(name);
+    threads[name] = [];
+    threadsData[name] = { x: 100, y: 200, unread: 0 };
+    saveChatData();
+    renderThreadDots();
+}
 
-    dots.forEach(dot => {
-        const name = threadNames[[...dots].indexOf(dot)];
-        const pos = threadsData[name];
-        const vel = velocities[name];
+// Delete thread
+function confirmDeleteThread(name) {
+    if (confirm(`Delete chat with ${name}?`)) {
+        delete threads[name];
+        delete threadsData[name];
+        threadNames.splice(threadNames.indexOf(name), 1);
+        saveChatData();
+        renderThreadDots();
+    }
+}
 
-        pos.x += vel.vx;
-        pos.y += vel.vy;
+// Utils
+function formatTime(date) {
+    const d = new Date(date);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    return d.toLocaleDateString();
+}
 
-        if (pos.x <= 0 || pos.x >= bounds.width - 60) vel.vx *= -1;
-        if (pos.y <= 0 || pos.y >= bounds.height - 60) vel.vy *= -1;
-
-        dot.style.left = pos.x + "px";
-        dot.style.top = pos.y + "px";
-    });
-
-    requestAnimationFrame(updateDots);
+// Open chat → refresh
+function openChat() {
+    chatModal.classList.remove("hidden");
+    renderThreadDots();
 }
 
 /* --------------------------- */

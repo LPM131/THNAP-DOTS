@@ -37,17 +37,20 @@
     <!-- CHAT MODAL -->
     <div id="chat-modal" class="modal hidden">
         <div class="header">
-            <button class="back" onclick="backToMain()">⬅ Back</button>
+            <button class="back" onclick="backToMain()">Back</button>
             <h2>Chats</h2>
+            <div></div> <!-- spacer -->
         </div>
 
+        <!-- THREAD LIST (floating dots) -->
         <div id="thread-area" class="thread-area"></div>
 
+        <!-- INDIVIDUAL CHAT -->
         <div id="chat-area" class="chat-area hidden">
             <div id="messages" class="messages"></div>
 
             <div class="input-section">
-                <input id="chat-input" type="text" placeholder="Type...">
+                <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off">
                 <button onclick="sendMessage()">Send</button>
             </div>
         </div>
