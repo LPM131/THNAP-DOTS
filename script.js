@@ -345,6 +345,7 @@ function addKey(rowDiv, char, wide = "") {
     const key = document.createElement("div");
     key.classList.add("key");
     if (wide) key.classList.add(wide);
+    if (char.length === 1) key.dataset.key = char; // ← THIS IS KEY
     key.textContent = char;
     key.onclick = () => handleKey(char);
     rowDiv.appendChild(key);
@@ -408,24 +409,46 @@ function submitGuess() {
 }
 
 // ------------------------------
-// Reveal animation & coloring
+// Reveal animation & coloring WITH Keyboard Highlighting
 // ------------------------------
 function revealGuess(guess, row) {
     const tiles = [...document.querySelectorAll(".tile")];
     const rowTiles = tiles.slice(row * 5, row * 5 + 5);
+    const letterStates = {}; // Track best state for each letter
 
+    // First pass: determine correct state for each letter (green > yellow > gray)
+    [...guess].forEach((char, i) => {
+        if (WORD[i] === char) {
+            letterStates[char] = "correct";
+        } else if (WORD.includes(char) && !letterStates[char]) {
+            letterStates[char] = "present";
+        } else if (!letterStates[char]) {
+            letterStates[char] = "absent";
+        }
+    });
+
+    // Second pass: animate tiles + update keyboard
     [...guess].forEach((char, i) => {
         setTimeout(() => {
-            rowTiles[i].classList.add("flip");
+            const tile = rowTiles[i];
+            tile.classList.add("flip");
 
-            if (WORD[i] === char) rowTiles[i].classList.add("correct");
-            else if (WORD.includes(char)) rowTiles[i].classList.add("present");
-            else rowTiles[i].classList.add("absent");
+            let state = "absent";
+            if (WORD[i] === char) state = "correct";
+            else if (WORD.includes(char)) state = "present";
 
-            rowTiles[i].querySelector("span").textContent = char;
+            tile.classList.add(state);
+            tile.querySelector("span").textContent = char;
+
+            // UPDATE KEYBOARD (only upgrade state: gray → yellow → green)
+            const key = document.querySelector(`.key[data-key="${char}"]`);
+            if (key) {
+                if (state === "correct") key.classList.add("correct");
+                else if (state === "present" && !key.classList.contains("correct")) key.classList.add("present");
+                else if (!key.classList.contains("correct") && !key.classList.contains("present")) key.classList.add("absent");
+            }
 
             if (i === 4) checkEndGame(guess);
-
         }, i * 300);
     });
 }
