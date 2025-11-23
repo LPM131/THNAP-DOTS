@@ -1,16 +1,6 @@
 /* RESET */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body, html {
-    height: 100%;
-    background: #fff;
-    font-family: Helvetica, sans-serif;
-    overflow: hidden;
-}
+* { box-sizing: border-box; }
+body { margin:0; padding:0; overflow-x:hidden; font-family:system-ui,-apple-system,sans-serif; }
 
 /* MAIN DOT GRID */
 .dots-grid {
@@ -109,31 +99,76 @@ body, html {
     padding: 10px;
 }
 
-/* WORDLE – quick clean style */
-.wordle-area {
+#game {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0 8px;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 30px;
-    padding-bottom: 20px;
+}
+
+/* your grid styles here */
+
+#keyboard {
+    margin-top: auto;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    user-select: none;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+.middle-row {
+    margin: 0 auto 8px;
+    justify-content: center;
+}
+
+.letter-key {
     flex: 1;
+    max-width: 43px;
+    height: 58px;
+    margin: 0 3px;
+    background: #d3d6da;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: black;
 }
 
-/* --- WORDLE BOARD LAYOUT (Official Style) --- */
-
-#game-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    height: calc(100vh - 80px); /* fit inside modal */
-    padding: 10px 0;
+.action-key {
+    flex: 1.5;
+    max-width: 65px;
+    height: 58px;
+    margin: 0 3px;
+    background: #d3d6da;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 12px;
+    text-transform: lowercase;
+    color: black;
 }
 
-/* Perfect Wordle Board Scaling */
-/* The secret:
-   Board total height = 6 rows * tile-size + spacing
-*/
+/* NYT colors */
+.absent   { background:#787c7e !important; color:white !important; }
+.present { background:#c9b458 !important; color:white !important; }
+.correct { background:#6aaa64 !important; color:white !important; }
+
+/* Mobile perfect scaling */
+@media (max-width: 500px) {
+    #game { padding: 0 4px; }
+    .letter-key  { height: 57px; margin: 0 2px; font-size: 15px; }
+    .action-key  { height: 57px; font-size: 11px; }
+}
+
+/* Wordle board */
 #game-board {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -151,7 +186,7 @@ body, html {
     position: relative;
     display: flex;
     justify-content: center;
-    align-items: center;   /* THIS fixes vertical centering */
+    align-items: center;
 
     font-size: clamp(20px, 6vw, 36px);
     font-weight: bold;
@@ -177,53 +212,6 @@ body, html {
 .correct { background: #6aaa64 !important; border-color: #6aaa64 !important; color: white !important; }
 .present { background: #c9b458 !important; border-color: #c9b458 !important; color: white !important; }
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
-
-/* --- KEYBOARD --- */
-#keyboard {
-    margin: 30px auto 0;
-    max-width: 500px;
-    user-select: none;
-}
-
-.keyboard-row {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 8px;
-}
-
-.key {
-    height: 58px;
-    min-width: 43px;
-    margin: 0 3px;
-    padding: 0;
-    background: #d3d6da;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 14px;
-    text-transform: uppercase;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-}
-
-.key.enter,
-.key.backspace {
-    flex: 1.5;
-    font-size: 12px;
-}
-
-.key.absent   { background:#787c7e !important; color:white !important; }
-.key.present  { background:#c9b458 !important; color:white !important; }
-.key.correct  { background:#6aaa64 !important; color:white !important; }
-
-/* Mobile */
-@media (max-width: 500px) {
-    .key { height: 57px; margin: 0 2px; font-size: 13px; }
-    .key.enter, .key.backspace { font-size: 11px; }
-}
 
 /* Message */
 #game-message {

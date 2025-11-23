@@ -396,10 +396,10 @@ function initBoard() {
 }
 
 // ------------------------------
-// Init Keyboard - NYTimes style
+// Init Keyboard - Production NYT style
 // ------------------------------
 function initKeyboard() {
-    // Keyboard is now statically in HTML, just attach event listeners
+    // Use the original working selector
     document.querySelectorAll('.key').forEach(button => {
         const dataKey = button.getAttribute('data-key');
         button.onclick = () => handleKey(dataKey);
