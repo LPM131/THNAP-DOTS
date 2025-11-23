@@ -179,40 +179,40 @@ body, html {
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
 
 /* --- KEYBOARD --- */
-
 #keyboard {
-    width: 100%;
-    max-width: 500px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding-bottom: env(safe-area-inset-bottom, 12px);
-    height: auto;
-    margin-top: auto;
+    margin-top: 15px;
 }
 
-.keyboard-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+.kb-row {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0;
     gap: 6px;
 }
 
 .key {
-    background: #d3d6da;
-    padding: 14px 6px;
-    border-radius: 6px;
+    width: 43px;
+    height: 58px;
+    font-size: 20px;
     font-weight: bold;
-    text-align: center;
+    background: #d3d6da;
+    border: none;
+    border-radius: 4px;
+    text-transform: uppercase;
+    color: #000;
     cursor: pointer;
-    user-select: none;
-    font-size: clamp(14px, 4vw, 20px);
 }
 
-.key.wide {
-    grid-column: span 2;
+.key.large {
+    width: 65px;
+    font-size: 16px;
 }
 
-.key:active {
+.correct { background: #6aaa64 !important; color: white !important; }
+.present { background: #c9b458 !important; color: white !important; }
+.absent { background: #787c7e !important; color: white !important; }
+
+.key:active:not(.present):not(.correct):not(.absent) {
     background: #bbb;
 }
 

@@ -2,6 +2,60 @@
 // 13K+ Wordle words compressed → 330 bits (99.999% accuracy)
 const BLOOM = [0x5C1B3E8B,0x5F2D7A19,0xA3E8C74D,0x9B4F2E6A,0x7C9D1B53,0xD8E4F6A1,0x3A7B9C5E,0xE1F4D298,0xB6C8A7F3,0x4D9E2B17];
 
+// ——— NYTIMES-STYLE KEYBOARD LETTER TRACKING ———
+const KEYBOARD_ROWS = [
+  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+  ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BACK']
+];
+
+// Tracks the best status we've seen for each letter: 0 = gray, 1 = yellow, 2 = green
+const letterStatus = {};
+
+// Call this function right after you process a correct guess (after pressing Enter)
+function updateKeyboard(guess, answer) {
+  const countInAnswer = {};
+  for (const ch of answer) {
+    countInAnswer[ch] = (countInAnswer[ch] || 0) + 1;
+  }
+
+  // First pass: mark all correct positions (green)
+  for (let i = 0; i < 5; i++) {
+    if (guess[i] === answer[i]) {
+      letterStatus[guess[i]] = 2;           // green wins everything
+      countInAnswer[guess[i]]--;
+    }
+  }
+
+  // Second pass: mark wrong-position (yellow) only for remaining letters
+  for (let i = 0; i < 5; i++) {
+    const ch = guess[i];
+    if (guess[i] !== answer[i] && countInAnswer[ch] > 0) {
+      // Only upgrade to yellow if it wasn't already green
+      if (letterStatus[ch] !== 2) {
+        letterStatus[ch] = 1;
+      }
+      countInAnswer[ch]--;
+    } else if (guess[i] !== answer[i]) {
+      // Only mark gray if we haven't seen it be green or yellow before
+      if (!letterStatus[ch]) {
+        letterStatus[ch] = 0;
+      }
+    }
+  }
+
+  // Now repaint the actual keyboard keys
+  document.querySelectorAll('.key').forEach(key => {
+    const letter = key.textContent;
+    if (letter.length === 1 && letterStatus[letter] !== undefined) {
+      key.className = 'key'; // reset
+      if (letterStatus[letter] === 2) key.classList.add('correct');
+      else if (letterStatus[letter] === 1) key.classList.add('present');
+      else if (letterStatus[letter] === 0) key.classList.add('absent');
+    }
+  });
+}
+
 function murmur3_32(key, seed = 0) {
   let h = seed ^ key.length;
   for (let i = 0; i < key.length; i++) {
@@ -339,43 +393,20 @@ function initBoard() {
 }
 
 // ------------------------------
-// Init Keyboard
+// Init Keyboard - NYTimes style
 // ------------------------------
 function initKeyboard() {
-    keyboardEl.innerHTML = "";
-
-    const keys = [
-        "QWERTYUIOP",
-        "ASDFGHJKL",
-        "ZXCVBNM"
-    ];
-
-    keys.forEach(row => {
-        const rowDiv = document.createElement("div");
-        rowDiv.classList.add("keyboard-row");
-
-        if (row === "ZXCVBNM") {
-            addKey(rowDiv, "ENTER", "wide");
+    // Keyboard is now statically in HTML, just attach event listeners
+    document.querySelectorAll('.key').forEach(button => {
+        const letter = button.textContent;
+        if (letter === 'ENTER') {
+            button.onclick = () => handleKey('ENTER');
+        } else if (letter === '⌫') {
+            button.onclick = () => handleKey('⌫');
+        } else {
+            button.onclick = () => handleKey(letter);
         }
-
-        [...row].forEach(k => addKey(rowDiv, k));
-
-        if (row === "ZXCVBNM") {
-            addKey(rowDiv, "⌫", "wide");
-        }
-
-        keyboardEl.appendChild(rowDiv);
     });
-}
-
-function addKey(rowDiv, char, wide = "") {
-    const key = document.createElement("div");
-    key.classList.add("key");
-    if (wide) key.classList.add(wide);
-    if (char.length === 1) key.dataset.key = char; // ← THIS IS KEY
-    key.textContent = char;
-    key.onclick = () => handleKey(char);
-    rowDiv.appendChild(key);
 }
 
 // ------------------------------
@@ -402,6 +433,22 @@ function handleKey(k) {
 // ------------------------------
 // Update Board
 // ------------------------------
+function updateBoard() {
+    const tiles = [...document.querySelectorAll(".tile span")];
+
+    for (let i = 0; i < 30; i++) {
+        let row = Math.floor(i / 5);
+
+        if (row < guesses.length) {
+            tiles[i].textContent = guesses[row][i % 5];
+        } else if (row === guesses.length) {
+            tiles[i].textContent = currentGuess[i % 5] || "";
+        } else {
+            tiles[i].textContent = "";
+        }
+    }
+}
+
 // ------------------------------
 // Submit guess WITH VALIDATION
 // ------------------------------
@@ -477,15 +524,11 @@ function revealGuess(guess, row) {
             tile.classList.add(state);
             tile.querySelector("span").textContent = char;
 
-            // UPDATE KEYBOARD (only upgrade state: gray → yellow → green)
-            const key = document.querySelector(`.key[data-key="${char}"]`);
-            if (key) {
-                if (state === "correct") key.classList.add("correct");
-                else if (state === "present" && !key.classList.contains("correct")) key.classList.add("present");
-                else if (!key.classList.contains("correct") && !key.classList.contains("present")) key.classList.add("absent");
+            // Call updateKeyboard after tiles finish revealing
+            if (i === 4) {
+                updateKeyboard(guess, WORD);
+                checkEndGame(guess);
             }
-
-            if (i === 4) checkEndGame(guess);
         }, i * 300);
     });
 }
@@ -508,6 +551,9 @@ function initGame() {
     initBoard();
     initKeyboard();
     updateBoard();
+
+    // Reset letter status for new game
+    Object.keys(letterStatus).forEach(key => delete letterStatus[key]);
 }
 
 function openWordle() {
