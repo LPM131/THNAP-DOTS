@@ -109,119 +109,80 @@ body, html {
     padding: 10px;
 }
 
-/* WORDLE – quick clean style */
+/* =============================== */
+/* UNIVERSAL PERFECT WORDLE LAYOUT */
+/* Works on: iPhone SE → 15 Pro Max */
+/* =============================== */
+
 .wordle-area {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 30px;
-    padding-bottom: 20px;
-    flex: 1;
-}
-
-/* --- WORDLE BOARD LAYOUT (Official Style) --- */
-
-#game-container {
-    display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    align-items: center;
-    height: calc(100vh - 80px); /* fit inside modal */
-    padding: 10px 0;
+    flex: 1;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0 env(safe-area-inset-left) env(safe-area-inset-bottom);
+    overflow: hidden;
 }
 
-/* Perfect Wordle Board Scaling */
-/* The secret:
-   Board total height = 6 rows * tile-size + spacing
-*/
+/* ----- BOARD: AUTOMATICALLY SCALES ----- */
 #game-board {
+    flex: 1;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 6px;
-    width: 330px;
-    height: 397px;
-    margin: 0 auto;
-    margin-top: 10px;
+
+    /* The magic: board never exceeds half the screen on any phone */
+    max-height: 55dvh;
+
+    /* Prevents distortion */
+    margin-top: 12px;
+    padding: 0 6px;
 }
 
+/* Tile scales with screen width */
 .tile {
-    background: #ffffff;
-    border: 2px solid #d3d6da;
+    aspect-ratio: 1 / 1;
+    font-size: clamp(18px, 4vw, 36px);
     border-radius: 4px;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;   /* THIS fixes vertical centering */
-
-    font-size: clamp(20px, 6vw, 36px);
-    font-weight: bold;
-    text-transform: uppercase;
 }
 
-.tile span {
-    position: absolute;
-}
-
-/* Flip animation */
-.tile.flip {
-    animation: flip 0.6s ease forwards;
-}
-
-@keyframes flip {
-    0% { transform: rotateX(0deg); }
-    50% { transform: rotateX(90deg); background:#fff; }
-    100% { transform: rotateX(0deg); }
-}
-
-/* Tile colors (Wordle correct palette) */
-.correct { background: #6aaa64 !important; border-color: #6aaa64 !important; color: white !important; }
-.present { background: #c9b458 !important; border-color: #c9b458 !important; color: white !important; }
-.absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
-
-/* --- KEYBOARD --- */
+/* ----- KEYBOARD: ALWAYS FULLY VISIBLE ----- */
 #keyboard {
-    margin-top: 15px;
+    flex-shrink: 0;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .kb-row {
     display: flex;
     justify-content: center;
-    margin: 4px 0;
     gap: 6px;
+    padding: 4px 0;
 }
 
+/* Keys auto-resize */
 .key {
-    width: 43px;
+    flex: 1;
+    max-width: 45px;
     height: 58px;
-    font-size: 20px;
-    font-weight: bold;
-    background: #d3d6da;
-    border: none;
-    border-radius: 4px;
-    text-transform: uppercase;
-    color: #000;
-    cursor: pointer;
+    font-size: clamp(16px, 4vw, 20px);
 }
 
 .key.large {
-    width: 65px;
-    font-size: 16px;
+    max-width: 70px;
 }
 
-.correct { background: #6aaa64 !important; color: white !important; }
-.present { background: #c9b458 !important; color: white !important; }
-.absent { background: #787c7e !important; color: white !important; }
-
-.key:active:not(.present):not(.correct):not(.absent) {
-    background: #bbb;
-}
-
-/* Message */
-#game-message {
-    margin-top: 10px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
+/* ----- MODAL FIX FOR ALL iPHONES ----- */
+@supports (-webkit-touch-callout: none) {
+    .modal {
+        height: 100dvh; /* dynamic viewport — iPhone safe */
+        padding-bottom: env(safe-area-inset-bottom);
+        overflow: hidden;
+    }
 }
 
 /* GEN BUTTONS */
@@ -541,40 +502,4 @@ body, html {
     font-size: 28px;
     color: #007AFF;
     padding: 0 10px;
-}
-
-/* ------------------------------ */
-/* iPHONE FIX — SAFE AREA & KEYBOARD VISIBILITY */
-/* ------------------------------ */
-
-@supports (-webkit-touch-callout: none) {
-
-    /* Fix modal height so it accounts for home indicator */
-    .modal {
-        height: calc(100vh - env(safe-area-inset-bottom));
-        padding-bottom: env(safe-area-inset-bottom);
-        overflow: hidden;
-    }
-
-    /* Wordle area must flex correctly */
-    .wordle-area {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding-bottom: env(safe-area-inset-bottom);
-        overflow: hidden;
-    }
-
-    /* Board must shrink slightly on small iPhones (SE / Mini) */
-    #game-board {
-        max-width: 90vw;
-        max-height: 52vh;      /* ← this is the magic number */
-    }
-
-    /* Keep keyboard ABOVE the home bar */
-    #keyboard {
-        padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
-        flex-shrink: 0;
-    }
 }
