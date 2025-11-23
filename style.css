@@ -192,23 +192,20 @@ body, html {
 }
 
 .key {
-    height: 58px;
-    min-width: 43px;
-    padding: 0 6px;
-    background: #d3d6da;
-    border: 0;
-    border-radius: 4px;
-    font-size: 20px;
+    height: 58px;                    /* ← this is the NYT height */
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 15px;                 /* ← reduced from 20px → perfect on small screens */
     font-weight: bold;
-    text-transform: uppercase;
-    color: black;
+    background: #d3d6da;
+    border-radius: 5px;
     flex: 1;
-    max-width: 65px;
+    max-width: 70px;
 }
 
 .key.large {
-    flex: 1.5;
-    font-size: 16px;
+    flex: 1.6;                       /* makes ENTER and backspace just right */
+    font-size: 13px;                 /* smaller text on big keys */
 }
 
 /* Colors — exact NYT */
@@ -531,6 +528,3 @@ body, html {
     background: none;
     border: none;
     font-size: 28px;
-    color: #007AFF;
-    padding: 0 10px;
-}
