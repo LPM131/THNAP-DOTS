@@ -83,6 +83,9 @@ function isValidGuess(word) {
 // DOTS — FINAL WORKING SCRIPT (MOBILE + DESKTOP)
 // ——————————————————————
 
+// Prevent horizontal scroll / cutoff on mobile
+document.body.style.overflowX = "hidden";
+
 const mainGrid     = document.getElementById("main-grid");
 const chatModal    = document.getElementById("chat-modal");
 const chatList     = document.getElementById("chat-list");

@@ -179,57 +179,50 @@ body, html {
 .absent { background: #787c7e !important; border-color: #787c7e !important; color: white !important; }
 
 /* --- KEYBOARD --- */
-#keyboard-cont {
-    margin-top: 30px;
-    user-select: none;
+#keyboard {
+    margin: 30px auto 0;
     max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    user-select: none;
 }
 
 .keyboard-row {
     display: flex;
-    width: 100%;
-    margin: 0 auto 8px;
-    touch-action: manipulation;
     justify-content: center;
+    margin-bottom: 8px;
 }
 
 .key {
-    flex: 1;
     height: 58px;
+    min-width: 43px;
     margin: 0 3px;
-    font-family: inherit;
-    font-weight: bold;
-    border: 0;
     padding: 0;
+    background: #d3d6da;
+    border: none;
     border-radius: 4px;
-    cursor: pointer;
-    text-transform: uppercase;
-    background-color: #d3d6da;
-    color: #000;
+    font-weight: bold;
     font-size: 14px;
-    min-width: 0;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
 }
 
-.key.big {
+.key.enter,
+.key.backspace {
     flex: 1.5;
     font-size: 12px;
 }
 
-.spacer-half {
-    flex: 0.5;
-}
+.key.absent   { background:#787c7e !important; color:white !important; }
+.key.present  { background:#c9b458 !important; color:white !important; }
+.key.correct  { background:#6aaa64 !important; color:white !important; }
 
-/* Colors — exactly like NYT */
-.key.absent  { background-color: #787c7e; color: white; }
-.key.present { background-color: #c9b458; color: white; }
-.key.correct { background-color: #6aaa64; color: white; }
-
-/* Mobile fix — ensures keys never get cut off */
+/* Mobile */
 @media (max-width: 500px) {
     .key { height: 57px; margin: 0 2px; font-size: 13px; }
-    .key.big { font-size: 11px; }
+    .key.enter, .key.backspace { font-size: 11px; }
 }
 
 /* Message */
