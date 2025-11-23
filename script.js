@@ -5,61 +5,30 @@ const mainGrid = document.getElementById("main-grid");
 const chatModal = document.getElementById("chat-modal");
 const wordleModal = document.getElementById("wordle-modal");
 
-// Chat DOM
-const threadArea = document.getElementById("thread-area");
-const chatArea = document.getElementById("chat-area");
-const messages = document.getElementById("messages");
-const chatInput = document.getElementById("chat-input");
-
 // Wordle DOM
 const board = document.getElementById("game-board");
 const keyboard = document.getElementById("keyboard");
 const gameMsg = document.getElementById("game-message");
 
 
-// ---------------------------
-// NAVIGATION
-// ---------------------------
+// ————— MAIN GRID DOT CLICK — THIS IS THE ONLY THING THAT OPENS CHAT —————
 document.querySelectorAll(".dot").forEach(dot => {
     dot.addEventListener("click", () => {
         const id = parseInt(dot.dataset.id);
 
         mainGrid.classList.add("hidden");
 
-        if (id === 1) openChat();
+        if (id === 1) {
+            openChat();                 // ← THIS IS THE ONLY LINE THAT MATTERS
+        }
         else if (id === 11) openWordle();
         else if (id === 13) openPokemon();
         else {
-            alert(`Dot ${id} clicked`);
+            alert(`Dot ${id} coming soon`);
             backToMain();
         }
     });
 });
-
-// ←←← THE MAGIC BACK BUTTON ←←←
-function backToMain() {
-    // If we're inside a chat → go back to floating dots
-    if (!chatArea.classList.contains("hidden")) {
-        chatArea.classList.add("hidden");
-        threadArea.classList.remove("hidden");
-        document.getElementById("chat-title").textContent = "Chats";
-        renderThreadDots();
-        return;
-    }
-
-    // If we're already in thread list → exit to main grid
-    if (!threadArea.classList.contains("hidden")) {
-        chatModal.classList.add("hidden");
-        mainGrid.classList.remove("hidden");
-        return;
-    }
-
-    // Fallback: any other modal
-    chatModal.classList.add("hidden");
-    wordleModal.classList.add("hidden");
-    document.getElementById("pokemon-modal").classList.add("hidden");
-    mainGrid.classList.remove("hidden");
-}
 
 
 // ——————————————————————
