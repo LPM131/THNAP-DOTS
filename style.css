@@ -342,11 +342,7 @@ body, html {
 .add-thread-dot { position:absolute; bottom:30px; right:30px; width:70px; height:70px; background:#34C759; font-size:40px; animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100% {transform:scale(1)} 50% {transform:scale(1.1)} }
 .thread-header { padding:15px; font-weight:bold; border-bottom:1px solid #eee; text-align:center; position:sticky; top:0; background:white; z-index:10; }
-.bubble { max-width:80%; padding:10px 14px; margin:8px; border-radius:18px; position:relative; }
-.bubble.me { background:#007AFF; color:white; align-self:flex-end; margin-left:auto; border-bottom-right-radius:4px; }
-.bubble.them { background:#E5E5EA; color:black; align-self:flex-start; border-bottom-left-radius:4px; }
-.bubble .time { font-size:11px; opacity:0.7; margin-top:4px; }
-.reply-to { font-size:12px; opacity:0.8; padding-bottom:4px; border-left:3px solid #fff; margin-left:-10px; padding-left:7px; }
+
 .reactions { background:white; border:1px solid #ddd; border-radius:12px; padding:2px 6px; font-size:18px; position:absolute; bottom:-10px; left:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
 #reply-banner { background:#f0f0f0; padding:10px; font-size:14px; border-top:1px solid #ddd; }
 .reaction-picker { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:white; border-radius:12px; padding:8px; box-shadow:0 4px 20px rgba(0,0,0,0.2); display:flex; gap:10px; z-index:100; }
@@ -391,6 +387,35 @@ body, html {
     font-size: 28px;
     cursor: pointer;
     padding: 4px;
+}
+
+/* FIX GIANT BLUE BUBBLES — MAKES THEM HUG THE TEXT PERFECTLY */
+.bubble {
+    max-width: 80%;
+    width: fit-content;
+    padding: 10px 14px;
+    margin: 8px 12px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    align-self: flex-start;
+}
+
+.bubble.me {
+    background: #007AFF;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+    margin-right: 12px;
+    border-bottom-right-radius: 4px;
+}
+
+.bubble.them {
+    background: #E5E5EA;
+    color: black;
+    align-self: flex-start;
+    margin-right: auto;
+    margin-left: 12px;
+    border-bottom-left-radius: 4px;
 }
 
 #voice-btn {
