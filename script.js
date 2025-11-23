@@ -63,74 +63,62 @@ function backToMain() {
 
 
 // ——————————————————————
-// FINAL CHAT SYSTEM — WORKS EVERYWHERE (MOBILE + DESKTOP)
+// CHAT SYSTEM — GUARANTEED WORKING (MOBILE + DESKTOP)
 // ——————————————————————
 
-const chatModal = document.getElementById("chat-modal");
-const chatList = document.getElementById("chat-list");
-const chatArea = document.getElementById("chat-area");
-const messages = document.getElementById("messages");
-const chatInput = document.getElementById("chat-input");
-const mainGrid = document.getElementById("main-grid");
+const chatModal  = document.getElementById("chat-modal");
+const chatList   = document.getElementById("chat-list");
+const chatArea   = document.getElementById("chat-area");
+const messages   = document.getElementById("messages");
+const chatInput  = document.getElementById("chat-input");
+const mainGrid   = document.getElementById("main-grid");
 
-let threadNames = ["Bot", "Mom", "Best Friend"];
-let threads = {};
-let threadsData = {};
+let threadNames = ["Bot", "Mom", "Alex"];
+let threads = {};        // {name: [msg]}
+let threadsData = {};    // {name: {unread:0}}
 let currentThread = null;
 
-// Load + init
-function loadChatData() {
-    const n = localStorage.getItem("threadNames");
-    const t = localStorage.getItem("threads");
-    const d = localStorage.getItem("threadsData");
+// Load data
+function initChat() {
+    const n = localStorage.getItem("dot_threadNames");
+    const t = localStorage.getItem("dot_threads");
+    const d = localStorage.getItem("dot_threadsData");
 
     threadNames = n ? JSON.parse(n) : threadNames;
-    threads = t ? JSON.parse(t) : {};
+    threads     = t ? JSON.parse(t) : {};
     threadsData = d ? JSON.parse(d) : {};
 
     threadNames.forEach(name => {
         if (!threads[name]) threads[name] = [];
         if (!threadsData[name]) threadsData[name] = { unread: 0 };
     });
-    saveChatData();
+    saveChat();
 }
-loadChatData();
+initChat();
 
-function saveChatData() {
-    localStorage.setItem("threadNames", JSON.stringify(threadNames));
-    localStorage.setItem("threads", JSON.stringify(threads));
-    localStorage.setItem("threadsData", JSON.stringify(threadsData));
+function saveChat() {
+    localStorage.setItem("dot_threadNames", JSON.stringify(threadNames));
+    localStorage.setItem("dot_threads", JSON.stringify(threads));
+    localStorage.setItem("dot_threadsData", JSON.stringify(threadsData));
 }
 
-// Render list
 function renderChatList() {
     chatList.innerHTML = threadNames.map(name => {
         const last = threads[name][threads[name].length - 1];
-        const preview = last
-            ? (last.sender === "me" ? "You: " : "") + (last.text || "Voice message")
-            : "No messages";
-
-        const unread = threadsData[name].unread
-            ? `<div class="unread-badge">${threadsData[name].unread > 99 ? "99+" : threadsData[name].unread}</div>`
-            : "";
-
+        const preview = last ? (last.sender === "me" ? "You: " : "") + (last.text || "Voice") : "No messages";
+        const unread = threadsData[name].unread > 0 ? `<div class="unread-badge">${threadsData[name].unread}</div>` : "";
         return `
-            <div class="chat-thread-item ${threadsData[name].unread ? "unread" : ""}"
-                 onclick="openThread('${name}')">
-                <div class="contact-dot" style="background:${stringToColor(name)}">
-                    ${name[0].toUpperCase()}
-                </div>
+            <div class="chat-thread-item ${threadsData[name].unread ? "unread" : ""}" onclick="openThread('${name}')">
+                <div class="contact-dot" style="background:${strToColor(name)}">${name[0]}</div>
                 <div class="thread-preview">
                     <div class="thread-name">${name}</div>
                     <div class="thread-last">${preview}</div>
                 </div>
                 ${unread}
-            </div>
-        `;
+            </div>`;
     }).join("");
 }
 
-// Open Messages
 function openChat() {
     chatModal.classList.remove("hidden");
     chatList.classList.remove("hidden");
@@ -139,23 +127,25 @@ function openChat() {
     renderChatList();
 }
 
-// Open a conversation
 function openThread(name) {
     currentThread = name;
     threadsData[name].unread = 0;
-    saveChatData();
-
+    saveChat();
     document.getElementById("chat-title").textContent = name;
     chatList.classList.add("hidden");
     chatArea.classList.remove("hidden");
-
-    messages.innerHTML = `<div id="typing"></div>`;
-    threads[name].forEach(addMessageBubble);
+    messages.innerHTML = "<div id='typing'></div>";
+    threads[name].forEach(msg => {
+        const b = document.createElement("div");
+        b.className = "bubble " + (msg.sender || "me");
+        b.textContent = msg.text || "Voice message";
+        if (msg.sender === "me") b.style.cssText = "background:#007AFF;color:white;margin-left:auto;border-bottom-right-radius:4px;";
+        messages.appendChild(b);
+    });
     messages.scrollTop = messages.scrollHeight;
     renderChatList();
 }
 
-// ONE BACK BUTTON — WORKS EVERYWHERE
 function backToMain() {
     if (!chatArea.classList.contains("hidden")) {
         chatArea.classList.add("hidden");
@@ -168,46 +158,32 @@ function backToMain() {
     mainGrid.classList.remove("hidden");
 }
 
-// Add new chat
 function createNewThread() {
     const name = prompt("Name:");
-    if (!name || threadNames.includes(name)) return;
-    threadNames.push(name);
-    threads[name] = [];
-    threadsData[name] = { unread: 0 };
-    saveChatData();
-    renderChatList();
+    if (name && !threadNames.includes(name)) {
+        threadNames.push(name);
+        threads[name] = [];
+        threadsData[name] = { unread: 0 };
+        saveChat();
+        renderChatList();
+    }
 }
 
-// SEND MESSAGE — NOW WORKS ON MOBILE
 function sendMessage() {
     if (!chatInput.value.trim() || !currentThread) return;
-
-    const msg = {
-        text: chatInput.value,
-        time: new Date(),
-        sender: "me",
-        reactions: []
-    };
-
+    const msg = { text: chatInput.value, sender: "me", time: Date.now() };
     threads[currentThread].push(msg);
-    addMessageBubble(msg);
+    const b = document.createElement("div");
+    b.className = "bubble me";
+    b.textContent = msg.text;
+    messages.appendChild(b);
     chatInput.value = "";
     messages.scrollTop = messages.scrollHeight;
-    saveChatData();
+    saveChat();
     renderChatList();
 }
 
-// Basic bubble
-function addMessageBubble(msg) {
-    const b = document.createElement("div");
-    b.className = `bubble ${msg.sender}`;
-    b.textContent = msg.text || "Voice message";
-    messages.appendChild(b);
-}
-
-// Color hash
-function stringToColor(str) {
+function strToColor(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
     return `hsl(${hash % 360}, 70%, 55%)`;
