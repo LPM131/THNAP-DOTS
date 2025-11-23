@@ -26,9 +26,6 @@ h1 {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  gap: 8px; /* gap between dots */
 }
 
 /* Each dot */
