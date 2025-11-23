@@ -109,12 +109,23 @@ body, html {
     padding: 10px;
 }
 
-/* ONLY these three lines — nothing more, nothing less */
-.wordle-area {                    /* only the Wordle screen */
+/* Wordle area layout */
+.wordle-area {                    /* the Wordle screen */
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    background: #ffffff;
+    padding: 10px;
+}
+
+/* Large Wordle title */
+#wordle-title {
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #1a1a1a;
 }
 
 #keyboard {
@@ -122,19 +133,17 @@ body, html {
     padding-bottom: max(20px, env(safe-area-inset-bottom));
 }
 
-/* RESTORE: Essential for board to show */
+/* Game board: 5 columns of 60px squares */
 #game-board {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    width: 100%;
-    max-width: 350px;
+    grid-template-columns: repeat(5, 62px);
+    gap: 5px;
     margin: 0 auto;
 }
 
-/* RESTORE: Makes tiles visible */
+/* Tiles: square, white with dark border initially */
 .tile {
-    aspect-ratio: 1 / 1;
+    height: 62px;
     border: 2px solid #d3d6da;
     background: #fff;
     display: flex;
@@ -143,23 +152,76 @@ body, html {
     font-size: 24px;
     font-weight: bold;
     border-radius: 4px;
+    color: black; /* letter color */
 }
 
-/* RESTORE: Button sizes so keyboard fits */
+/* Tile states: Wordle colors */
+.tile.correct {
+    background: #6aaa64;
+    border-color: #6aaa64;
+    color: white;
+}
+
+.tile.present {
+    background: #c9b458;
+    border-color: #c9b458;
+    color: white;
+}
+
+.tile.absent {
+    background: #787c7e;
+    border-color: #787c7e;
+    color: white;
+}
+
+/* Flip animation for tile reveals */
+.tile.flip {
+    animation: flip 0.5s ease-in-out;
+}
+
+@keyframes flip {
+    0% { transform: rotateX(0deg); }
+    50% { transform: rotateX(90deg); }
+    100% { transform: rotateX(0deg); }
+}
+
+/* Keyboard keys: larger, rounded like Wordle */
 .key {
-    width: 35px;
-    height: 45px;
-    font-size: 16px;
-    border-radius: 4px;
+    min-height: 50px;
+    padding: 0 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
     border: none;
     background: #d3d6da;
-    margin: 2px;
+    color: black;
+    margin: 3px;
     cursor: pointer;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .key.large {
-    width: 50px;
+    min-width: 55px;
+    padding: 0 14px;
+}
+
+/* Keyboard key states: match tile colors */
+.key.correct {
+    background: #6aaa64;
+    color: white;
+}
+
+.key.present {
+    background: #c9b458;
+    color: white;
+}
+
+.key.absent {
+    background: #787c7e;
+    color: white;
 }
 
 /* GEN BUTTONS */
