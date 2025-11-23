@@ -32,10 +32,11 @@ h1 {
   width: 100%;
   height: 100%;
   display: grid;
-  place-items: center;
-  padding: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); /* Auto-adjusts columns */
-  grid-gap: 10px;
+  grid-template-columns: repeat(5, 1fr); /* Fixed 5 columns for 15 dots (3 rows) */
+  grid-template-rows: repeat(3, 1fr); /* 3 rows for balanced layout */
+  grid-gap: 15px; /* Gap between dots */
+  padding: 40px 20px; /* Padding from edges */
+  box-sizing: border-box;
 }
 
 /* Each dot */

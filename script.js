@@ -60,36 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', showMainGrid);
   });
 
-  function layoutDots() {
-    const totalDots = 15;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    let cols = Math.ceil(Math.sqrt(totalDots * (w / h)));
-    let rows = Math.ceil(totalDots / cols);
-
-    mainGrid.style.display = 'grid';
-    mainGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    mainGrid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-    mainGrid.style.width = '100vw';
-    mainGrid.style.height = '100vh';
-    mainGrid.style.justifyItems = 'center';
-    mainGrid.style.alignItems = 'center';
-    mainGrid.style.gap = '10px';
-
-    const dots = document.querySelectorAll('.dot');
-    const dotSize = Math.min(
-      (w - (cols - 1) * 10) / cols,
-      (h - (rows - 1) * 10) / rows
-    );
-
-    dots.forEach(dot => {
-      dot.style.width = `${dotSize}px`;
-      dot.style.height = `${dotSize}px`;
-    });
-  }
-
-  layoutDots();
-  window.addEventListener('resize', layoutDots);
+  // No JavaScript layout needed - CSS handles the fixed 5-column grid
 
   // ====================================
   // CHAT SYSTEM
