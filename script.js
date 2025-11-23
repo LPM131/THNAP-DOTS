@@ -44,17 +44,14 @@ function updateKeyboard(guess, answer) {
     }
   }
 
-  // Now repaint the actual keyboard keys — FIXED SELECTOR
+  // FIXED SELECTOR
   document.querySelectorAll('[data-key]').forEach(keyEl => {
     const letter = keyEl.textContent.trim();
-    const dataKey = keyEl.getAttribute('data-key');
-
-    // Only color letter keys (not ENTER/delete)
     if (letter.length === 1 && letterStatus[letter] !== undefined) {
-      keyEl.classList.remove('correct', 'present', 'absent');
+      keyEl.classList.remove('correct','present','absent');
       if (letterStatus[letter] === 2) keyEl.classList.add('correct');
       else if (letterStatus[letter] === 1) keyEl.classList.add('present');
-      else if (letterStatus[letter] === 0) keyEl.classList.add('absent');
+      else keyEl.classList.add('absent');
     }
   });
 }

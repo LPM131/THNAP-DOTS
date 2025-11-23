@@ -1,26 +1,10 @@
-/* CLEAN MODAL - RESTORED TO ORIGINAL */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    z-index: 99;
+/* FINAL FIX - ONLY THESE 4 RULES */
+#wordle-modal {                   /* only Wordle modal */
     display: flex;
     flex-direction: column;
-    contain: layout style;      /* safe performance optimization */
-}
-
-/* 1. Fix Wordle container - HEIGHT ONLY ON WORDLE */
-#wordle-modal {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;           /* only Wordle modal needs this */
     height: 100dvh;
 }
 
-/* 2. Make #game take the remaining space */
 #game {
     flex: 1;
     display: flex;
@@ -29,11 +13,12 @@
     margin: 0 auto;
     width: 100%;
     padding: 0 8px;
-    overflow: hidden;
 }
 
-/* 3. Push keyboard to bottom */
 #keyboard {
     margin-top: auto;
     padding-bottom: max(20px, env(safe-area-inset-bottom));
 }
+
+/* Fix back button size */
+.header .back { font-size: 24px; padding: 8px; background: none; border: none; }

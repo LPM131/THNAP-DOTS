@@ -29,24 +29,7 @@
         <div class="dot" data-id="15">15</div>
     </div>
 
-    <!-- CHAT MODAL -->
-    <div id="chat-modal" class="modal hidden">
-        <div class="header">
-            <button class="back" onclick="backToMain()">Back</button>
-            <h2 id="chat-title">Messages</h2>
-            <button class="new-chat" onclick="createNewThread()">+</button>
-        </div>
-        <div id="chat-list" class="chat-list"></div>
-        <div id="chat-area" class="chat-area hidden">
-            <div id="messages" class="messages"></div>
-            <div class="input-section">
-                <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off">
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- WORDLE MODAL -->
+    <!-- WORDLE MODAL - ONLY CHANGE: fixed layout + keyboard -->
     <div id="wordle-modal" class="modal hidden">
         <div class="header">
             <button class="back" onclick="backToMain()">Back</button>
@@ -55,7 +38,6 @@
         <div id="game">
             <div id="game-board"></div>
             <div id="game-message" class="game-message"></div>
-
             <div id="keyboard">
                 <div class="row">
                     <button class="letter-key" data-key="Q">Q</button>
@@ -84,13 +66,30 @@
                     <button class="action-key" data-key="ENTER">enter</button>
                     <button class="letter-key" data-key="Z">Z</button>
                     <button class="letter-key" data-key="X">X</button>
-                    <button class="letter-key" data-key="C">C</button>
+                    <button class="action-key" data-key="C">C</button>
                     <button class="letter-key" data-key="V">V</button>
                     <button class="letter-key" data-key="B">B</button>
                     <button class="letter-key" data-key="N">N</button>
                     <button class="letter-key" data-key="M">M</button>
                     <button class="action-key" data-key="BACKSPACE">delete</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHAT MODAL -->
+    <div id="chat-modal" class="modal hidden">
+        <div class="header">
+            <button class="back" onclick="backToMain()">Back</button>
+            <h2 id="chat-title">Messages</h2>
+            <button class="new-chat" onclick="createNewThread()">+</button>
+        </div>
+        <div id="chat-list" class="chat-list"></div>
+        <div id="chat-area" class="chat-area hidden">
+            <div id="messages" class="messages"></div>
+            <div class="input-section">
+                <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off">
+                <button onclick="sendMessage()">Send</button>
             </div>
         </div>
     </div>
@@ -130,4 +129,6 @@
             <p id="pokemon-feedback"></p>
         </div>
     </div>
+
 </body>
+</html>
