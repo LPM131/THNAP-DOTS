@@ -62,21 +62,31 @@ function backToMain() {
 }
 
 
-// ---------------------------
-// CHAT MODULE — iMESSAGE HYBRID (FINAL WORKING VERSION)
-// ---------------------------
+// ——————————————————————
+// FINAL CHAT SYSTEM — WORKS EVERYWHERE (MOBILE + DESKTOP)
+// ——————————————————————
 
-const threadNames = ["Bot", "Mom", "Alex"];
-let threadsData = {};  // {name: {unread: 0}}
-let threads = {};      // {name: [messages]}
+const chatModal = document.getElementById("chat-modal");
+const chatList = document.getElementById("chat-list");
+const chatArea = document.getElementById("chat-area");
+const messages = document.getElementById("messages");
+const chatInput = document.getElementById("chat-input");
+const mainGrid = document.getElementById("main-grid");
+
+let threadNames = ["Bot", "Mom", "Best Friend"];
+let threads = {};
+let threadsData = {};
 let currentThread = null;
 
-// Load everything
+// Load + init
 function loadChatData() {
-    const pos = localStorage.getItem('chatThreads');
-    const data = localStorage.getItem('chatThreadsData');
-    threads = pos ? JSON.parse(pos) : {};
-    threadsData = data ? JSON.parse(data) : {};
+    const n = localStorage.getItem("threadNames");
+    const t = localStorage.getItem("threads");
+    const d = localStorage.getItem("threadsData");
+
+    threadNames = n ? JSON.parse(n) : threadNames;
+    threads = t ? JSON.parse(t) : {};
+    threadsData = d ? JSON.parse(d) : {};
 
     threadNames.forEach(name => {
         if (!threads[name]) threads[name] = [];
@@ -87,30 +97,27 @@ function loadChatData() {
 loadChatData();
 
 function saveChatData() {
-    localStorage.setItem('chatThreads', JSON.stringify(threads));
-    localStorage.setItem('chatThreadsData', JSON.stringify(threadsData));
+    localStorage.setItem("threadNames", JSON.stringify(threadNames));
+    localStorage.setItem("threads", JSON.stringify(threads));
+    localStorage.setItem("threadsData", JSON.stringify(threadsData));
 }
 
-// Render iMessage-style list
+// Render list
 function renderChatList() {
-    const list = document.getElementById("chat-list");
-    list.innerHTML = threadNames.map(name => {
-        const lastMsg = threads[name][threads[name].length - 1];
-        const preview = lastMsg
-            ? (lastMsg.sender === "me" ? "You: " : "") +
-              (lastMsg.type === "voice" ? "Voice message" : lastMsg.text.substring(0, 40) + (lastMsg.text.length > 40 ? "…" : ""))
+    chatList.innerHTML = threadNames.map(name => {
+        const last = threads[name][threads[name].length - 1];
+        const preview = last
+            ? (last.sender === "me" ? "You: " : "") + (last.text || "Voice message")
             : "No messages";
 
-        const unread = threadsData[name].unread > 0
-            ? `<div class="unread-badge">${threadsData[name].unread > 99 ? '99+' : threadsData[name].unread}</div>`
-            : '';
-
-        const color = stringToColor(name);
+        const unread = threadsData[name].unread
+            ? `<div class="unread-badge">${threadsData[name].unread > 99 ? "99+" : threadsData[name].unread}</div>`
+            : "";
 
         return `
-            <div class="chat-thread-item ${threadsData[name].unread > 0 ? 'unread' : ''}"
+            <div class="chat-thread-item ${threadsData[name].unread ? "unread" : ""}"
                  onclick="openThread('${name}')">
-                <div class="contact-dot" style="background:${color}">
+                <div class="contact-dot" style="background:${stringToColor(name)}">
                     ${name[0].toUpperCase()}
                 </div>
                 <div class="thread-preview">
@@ -120,39 +127,39 @@ function renderChatList() {
                 ${unread}
             </div>
         `;
-    }).join('');
+    }).join("");
 }
 
-// Open chat list
+// Open Messages
 function openChat() {
     chatModal.classList.remove("hidden");
-    document.getElementById("chat-list").classList.remove("hidden");
+    chatList.classList.remove("hidden");
     chatArea.classList.add("hidden");
     document.getElementById("chat-title").textContent = "Messages";
     renderChatList();
 }
 
-// Open individual thread
+// Open a conversation
 function openThread(name) {
     currentThread = name;
     threadsData[name].unread = 0;
     saveChatData();
 
     document.getElementById("chat-title").textContent = name;
-    document.getElementById("chat-list").classList.add("hidden");
+    chatList.classList.add("hidden");
     chatArea.classList.remove("hidden");
 
     messages.innerHTML = `<div id="typing"></div>`;
-    threads[name].forEach(msg => addMessageBubble(msg));
+    threads[name].forEach(addMessageBubble);
     messages.scrollTop = messages.scrollHeight;
-    renderChatList(); // update unread badges
+    renderChatList();
 }
 
-// Back button — ONE BUTTON, WORKS EVERYWHERE
+// ONE BACK BUTTON — WORKS EVERYWHERE
 function backToMain() {
     if (!chatArea.classList.contains("hidden")) {
         chatArea.classList.add("hidden");
-        document.getElementById("chat-list").classList.remove("hidden");
+        chatList.classList.remove("hidden");
         document.getElementById("chat-title").textContent = "Messages";
         renderChatList();
         return;
@@ -161,9 +168,9 @@ function backToMain() {
     mainGrid.classList.remove("hidden");
 }
 
-// Create new thread
+// Add new chat
 function createNewThread() {
-    const name = prompt("Contact name:");
+    const name = prompt("Name:");
     if (!name || threadNames.includes(name)) return;
     threadNames.push(name);
     threads[name] = [];
@@ -172,7 +179,7 @@ function createNewThread() {
     renderChatList();
 }
 
-// Send message (your existing one — just add this line at the end)
+// SEND MESSAGE — NOW WORKS ON MOBILE
 function sendMessage() {
     if (!chatInput.value.trim() || !currentThread) return;
 
@@ -188,10 +195,16 @@ function sendMessage() {
     chatInput.value = "";
     messages.scrollTop = messages.scrollHeight;
     saveChatData();
-    renderChatList(); // update preview
+    renderChatList();
 }
 
-// Keep your existing addMessageBubble(), reactions, etc.
+// Basic bubble
+function addMessageBubble(msg) {
+    const b = document.createElement("div");
+    b.className = `bubble ${msg.sender}`;
+    b.textContent = msg.text || "Voice message";
+    messages.appendChild(b);
+}
 
 // Color hash
 function stringToColor(str) {
@@ -200,132 +213,7 @@ function stringToColor(str) {
     return `hsl(${hash % 360}, 70%, 55%)`;
 }
 
-// Render thread dots with unread badges
-function renderThreadDots() {
-    threadArea.innerHTML = `
-        <div class="add-thread-dot" style="bottom:30px;right:30px;">+</div>
-        ${threadNames.map(name => {
-            const t = threadsData[name];
-            const unread = t.unread > 0 ? `<span class="unread-badge">${t.unread > 99 ? '99+' : t.unread}</span>` : '';
-            return `<div class="thread-dot" data-name="${name}" style="left:${t.x}px;top:${t.y}px;">
-                        ${name[0].toUpperCase()}${unread}
-                    </div>`;
-        }).join('')}
-    `;
 
-    // Bind events AFTER render
-    setTimeout(() => {  // Tiny delay = DOM ready
-        document.querySelectorAll('.thread-dot').forEach(dot => {
-            const name = dot.dataset.name;
-            console.log("Binding dot:", name); // DEBUG
-            makeDraggable(dot, name);
-            addLongPress(dot, () => confirmDeleteThread(name));
-        });
-
-        const addDot = document.querySelector('.add-thread-dot');
-        if (addDot) addDot.addEventListener('click', createNewThread);
-    }, 50);
-}
-
-// ─────── FIXED DRAG (15px threshold + click fallback) ───────
-function makeDraggable(el, name) {
-    let startPos = { x: 0, y: 0 };
-    let currentPos = { x: threadsData[name].x, y: threadsData[name].y };
-    let isDragging = false;
-
-    const getEventPos = (e) => ({
-        x: e.touches ? e.touches[0].clientX : e.clientX,
-        y: e.touches ? e.touches[0].clientY : e.clientY
-    });
-
-    const startDrag = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const pos = getEventPos(e);
-        startPos = pos;
-        isDragging = false;
-
-        console.log("Drag start on", name); // DEBUG
-
-        const onMove = (e) => {
-            e.preventDefault();
-            const pos = getEventPos(e);
-            const delta = Math.hypot(pos.x - startPos.x, pos.y - startPos.y);
-
-            if (delta > 15) {  // 15px = real drag
-                isDragging = true;
-                const rect = threadArea.getBoundingClientRect();
-                currentPos.x = Math.max(0, Math.min(pos.x - rect.left - 35, rect.width - 70));
-                currentPos.y = Math.max(0, Math.min(pos.y - rect.top - 35, rect.height - 70));
-
-                el.style.left = currentPos.x + 'px';
-                el.style.top = currentPos.y + 'px';
-            }
-        };
-
-        const onEnd = (e) => {
-            e.preventDefault();
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('touchmove', onMove, { passive: false });
-            document.removeEventListener('mouseup', onEnd);
-            document.removeEventListener('touchend', onEnd);
-
-            if (isDragging) {
-                threadsData[name].x = currentPos.x;
-                threadsData[name].y = currentPos.y;
-                saveChatData();
-                console.log("Drag saved for", name, currentPos); // DEBUG
-            } else {
-                // NO DRAG = CLICK → open thread
-                console.log("TAP DETECTED on", name); // DEBUG
-                openThread(name);
-            }
-        };
-
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('mouseup', onEnd);
-        document.addEventListener('touchend', onEnd);
-    };
-
-    // Bind events
-    el.addEventListener('mousedown', startDrag, { passive: false });
-    el.addEventListener('touchstart', startDrag, { passive: false });
-}
-
-function addMessageBubble(msg) {
-    const bubble = document.createElement("div");
-    bubble.className = `bubble ${msg.sender}`;
-    if (msg.replyTo) bubble.classList.add('reply');
-
-    bubble.innerHTML = `
-        ${msg.replyTo ? `<div class="reply-to">↳ ${msg.replyTo}</div>` : ''}
-        <div class="text">${msg.text}</div>
-        <div class="time">${formatTime(msg.time)}</div>
-    `;
-
-    updateReactionsDisplay(bubble, msg);
-
-    addLongPress(bubble, () => showReactionPicker(bubble, msg));
-
-    let startX;
-    bubble.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-    bubble.addEventListener('touchend', e => {
-        if (startX && Math.abs(e.changedTouches[0].clientX - startX) > 80) {
-            replyToMessage(msg.text);
-        }
-    });
-
-    messages.appendChild(bubble);
-}
-
-// Add this helper (used in long-press)
-function getEventPos(e) {
-    return {
-        x: e.touches ? e.touches[0].clientX : e.clientX,
-        y: e.touches ? e.touches[0].clientY : e.clientY
-    };
-}
 
 
 
