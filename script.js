@@ -1,97 +1,59 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const mainGrid = document.getElementById('main-grid');
-  const title = document.querySelector('h1') || document.createElement('h1');
-  const appContainer = document.getElementById('app-container') || document.body;
+// ===============================
+// DOT → MODAL mapping
+// ===============================
+const modalMap = {
+    1: "chat-modal",
+    2: "wordle-modal",
+    3: "pokemon-modal",
+    12: "crossword-modal"
+    // others can be mapped later when features are added
+};
 
-  // Function to show main grid and hide feature view
-  function showMainGrid() {
-    if (title) {
-      title.textContent = 'DOTS';
-    }
-    if (mainGrid) mainGrid.style.display = 'grid';
+// Close all modals
+function hideAllModals() {
+    document.querySelectorAll(".modal").forEach(m => m.classList.add("hidden"));
+}
 
-    // Remove any feature content if present
-    const featureView = document.getElementById('feature-view');
-    if (featureView) {
-      featureView.remove();
-    }
+// Return to main grid
+function backToMain() {
+    hideAllModals();
+}
 
-    // Hide modals
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => modal.classList.add('hidden'));
-  }
+// Add click listeners to all dots
+document.querySelectorAll(".dot").forEach(dot => {
+    dot.addEventListener("click", () => {
+        const id = dot.dataset.id;
+        const modalId = modalMap[id];
 
-  // Function to show feature by calling existing functions
-  function showFeature(dotId) {
-    const featureMap = {
-      1: openChat,
-      11: openWordle,
-      13: openPokemon,
-      12: openCrossword
-    };
+        hideAllModals();
 
-    const openFunction = featureMap[dotId];
-    if (openFunction) {
-      if (title) {
-        title.textContent = '';
-      }
-      if (mainGrid) mainGrid.style.display = 'none';
-      openFunction();
-    }
-  }
-
-  // Handle click on dots
-  if (mainGrid) {
-    mainGrid.addEventListener('click', (e) => {
-      let dot = e.target.closest('.dot');
-      if (!dot) return;
-      let dotId = dot.getAttribute('data-id');
-      if (dotId) {
-        showFeature(dotId);
-      }
+        if (modalId) {
+            document.getElementById(modalId).classList.remove("hidden");
+        }
     });
-  }
-
-  // Initial setup
-  showMainGrid();
 });
 
-// ---------------------------
-// DOM ELEMENTS
-// ---------------------------
-const chatModal = document.getElementById("chat-modal");
-const wordleModal = document.getElementById("wordle-modal");
 
-// Chat DOM
-const threadArea = document.getElementById("thread-area");
-const chatArea = document.getElementById("chat-area");
-const messages = document.getElementById("messages");
-const chatInput = document.getElementById("chat-input");
+// ===============================
+// CHAT APP
+// ===============================
+function sendMessage() {
+    const input = document.getElementById("chat-input");
+    const text = input.value.trim();
 
-// Wordle DOM
-const board = document.getElementById("game-board");
-const keyboard = document.getElementById("keyboard");
-const gameMsg = document.getElementById("game-message");
+    if (!text) return;
 
-// ---------------------------
-// MODIFIED NAVIGATION
-// ---------------------------
-function backToMain() {
-    chatModal.classList.add("hidden");
-    wordleModal.classList.add("hidden");
-    document.getElementById("pokemon-modal").classList.add("hidden");
-    document.getElementById("crossword-modal").classList.add("hidden");
+    const msg = document.createElement("div");
+    msg.textContent = "You: " + text;
+    document.getElementById("messages").appendChild(msg);
 
-    const mainGrid = document.getElementById('main-grid');
-    const title = document.querySelector('h1');
-    if (mainGrid) mainGrid.style.display = 'grid';
-    if (title) title.textContent = 'DOTS';
+    input.value = "";
 }
 
 
-// ---------------------------
-// CHAT MODULE
-// ---------------------------
+// ===============================
+// CHAT MODULE (ORIGINAL)
+// ===============================
 const threadNames = ["Bot", "Friend 1", "Friend 2"];
 let threadsData = {
     "Bot": { x: 40, y: 40 },
@@ -101,12 +63,13 @@ let threadsData = {
 let velocities = {};
 
 function openChat() {
-    chatModal.classList.remove("hidden");
+    document.getElementById("chat-modal").classList.remove("hidden");
     renderThreadDots();
     initPhysics();
 }
 
 function renderThreadDots() {
+    const threadArea = document.getElementById("thread-area");
     threadArea.innerHTML = "";
 
     threadNames.forEach(name => {
@@ -123,24 +86,12 @@ function renderThreadDots() {
 }
 
 function openThread(name) {
-    threadArea.classList.add("hidden");
-    chatArea.classList.remove("hidden");
-    messages.innerHTML = `<p>Chat with ${name}</p>`;
+    document.getElementById("thread-area").classList.add("hidden");
+    document.getElementById("chat-area").classList.remove("hidden");
+    document.getElementById("messages").innerHTML = `<p>Chat with ${name}</p>`;
 }
 
-function sendMessage() {
-    if (!chatInput.value.trim()) return;
-
-    const bubble = document.createElement("div");
-    bubble.textContent = chatInput.value;
-    messages.appendChild(bubble);
-    chatInput.value = "";
-}
-
-
-// ---------------------------
 // FLOATING DOT PHYSICS
-// ---------------------------
 function initPhysics() {
     threadNames.forEach(name => {
         velocities[name] = {
@@ -154,7 +105,7 @@ function initPhysics() {
 
 function updateDots() {
     const dots = document.querySelectorAll(".thread-dot");
-    const bounds = threadArea.getBoundingClientRect();
+    const bounds = document.getElementById("thread-area").getBoundingClientRect();
 
     dots.forEach(dot => {
         const name = threadNames[[...dots].indexOf(dot)];
@@ -177,14 +128,12 @@ function updateDots() {
 /* --------------------------- */
 /* POKEMON GAME MODULE */
 /* ----------------------------- */
-
 let pokemonNames = [];
 let fullPokemonData = [];
 let filteredList = [];
 let currentPokemonName = "";
 let currentPokemonSprite = "";
 
-/* GENERATION RANGES */
 const GEN_RANGES = {
     "Gen 1": [1, 151],
     "Gen 2": [152, 251],
@@ -197,7 +146,6 @@ const GEN_RANGES = {
     "Gen 9": [899, 1025]
 };
 
-/* LOAD ALL NAMES */
 async function loadAllPokemonNames() {
     if (pokemonNames.length > 0) return;
 
@@ -208,7 +156,6 @@ async function loadAllPokemonNames() {
     fullPokemonData = data.results;
 }
 
-/* OPEN GAME */
 function openPokemon() {
     document.getElementById("pokemon-modal").classList.remove("hidden");
 
@@ -216,14 +163,8 @@ function openPokemon() {
         document.querySelector('.gen-row button:first-child').classList.add('active');
         loadPokemon();
     });
-
-    const input = document.getElementById("pokemon-guess");
-    input.addEventListener("input", spellingAssist);
 }
 
-// ---------------------------
-// GENERATION FILTER
-// ---------------------------
 function setGeneration(gen) {
     document.querySelectorAll('.gen-row button').forEach(btn => btn.classList.remove('active'));
 
@@ -235,7 +176,6 @@ function setGeneration(gen) {
         const end = GEN_RANGES[`Gen ${gen}`][1];
         filteredList = fullPokemonData.slice(start, end);
 
-        // Highlight the clicked gen
         const row = gen <= 5 ? 1 : 2;
         const index = gen <= 5 ? gen - 1 : gen - 6;
         document.querySelector(`.gen-row:nth-child(${row}) button:nth-child(${index + 1})`).classList.add('active');
@@ -243,10 +183,8 @@ function setGeneration(gen) {
     loadPokemon();
 }
 
-/* LOAD RANDOM POKEMON */
 async function loadPokemon() {
     const pool = filteredList.length ? filteredList : fullPokemonData;
-
     const choice = pool[Math.floor(Math.random() * pool.length)];
     const res = await fetch(choice.url);
     const data = await res.json();
@@ -263,7 +201,6 @@ async function loadPokemon() {
     document.getElementById("pokemon-suggestions").style.display = "none";
 }
 
-/* GUESS */
 function guessPokemon() {
     const guess = document.getElementById("pokemon-guess").value.trim().toLowerCase();
     if (!guess) return;
@@ -273,20 +210,17 @@ function guessPokemon() {
     if (guess === currentPokemonName) {
         feedback.textContent = "🎉 Correct!";
         document.getElementById("pokemon-silhouette").style.filter = "none";
-
         setTimeout(loadPokemon, 1500);
     } else {
         feedback.textContent = "❌ Wrong. Try again!";
     }
 }
 
-/* HINT */
 function giveHint() {
     const feedback = document.getElementById("pokemon-feedback");
     feedback.textContent = `Hint: Starts with \"${currentPokemonName[0].toUpperCase()}\"`;
 }
 
-// SPELLING ASSIST DROPDOWN
 function spellingAssist() {
     const q = document.getElementById("pokemon-guess").value.toLowerCase();
     const list = document.getElementById("pokemon-suggestions");
@@ -311,12 +245,11 @@ function spellingAssist() {
     list.style.display = matches.length ? "block" : "none";
 }
 
-// Load input event listener
 document.getElementById("pokemon-guess").addEventListener("input", spellingAssist);
 
-// ------------------------------
-// WORDLE 100% CLEAN MODULE
-// ------------------------------
+/* ------------------------------ */
+/* WORDLE MODULE */
+/* ------------------------------ */
 const WORD_LIST = ["APPLE", "BANJO", "CRANE", "DANCE", "ELITE", "FLAME", "GRAPE"];
 
 function getWordOfTheDay() {
@@ -330,14 +263,10 @@ let WORD = getWordOfTheDay();
 let guesses = [];
 let currentGuess = "";
 
-// Elements
 const boardEl = document.getElementById("game-board");
 const keyboardEl = document.getElementById("keyboard");
 const messageEl = document.getElementById("game-message");
 
-// ------------------------------
-// Init board (30 tiles)
-// ------------------------------
 function initBoard() {
     boardEl.innerHTML = "";
     for (let i = 0; i < 30; i++) {
@@ -349,17 +278,9 @@ function initBoard() {
     }
 }
 
-// ------------------------------
-// Init Keyboard
-// ------------------------------
 function initKeyboard() {
     keyboardEl.innerHTML = "";
-
-    const keys = [
-        "QWERTYUIOP",
-        "ASDFGHJKL",
-        "ZXCVBNM"
-    ];
+    const keys = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
 
     keys.forEach(row => {
         const rowDiv = document.createElement("div");
@@ -388,9 +309,6 @@ function addKey(rowDiv, char, wide = "") {
     rowDiv.appendChild(key);
 }
 
-// ------------------------------
-// Key handling
-// ------------------------------
 function handleKey(k) {
     if (k === "⌫") {
         currentGuess = currentGuess.slice(0, -1);
@@ -409,9 +327,6 @@ function handleKey(k) {
     }
 }
 
-// ------------------------------
-// Update Board
-// ------------------------------
 function updateBoard() {
     const tiles = [...document.querySelectorAll(".tile span")];
 
@@ -428,9 +343,6 @@ function updateBoard() {
     }
 }
 
-// ------------------------------
-// Submit guess
-// ------------------------------
 function submitGuess() {
     if (currentGuess.length < 5) {
         messageEl.textContent = "Not enough letters.";
@@ -445,9 +357,6 @@ function submitGuess() {
     revealGuess(guess, guesses.length - 1);
 }
 
-// ------------------------------
-// Reveal animation & coloring
-// ------------------------------
 function revealGuess(guess, row) {
     const tiles = [...document.querySelectorAll(".tile")];
     const rowTiles = tiles.slice(row * 5, row * 5 + 5);
@@ -476,9 +385,6 @@ function checkEndGame(guess) {
     }
 }
 
-// ------------------------------
-// Initialize on modal open
-// ------------------------------
 function initGame() {
     guesses = [];
     currentGuess = "";
@@ -489,30 +395,23 @@ function initGame() {
 }
 
 function openWordle() {
-    wordleModal.classList.remove("hidden");
+    document.getElementById("wordle-modal").classList.remove("hidden");
     initGame();
 }
 
 /* ======================================================
-   DOT #12 — CROSSWORD PUZZLE MODULE
+   CROSSWORD PUZZLE MODULE
    ====================================================== */
-
 const crosswordModal = document.getElementById("crossword-modal");
 const crosswordGrid = document.getElementById("crossword-grid");
 const crosswordClue = document.getElementById("crossword-clue");
 
-let crosswordSize = 15; // NYT standard 15x15
+let crosswordSize = 15;
 let crosswordCells = [];
 let crosswordData = null;
-
 let selectedCell = null;
 let selectedDirection = "across";
-let activeClue = null;
 
-/* ============================
-   SAMPLE DAILY PUZZLE
-   (Replace with server puzzles)
-   ============================ */
 const DAILY_CROSSWORD = {
     size: 15,
     grid: [
@@ -533,32 +432,16 @@ const DAILY_CROSSWORD = {
         "FOX............"
     ],
     clues: {
-        across: {
-            1: "Furry pet (3)",
-            4: "Barks (3)",
-            7: "Ghost sound (5)",
-            12: "Tree dwelling singer (4)",
-            14: "Green giant (4)",
-        },
-        down: {
-            1: "Farm animal (3)",
-            2: "Croaks (4)",
-            3: "Forest animal (3)"
-        }
+        across: { 1: "Furry pet (3)", 4: "Barks (3)", 7: "Ghost sound (5)", 12: "Tree dwelling singer (4)", 14: "Green giant (4)" },
+        down: { 1: "Farm animal (3)", 2: "Croaks (4)", 3: "Forest animal (3)" }
     }
 };
 
-/* ============================
-   OPEN CROSSWORD
-   ============================ */
 function openCrossword() {
     crosswordModal.classList.remove("hidden");
     loadDailyPuzzle();
 }
 
-/* ============================
-   LOAD PUZZLE
-   ============================ */
 function loadDailyPuzzle() {
     crosswordData = DAILY_CROSSWORD;
     crosswordSize = crosswordData.size;
@@ -569,9 +452,6 @@ function loadDailyPuzzle() {
     setupKeyboard();
 }
 
-/* ============================
-   DRAW GRID
-   ============================ */
 function drawGrid() {
     crosswordGrid.style.gridTemplateColumns = `repeat(${crosswordSize}, 1fr)`;
     crosswordGrid.innerHTML = "";
@@ -596,9 +476,6 @@ function drawGrid() {
     }
 }
 
-/* ============================
-   CLUE NUMBERS
-   ============================ */
 function drawClueNumbers() {
     crosswordCells.forEach(cell => {
         if (cell.classList.contains("black")) return;
@@ -606,13 +483,11 @@ function drawClueNumbers() {
         const r = parseInt(cell.dataset.row);
         const c = parseInt(cell.dataset.col);
 
-        let number = null;
-
         const startsAcross = c === 0 || getCell(r, c - 1).classList.contains("black");
         const startsDown = r === 0 || getCell(r - 1, c).classList.contains("black");
 
         if (startsAcross || startsDown) {
-            number = getClueNumber(r, c);
+            const number = getClueNumber(r, c);
             const numEl = document.createElement("div");
             numEl.classList.add("clue-number");
             numEl.textContent = number;
@@ -621,26 +496,18 @@ function drawClueNumbers() {
     });
 }
 
-/* basic numbering system */
 function getClueNumber(r, c) {
     return r * crosswordSize + c + 1;
 }
 
-/* helper */
 function getCell(r, c) {
     return crosswordCells[r * crosswordSize + c];
 }
 
-/* ============================
-   CELL SELECTION & HIGHLIGHTS
-   ============================ */
 function selectCell(cell) {
-    // remove previous highlighting
     crosswordCells.forEach(c => c.classList.remove("selected", "word-highlight"));
-
     cell.classList.add("selected");
     selectedCell = cell;
-
     highlightWord(cell, selectedDirection);
     updateClueDisplay(cell);
 }
@@ -648,26 +515,20 @@ function selectCell(cell) {
 function highlightWord(cell, direction) {
     const r = parseInt(cell.dataset.row);
     const c = parseInt(cell.dataset.col);
-
-    // find word span
     let coords = [];
 
     if (direction === "across") {
-        // scan left
         let cc = c;
         while (cc >= 0 && !getCell(r, cc).classList.contains("black")) cc--;
         cc++;
-
         while (cc < crosswordSize && !getCell(r, cc).classList.contains("black")) {
             coords.push([r, cc]);
             cc++;
         }
     } else {
-        // scan up
         let rr = r;
         while (rr >= 0 && !getCell(rr, c).classList.contains("black")) rr--;
         rr++;
-
         while (rr < crosswordSize && !getCell(rr, c).classList.contains("black")) {
             coords.push([rr, c]);
             rr++;
@@ -681,13 +542,9 @@ function highlightWord(cell, direction) {
     });
 }
 
-/* ============================
-   UPDATE CLUE PANEL
-   ============================ */
 function updateClueDisplay(cell) {
     const number = cell.querySelector(".clue-number")?.textContent || "?";
     const clueObj = crosswordData.clues[selectedDirection];
-
     let clueText = clueObj[number] || "—";
 
     crosswordClue.innerHTML = `
@@ -697,15 +554,11 @@ function updateClueDisplay(cell) {
     `;
 }
 
-/* select first non-black cell */
 function selectFirstCell() {
     const cell = crosswordCells.find(c => !c.classList.contains("black"));
     if (cell) selectCell(cell);
 }
 
-/* ============================
-   KEYBOARD INPUT
-   ============================ */
 function setupKeyboard() {
     document.querySelectorAll("#crossword-keyboard .ck-key").forEach(key => {
         key.onclick = () => {
