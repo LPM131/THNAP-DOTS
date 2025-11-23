@@ -392,3 +392,11 @@ body, html {
     cursor: pointer;
     padding: 4px;
 }
+
+#voice-btn {
+    width: 48px; height: 48px; border-radius: 50%; background: #007AFF; color: white; font-size: 20px;
+}
+
+.voice { background: #ff3b30 !important; color: white; }
+
+.waveform { width: 100px; height: 30px; background: rgba(255,255,255,0.3); border-radius: 15px; margin-top: 8px; }

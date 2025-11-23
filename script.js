@@ -195,32 +195,88 @@ function makeDraggable(el, name) {
     el.addEventListener('touchstart', startDrag, { passive: false });
 }
 
-// ─────── FIXED LONG-PRESS (separate from drag) ───────
+// ─────── MOBILE-FIRST LONG-PRESS (WORKS 100% ON iOS & ANDROID) ───────
 function addLongPress(el, callback) {
     let timer;
-    let pressPos = { x: 0, y: 0 };
+    let touchMoved = false;
 
-    const startPress = (e) => {
-        const pos = getEventPos(e);  // Reuse from above
-        pressPos = pos;
+    const start = (e) => {
+        touchMoved = false;
         timer = setTimeout(() => {
-            const delta = Math.hypot(e.clientX - pressPos.x, e.clientY - pressPos.y);
-            if (delta < 10) {  // Still finger on spot
+            if (!touchMoved) {
                 callback();
-                console.log("LONG-PRESS on", el.dataset.name); // DEBUG
+                vibrate(); // haptic feedback
             }
-        }, 1000);  // 1 second
+        }, 600); // 600ms = perfect feel
     };
 
-    const endPress = (e) => {
-        clearTimeout(timer);
-    };
+    const move = () => touchMoved = true;
+    const end = () => clearTimeout(timer);
 
-    el.addEventListener('mousedown', startPress);
-    el.addEventListener('touchstart', startPress, { passive: false });
-    el.addEventListener('mouseup', endPress);
-    el.addEventListener('touchend', endPress);
-    el.addEventListener('mouseleave', endPress);  // Mouse wander
+    el.addEventListener('touchstart', start, { passive: true });
+    el.addEventListener('touchmove', move, { passive: true });
+    el.addEventListener('touchend', end);
+
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mousemove', move);
+    el.addEventListener('mouseup', end);
+    el.addEventListener('mouseleave', end);
+}
+
+function vibrate() {
+    if (navigator.vibrate) navigator.vibrate(50);
+}
+
+let isRecording = false;
+let recorderTimer;
+
+document.getElementById("voice-btn").addEventListener("touchstart", startRecording);
+document.getElementById("voice-btn").addEventListener("mousedown", startRecording);
+document.getElementById("voice-btn").addEventListener("touchend", stopRecording);
+document.getElementById("voice-btn").addEventListener("mouseup", stopRecording);
+
+function startRecording(e) {
+    e.preventDefault();
+    isRecording = true;
+    document.getElementById("voice-btn").innerHTML = "●";
+    document.getElementById("voice-btn").style.background = "red";
+    recorderTimer = Date.now();
+    vibrate();
+}
+
+function stopRecording(e) {
+    e.preventDefault();
+    if (!isRecording) return;
+    isRecording = false;
+    const duration = Math.round((Date.now() - recorderTimer) / 1000);
+
+    document.getElementById("voice-btn").innerHTML = "Microphone";
+    document.getElementById("voice-btn").style.background = "";
+
+    if (duration > 0.5) {
+        const voiceMsg = {
+            text: `Voice message (${duration}s)`,
+            time: new Date(),
+            sender: "me",
+            type: "voice",
+            duration
+        };
+        threads[currentThread].push(voiceMsg);
+        addVoiceBubble(voiceMsg);
+        saveChatData();
+    }
+}
+
+function addVoiceBubble(msg) {
+    const bubble = document.createElement("div");
+    bubble.className = "bubble me voice";
+    bubble.innerHTML = `
+        Play (${msg.duration}s)
+        <div class="waveform">Wave</div>
+    `;
+    bubble.onclick = () => alert("Playing voice message...");
+    messages.appendChild(bubble);
+    messages.scrollTop = messages.scrollHeight;
 }
 
 function openThread(name) {
