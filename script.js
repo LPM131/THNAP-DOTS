@@ -232,10 +232,9 @@ function submitGuess() {
   if (!isValidGuess(guess)) {
     showMessage("Not in word list");
     shakeCurrentRow();
-    return; // ← THIS PREVENTS CRASH
+    return;
   }
 
-  // Valid word — add it and animate
   guesses.push(guess);
   currentGuess = "";
   animateRow(guesses.length - 1, guess);
@@ -459,87 +458,128 @@ function openChat() {
 // ———————————————
 // POKEMON SYSTEM — RESTORED
 // ———————————————
+let pokemonNames = [];
+let fullPokemonData = [];
+let filteredList = [];
+let currentPokemonName = "";
+let currentPokemonSprite = "";
+
+const GEN_RANGES = {
+  "Gen 1": [1, 151],
+  "Gen 2": [152, 251],
+  "Gen 3": [252, 386],
+  "Gen 4": [387, 493],
+  "Gen 5": [494, 649],
+  "Gen 6": [650, 721],
+  "Gen 7": [722, 809],
+  "Gen 8": [810, 898],
+  "Gen 9": [899, 1025]
+};
+
+async function loadAllPokemonNames() {
+  if (pokemonNames.length > 0) return;
+
+  const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=1025`);
+  const data = await res.json();
+
+  pokemonNames = data.results.map(p => p.name);
+  fullPokemonData = data.results;
+}
+
 function openPokemon() {
-  const pokemonModal = document.getElementById("pokemon-modal");
+  document.getElementById("pokemon-modal").classList.remove("hidden");
   mainGrid.classList.add("hidden");
-  pokemonModal.classList.remove("hidden");
 
-  initPokemonBattle();
+  loadAllPokemonNames().then(() => {
+    document.querySelector('.gen-row button:first-child').classList.add('active');
+    loadPokemon();
+  });
+
+  const input = document.getElementById("pokemon-guess");
+  input.addEventListener("input", spellingAssist);
 }
 
-function initPokemonBattle() {
-  const battleArea = document.createElement("div");
-  battleArea.id = "battle-area";
-  battleArea.innerHTML = `
-    <h1>Pokemon Battle Arena</h1>
-    <div class="pokemon-scene">
-      <div class="player-team">
-        <div class="pokemon-card">
-          <h3>Charizard</h3>
-          <div class="pokemon-image">🐉</div>
-          <div class="health-bar">
-            <div class="health-fill" style="width: 100%"></div>
-          </div>
-        </div>
-      </div>
-      <div class="battle-controls">
-        <button onclick="attack()">Attack</button>
-        <button onclick="specialAttack()">Special Attack</button>
-        <button onclick="heal()">Heal</button>
-      </div>
-      <div class="opponent-team">
-        <div class="pokemon-card">
-          <h3>Mewtwo</h3>
-          <div class="pokemon-image">👾</div>
-          <div class="health-bar">
-            <div class="health-fill" style="width: 100%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="battle-log" id="battle-log"></div>
-  `;
+function setGeneration(gen) {
+  document.querySelectorAll('.gen-row button').forEach(btn => btn.classList.remove('active'));
 
-  document.getElementById("pokemon-modal").appendChild(battleArea);
+  if (gen === 'all') {
+    filteredList = fullPokemonData;
+    document.querySelector('.gen-row:nth-child(2) button:last-child').classList.add('active');
+  } else {
+    const start = GEN_RANGES[`Gen ${gen}`][0] - 1;
+    const end = GEN_RANGES[`Gen ${gen}`][1];
+    filteredList = fullPokemonData.slice(start, end);
+
+    const row = gen <= 5 ? 1 : 2;
+    const index = gen <= 5 ? gen - 1 : gen - 6;
+    document.querySelector(`.gen-row:nth-child(${row}) button:nth-child(${index + 1})`).classList.add('active');
+  }
+  loadPokemon();
 }
 
-function attack() {
-  addToLog("Your Charizard used Scratch!");
-  setTimeout(() => {
-    addToLog("Mewtwo's HP went down!");
-    animateDamage('opponent');
-  }, 500);
+async function loadPokemon() {
+  const pool = filteredList.length ? filteredList : fullPokemonData;
+
+  const choice = pool[Math.floor(Math.random() * pool.length)];
+  const res = await fetch(choice.url);
+  const data = await res.json();
+
+  currentPokemonName = data.name;
+  currentPokemonSprite = data.sprites.front_default;
+
+  const img = document.getElementById("pokemon-silhouette");
+  img.src = currentPokemonSprite;
+  img.style.filter = "brightness(0)";
+
+  document.getElementById("pokemon-feedback").textContent = "";
+  document.getElementById("pokemon-guess").value = "";
+  document.getElementById("pokemon-suggestions").style.display = "none";
 }
 
-function specialAttack() {
-  addToLog("Your Charizard used Flamethrower!");
-  setTimeout(() => {
-    addToLog("Critical hit! Mewtwo fainted!");
-    animateDamage('opponent');
-  }, 500);
+function guessPokemon() {
+  const guess = document.getElementById("pokemon-guess").value.trim().toLowerCase();
+  if (!guess) return;
+
+  const feedback = document.getElementById("pokemon-feedback");
+
+  if (guess === currentPokemonName) {
+    feedback.textContent = "🎉 Correct!";
+    document.getElementById("pokemon-silhouette").style.filter = "none";
+
+    setTimeout(loadPokemon, 1500);
+  } else {
+    feedback.textContent = "❌ Wrong. Try again!";
+  }
 }
 
-function heal() {
-  addToLog("Your Charizard healed!");
-  animateHeal('player');
+function giveHint() {
+  const feedback = document.getElementById("pokemon-feedback");
+  feedback.textContent = `Hint: Starts with \"${currentPokemonName[0].toUpperCase()}\"`;
 }
 
-function addToLog(text) {
-  const log = document.getElementById("battle-log");
-  const entry = document.createElement("div");
-  entry.textContent = text;
-  log.appendChild(entry);
-  log.scrollTop = log.scrollHeight;
+// SPELLING ASSIST DROPDOWN
+function spellingAssist() {
+  const q = document.getElementById("pokemon-guess").value.toLowerCase();
+  const list = document.getElementById("pokemon-suggestions");
+
+  if (!q) { list.style.display = "none"; return; }
+
+  const matches = pokemonNames
+    .filter(n => n.startsWith(q))
+    .slice(0, 12);
+
+  list.innerHTML = "";
+  matches.forEach(name => {
+    const li = document.createElement("li");
+    li.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    li.onclick = () => {
+      document.getElementById("pokemon-guess").value = li.textContent;
+      list.style.display = "none";
+    };
+    list.appendChild(li);
+  });
+
+  list.style.display = matches.length ? "block" : "none";
 }
 
-function animateDamage(target) {
-  const card = document.querySelector(`.${target}-team .pokemon-card`);
-  card.classList.add("damage");
-  setTimeout(() => card.classList.remove("damage"), 500);
-}
-
-function animateHeal(target) {
-  const bar = document.querySelector(`.${target}-team .health-fill`);
-  const currentWidth = parseInt(bar.style.width);
-  bar.style.width = Math.min(100, currentWidth + 20) + "%";
-}
+initChat();
