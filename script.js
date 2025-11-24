@@ -345,201 +345,162 @@ function spellingAssist() {
 // Load input event listener
 document.getElementById("pokemon-guess").addEventListener("input", spellingAssist);
 
-// ------------------------------
-// WORDLE 100% CLEAN MODULE
-// ------------------------------
-const WORD_LIST = ["APPLE", "BANJO", "CRANE", "DANCE", "ELITE", "FLAME", "GRAPE"];
+// ———————————————————————————————
+// WORDLE — FINAL FIXED VERSION (2025)
+// ———————————————————————————————
+let WORD = "";
+let guesses = [];
+let currentGuess = "";
+
+const board = document.getElementById("game-board");
+const messageEl = document.getElementById("game-message");
 
 function getWordOfTheDay() {
   const start = new Date("2025-01-01");
   const today = new Date();
-  const diff = Math.floor((today - start) / (86400000));
-  const answers = [...ANSWERS_EVER];
-  return answers[diff % answers.length];
+  const days = Math.floor((today - start) / 86400000);
+  const allAnswers = [...ANSWERS_EVER];
+  return allAnswers[days % allAnswers.length];
 }
 
-let WORD = getWordOfTheDay();
-let guesses = [];
-let currentGuess = "";
-
-// Elements
-const boardEl = document.getElementById("game-board");
-const keyboardEl = document.getElementById("keyboard");
-const messageEl = document.getElementById("game-message");
-
-// ------------------------------
-// Init board (30 tiles)
-// ------------------------------
 function initBoard() {
-    boardEl.innerHTML = "";
-    for (let i = 0; i < 30; i++) {
-        const tile = document.createElement("div");
-        tile.classList.add("tile");
-        const span = document.createElement("span");
-        tile.appendChild(span);
-        boardEl.appendChild(tile);
-    }
+  board.innerHTML = "";
+  for (let i = 0; i < 30; i++) {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    board.appendChild(tile);
+  }
 }
 
-function initKeyboard() {
-  document.querySelectorAll('.key').forEach(button => {
-    button.onclick = () => {
-      const key = button.dataset.key;
-      if (key === 'ENTER') handleKey('ENTER');
-      else if (key === 'BACKSPACE') handleKey('BACKSPACE');
-      else if (key.length === 1) handleKey(key);
-    };
+function updateBoard() {
+  const tiles = board.querySelectorAll(".tile");
+  tiles.forEach((tile, i) => {
+    const row = Math.floor(i / 5);
+    const col = i % 5;
+    tile.textContent = "";
+    tile.className = "tile";
+
+    if (row < guesses.length) {
+      tile.textContent = guesses[row][col];
+      tile.classList.add("filled");
+    } else if (row === guesses.length) {
+      tile.textContent = currentGuess[col] || "";
+      if (currentGuess[col]) tile.classList.add("filled");
+    }
   });
 }
 
-// ------------------------------
-// Key handling
-// ------------------------------
-function handleKey(k) {
-    if (k === "BACKSPACE" || k === "backspace") {
-        currentGuess = currentGuess.slice(0, -1);
-        updateBoard();
-        return;
-    }
-
-    if (k === "ENTER") {
-        submitGuess();
-        return;
-    }
-
-    if (currentGuess.length < 5) {
-        currentGuess += k;
-        updateBoard();
-    }
-}
-
-// ------------------------------
-// Update Board
-// ------------------------------
-function updateBoard() {
-    const tiles = [...document.querySelectorAll(".tile span")];
-
-    for (let i = 0; i < 30; i++) {
-        let row = Math.floor(i / 5);
-
-        if (row < guesses.length) {
-            tiles[i].textContent = guesses[row][i % 5];
-        } else if (row === guesses.length) {
-            tiles[i].textContent = currentGuess[i % 5] || "";
-        } else {
-            tiles[i].textContent = "";
-        }
-    }
-}
-
-// ------------------------------
-// Submit guess WITH VALIDATION
-// ------------------------------
 function submitGuess() {
-    if (currentGuess.length < 5) {
-        messageEl.textContent = "Not enough letters.";
-        return;
+  if (currentGuess.length < 5) {
+    messageEl.textContent = "Not enough letters";
+    setTimeout(() => messageEl.textContent = "", 1500);
+    return;
+  }
+
+  const guess = currentGuess.toUpperCase();
+
+  if (!isValidGuess(guess)) {
+    messageEl.textContent = "Not in word list";
+    shakeCurrentRow();
+    setTimeout(() => messageEl.textContent = "", 1500);
+    return;
+  }
+
+  guesses.push(guess);
+  currentGuess = "";
+  messageEl.textContent = "";
+
+  animateRow(guesses.length - 1, guess);
+}
+
+function shakeCurrentRow() {
+  const start = guesses.length * 5;
+  const tiles = board.querySelectorAll(".tile");
+  for (let i = start; i < start + 5; i++) {
+    tiles[i].classList.add("shake");
+    setTimeout(() => tiles[i].classList.remove("shake"), 600);
+  }
+}
+
+function animateRow(rowIndex, guess) {
+  const start = rowIndex * 5;
+  const tiles = board.querySelectorAll(".tile");
+
+  // Count letters in answer
+  const letterCount = {};
+  for (const c of WORD) letterCount[c] = (letterCount[c] || 0) + 1;
+
+  // First mark all correct (green)
+  for (let i = 0; i < 5; i++) {
+    if (guess[i] === WORD[i]) {
+      setTimeout(() => {
+        tiles[start + i].classList.add("flip", "correct");
+        tiles[start + i].textContent = guess[i];
+        letterCount[guess[i]]--;
+      }, i * 300);
     }
+  }
 
-    const guess = currentGuess.toUpperCase();
-
-    // CHECK IF VALID WORD (BLOOM FILTER)
-    if (!isValidGuess(guess)) {
-        showError("Not in word list");
-        shakeRow(guesses.length);
-        return;
-    }
-
-    guesses.push(guess);
-    currentGuess = "";
-    messageEl.textContent = "";
-
-    revealGuess(guess, guesses.length - 1);
-}
-
-function showError(text) {
-    // Remove old error
-    document.querySelectorAll(".error-message").forEach(e => e.remove());
-
-    const msg = document.createElement("div");
-    msg.className = "error-message";
-    msg.textContent = text;
-    document.body.appendChild(msg);
-
-    setTimeout(() => msg.remove(), 2000);
-}
-
-function shakeRow(row) {
-    const tiles = [...document.querySelectorAll(".tile")].slice(row * 5, row * 5 + 5);
-    tiles.forEach(tile => tile.classList.add("shake"));
-    setTimeout(() => tiles.forEach(tile => tile.classList.remove("shake")), 600);
-}
-
-// ------------------------------
-// Reveal animation & coloring WITH Keyboard Highlighting
-// ------------------------------
-function revealGuess(guess, row) {
-    const tiles = [...document.querySelectorAll(".tile")];
-    const rowTiles = tiles.slice(row * 5, row * 5 + 5);
-    const letterStates = {}; // Track best state for each letter
-
-    // First pass: determine correct state for each letter (green > yellow > gray)
-    [...guess].forEach((char, i) => {
-        if (WORD[i] === char) {
-            letterStates[char] = "correct";
-        } else if (WORD.includes(char) && !letterStates[char]) {
-            letterStates[char] = "present";
-        } else if (!letterStates[char]) {
-            letterStates[char] = "absent";
+  // Then mark present/absent
+  for (let i = 0; i < 5; i++) {
+    if (guess[i] !== WORD[i]) {
+      setTimeout(() => {
+        tiles[start + i].textContent = guess[i];
+        tiles[start + i].classList.add("flip");
+        if (WORD.includes(guess[i]) && letterCount[guess[i]] > 0) {
+          tiles[start + i].classList.add("present");
+          letterCount[guess[i]]--;
+        } else {
+          tiles[start + i].classList.add("absent");
         }
-    });
+        updateKeyboard(guess, WORD);
 
-    // Second pass: animate tiles + update keyboard
-    [...guess].forEach((char, i) => {
-        setTimeout(() => {
-            const tile = rowTiles[i];
-            tile.classList.add("flip");
-
-            let state = "absent";
-            if (WORD[i] === char) state = "correct";
-            else if (WORD.includes(char)) state = "present";
-
-            tile.classList.add(state);
-            tile.querySelector("span").textContent = char;
-
-            // Call updateKeyboard after tiles finish revealing
-            if (i === 4) {
-                updateKeyboard(guess, WORD);
-                checkEndGame(guess);
-            }
-        }, i * 300);
-    });
-}
-
-function checkEndGame(guess) {
-    if (guess === WORD) {
-        messageEl.textContent = "🎉 You got it!";
-    } else if (guesses.length === 6) {
-        messageEl.textContent = `The word was: ${WORD}`;
+        if (i === 4) {
+          setTimeout(checkWin, 300);
+        }
+      }, i * 300);
     }
+  }
 }
 
-// ------------------------------
-// Initialize on modal open
-// ------------------------------
-function initGame() {
-    guesses = [];
-    currentGuess = "";
-    WORD = getWordOfTheDay();
-    initBoard();
-    initKeyboard();
+function checkWin() {
+  const lastGuess = guesses[guesses.length - 1];
+  if (lastGuess === WORD) {
+    messageEl.textContent = "Genius!";
+  } else if (guesses.length === 6) {
+    messageEl.textContent = `The word was ${WORD}`;
+  }
+}
+
+// Keyboard handler
+document.querySelectorAll(".key").forEach(key => {
+  key.addEventListener("click", () => {
+    const k = key.dataset.key || key.textContent;
+    if (k === "ENTER") submitGuess();
+    else if (k === "BACK") currentGuess = currentGuess.slice(0, -1);
+    else if (currentGuess.length < 5) currentGuess += k;
     updateBoard();
+  });
+});
 
-    // Reset letter status for new game
-    Object.keys(letterStatus).forEach(key => delete letterStatus[key]);
-}
+// Physical keyboard support
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") submitGuess();
+  else if (e.key === "Backspace") currentGuess = currentGuess.slice(0, -1);
+  else if (/^[A-Z]$/i.test(e.key) && currentGuess.length < 5) currentGuess += e.key.toUpperCase();
+  updateBoard();
+});
 
 function openWordle() {
-    wordleModal.classList.remove("hidden");
-    initGame();
+  wordleModal.classList.remove("hidden");
+  WORD = getWordOfTheDay();
+  guesses = [];
+  currentGuess = "";
+  messageEl.textContent = "";
+  Object.keys(letterStatus).forEach(k => delete letterStatus[k]);
+  document.querySelectorAll(".key").forEach(k => {
+    k.classList.remove("correct", "present", "absent");
+  });
+  initBoard();
+  updateBoard();
 }
