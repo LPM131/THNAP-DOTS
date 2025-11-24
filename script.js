@@ -8,6 +8,7 @@ let currentGuess = "";
 const board = document.getElementById("game-board");
 const messageEl = document.getElementById("game-message");
 const wordleModal = document.getElementById("wordle-modal");
+const mainGrid = document.getElementById("main-grid");
 
 const VALID_GUESSES = new Set([
   "ABOUT", "ABOVE", "ABUSE", "ACTOR", "ADMIT", "ADULT", "AFTER", "AGAIN", "AGENT", "ALIEN", "ALLOW", "ALONE", "ALONG", "ALOUD", "ALPHA",
