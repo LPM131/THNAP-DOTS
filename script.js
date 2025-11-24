@@ -64,15 +64,18 @@ function updateBoard() {
   });
 }
 
-// ——— MESSAGE POPUP THAT CANNOT BE HIDDEN ———
 function showMessage(text, duration = 2000) {
   messageEl.textContent = text;
-  messageEl.style.opacity = "1";
-  messageEl.style.transform = "translateY(0)";
-  clearTimeout(messageEl.timeout);
-  messageEl.timeout = setTimeout(() => {
-    messageEl.style.opacity = "0";
-    messageEl.style.transform = "translateY(-20px)";
+  messageEl.classList.remove("show");
+
+  // Force reflow
+  void messageEl.offsetWidth;
+
+  messageEl.classList.add("show");
+
+  clearTimeout(messageEl.hideTimeout);
+  messageEl.hideTimeout = setTimeout(() => {
+    messageEl.classList.remove("show");
   }, duration);
 }
 
