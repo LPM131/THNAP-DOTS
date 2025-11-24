@@ -68,13 +68,6 @@ body, html {
   overflow: hidden;
 }
 
-.wordle-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-}
-
 /* HEADERS */
 .header {
     display: flex;
@@ -130,7 +123,6 @@ body, html {
     grid-template-columns: repeat(5, 62px);
     gap: 5px;
     justify-content: center;
-    margin: 20px auto;
 }
 
 /* Tiles: square, white with dark border initially */
@@ -567,26 +559,3 @@ html, body {
   overflow: hidden !important;
 }
 
-/* 2. The game area — flex: 1 pushes keyboard down */
-.wordle-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  max-height: none !important;   /* ← kills any bad calc() */
-}
-
-/* 3. The actual keyboard — this one line sticks it perfectly */
-#keyboard {
-  margin-top: auto !important;
-  padding: 0 6px max(8px, env(safe-area-inset-bottom)) !important;
-}
-
-/* —— TINY FIX: game-upper wrapper —— */
-.game-upper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-  padding: 20px 0;
-}
