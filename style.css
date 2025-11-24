@@ -73,7 +73,6 @@ body, html {
   display: flex;
   flex-direction: column;
   padding: 0;
-  overflow: hidden;
 }
 
 /* HEADERS */
@@ -580,4 +579,14 @@ html, body {
 #keyboard {
   margin-top: auto !important;
   padding: 0 6px max(8px, env(safe-area-inset-bottom)) !important;
+}
+
+/* —— TINY FIX: game-upper wrapper —— */
+.game-upper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  padding: 20px 0;
 }
