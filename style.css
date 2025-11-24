@@ -59,6 +59,23 @@ body, html {
     display: none !important;
 }
 
+/* WORDLE MODAL LAYOUT - iPhone-perfect forever */
+#wordle-modal {
+  height: 100dvh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wordle-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
 /* HEADERS */
 .header {
     display: flex;
@@ -107,22 +124,6 @@ body, html {
     display: flex;
     gap: 10px;
     padding: 10px;
-}
-
-/* Wordle area layout */
-.wordle-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;   /* ← THIS is the magic */
-    padding: 10px 0;
-}
-
-
-
-#keyboard {
-    margin-top: auto;                                   /* ← sticks to bottom */
-    padding: 0 8px max(12px, env(safe-area-inset-bottom)); /* ← safe area + tiny padding */
 }
 
 #game-board {
@@ -491,47 +492,64 @@ body, html {
     padding: 0 10px;
 }
 
-/* ——— NYT EXACT KEYBOARD (2025) ——— */
+/* ——— REAL NYT WORDLE KEYBOARD 2025 — 100% iPhone-perfect ——— */
 #keyboard {
   margin-top: auto;
-  padding: 0 8px max(8px, env(safe-area-inset-bottom));
+  padding: 0 6px 8px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   user-select: none;
 }
 
-.nyt-row {
+#keyboard .row {
   display: flex;
   width: 100%;
-  margin: 0 auto 7px;
+  margin: 0 auto 6px;
+  touch-action: manipulation;
   justify-content: center;
+  gap: 4px;
 }
 
-.nyt-key {
+#keyboard .key {
   flex: 1;
   height: 58px;
-  margin: 0 3px;
   background: #d3d6da;
-  border: 0;
+  border: none;
   border-radius: 4px;
   font-weight: bold;
   font-size: 14px;
   text-transform: uppercase;
-  color: #000;
-  max-width: 65px;
+  color: #111;
   display: flex;
   align-items: center;
   justify-content: center;
+  max-width: 43px;
+  min-width: 30px;
 }
 
-.nyt-large {
+#keyboard .key.large {
   flex: 1.5;
   font-size: 12px;
+  max-width: 65px;
 }
 
-.nyt-spacer {
+#keyboard .spacer {
   flex: 0.5;
+  max-width: 20px;
 }
 
-/* Colors — exact NYT */
-.nyt-key.correct  { background:#6aaa64 !important; color:white !important; }
-.nyt-key.present  { background:#c9b458 !important; color:white !important; }
-.nyt-key.absent   { background:#787c7e !important; color:white !important; }
+#keyboard .key svg {
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+}
+
+/* Exact NYT colors */
+#keyboard .key.correct  { background: #6aaa64 !important; color: white !important; }
+#keyboard .key.present  { background: #c9b458 !important; color: white !important; }
+#keyboard .key.absent   { background: #787c7e !important; color: white !important; }
+
+/* Pressed effect */
+#keyboard .key:active {
+  background: #bbb !important;
+  transform: scale(0.95);
+}

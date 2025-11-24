@@ -34,8 +34,8 @@ function updateKeyboard(guess, answer) {
     }
   }
 
-  // FIXED: keep .nyt-key class, only add/remove correct/present/absent
-  document.querySelectorAll('.nyt-key').forEach(key => {
+  // FIXED: keep .key class, only add/remove correct/present/absent
+  document.querySelectorAll('.key').forEach(key => {
     const letter = key.textContent.trim().toUpperCase();
     if (letter && letterStatus[letter] !== undefined) {
       key.classList.remove('correct', 'present', 'absent');
@@ -383,7 +383,7 @@ function initBoard() {
 }
 
 function initKeyboard() {
-  document.querySelectorAll('.nyt-key').forEach(button => {
+  document.querySelectorAll('.key').forEach(button => {
     button.onclick = () => {
       const key = button.dataset.key;
       if (key === 'ENTER') handleKey('ENTER');
