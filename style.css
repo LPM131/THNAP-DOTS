@@ -553,3 +553,31 @@ body, html {
   background: #bbb !important;
   transform: scale(0.95);
 }
+
+/* ——— NYT 2025 iPhone-perfect layout fixes ——— */
+
+/* 1. The modal / root container — THIS IS THE KEY */
+#wordle-modal,
+html, body {
+  height: 100vh;
+  height: 100dvh;           /* ← fixes iPhone notch + keyboard */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
+}
+
+/* 2. The game area — flex: 1 pushes keyboard down */
+.wordle-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: none !important;   /* ← kills any bad calc() */
+}
+
+/* 3. The actual keyboard — this one line sticks it perfectly */
+#keyboard {
+  margin-top: auto !important;
+  padding: 0 6px max(8px, env(safe-area-inset-bottom)) !important;
+}
