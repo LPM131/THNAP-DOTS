@@ -69,33 +69,30 @@ body, html {
   overflow: hidden;
 }
 
-/* Header — identical to real Wordle */
+/* HEADER — final tiny tweak (real NYT size, Nov 2025) */
 .nyt-header {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 8px 12px 6px;          /* ← reduced from 10px 16 10 */
   border-bottom: 1px solid #d3d6da;
-  font-size: 28px;
-  font-weight: bold;
-  color: black;
+  height: 56px;                   /* ← this is the magic line */
+  box-sizing: border-box;
 }
+
 .nyt-header .back {
-  background: none;
-  border: none;
-  font-size: 32px;
+  font-size: 34px;                /* ← slightly smaller arrow */
   padding: 0;
-  cursor: pointer;
-  color: #333;
+  margin-top: -2px;
 }
+
 .nyt-header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;                /* ← down from 28px */
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
-.nyt-header .spacer { width: 40px; }
 
 /* Main game area — the single most important line */
 .nyt-game {
