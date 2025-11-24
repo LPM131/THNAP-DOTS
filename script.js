@@ -241,4 +241,86 @@ function flipRow(row) {
       if (letter === WORD[i]) {
         status = "correct";
         counts[letter]--;
-      } else if (WORD.includes(letter) && counts
+      } else if (WORD.includes(letter) && counts[letter] > 0) {
+        status = "present";
+        counts[letter]--;
+      }
+
+      setTimeout(() => tile.classList.add(status), 250);
+
+      const key = document.querySelector(`.key[data-key="${letter}"]`);
+      if (key) {
+        if (status === "correct") key.classList.add("correct");
+        else if (status === "present" && !key.classList.contains("correct")) key.classList.add("present");
+        else if (!key.classList.contains("correct") && !key.classList.contains("present")) key.classList.add("absent");
+      }
+    }, i * 300);
+  });
+
+  setTimeout(() => {
+    if (guesses.at(-1).join("") === WORD) showMessage("Genius!", 5000);
+    else if (guesses.length === 6) showMessage("The word was " + WORD, 10000);
+  }, 1800);
+}
+
+function handleKey(key) {
+  if (guesses.length >= 6 || (guesses.length > 0 && guesses.at(-1).join("") === WORD)) return;
+
+  if (key === "ENTER") submitGuess();
+  else if (key === "BACKSPACE") currentGuess = currentGuess.slice(0, -1);
+  else if (currentGuess.length < 5 && /^[A-Z]$/.test(key)) currentGuess += key;
+  updateBoard();
+}
+
+document.querySelectorAll(".key").forEach(k => {
+  k.addEventListener("click", () => handleKey(k.dataset.key || k.textContent.trim()));
+});
+
+document.addEventListener("keydown", e => {
+  if (!wordleModal.classList.contains("hidden")) {
+    if (e.key === "Enter") handleKey("ENTER");
+    else if (e.key === "Backspace") handleKey("BACKSPACE");
+    else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+  }
+});
+
+function openWordle() {
+  wordleModal.classList.remove("hidden");
+  mainGrid.classList.add("hidden");
+  WORD = getWordOfTheDay();
+  guesses = [];
+  currentGuess = "";
+  document.querySelectorAll(".key").forEach(k => k.className = "key");
+  initBoard();
+  updateBoard();
+}
+
+function backToMain() {
+  document.querySelectorAll(".modal").forEach(m => m.classList.add("hidden"));
+  mainGrid.classList.remove("hidden");
+}
+
+function openChat() {
+  document.getElementById("chat-modal").classList.remove("hidden");
+  mainGrid.classList.add("hidden");
+}
+
+function openPokemon() {
+  document.getElementById("pokemon-modal").classList.remove("hidden");
+  mainGrid.classList.add("hidden");
+}
+
+document.querySelectorAll(".dot").forEach(dot => {
+  dot.addEventListener("click", () => {
+    const id = parseInt(dot.dataset.id);
+    if (id === 1) openChat();
+    else if (id === 11) {
+      openWordle();
+    } else if (id === 13) {
+      openPokemon();
+    } else {
+      alert(`Dot ${id} coming soon!`);
+      backToMain();
+    }
+  });
+});
