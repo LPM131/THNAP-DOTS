@@ -69,32 +69,41 @@ body, html {
   overflow: hidden;
 }
 
-/* HEADER — final tiny tweak (real NYT size, Nov 2025) */
+/* FINAL HEADER — thinner, no overlap, works on mobile + desktop */
 .nyt-header {
+  position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px 6px;          /* ← reduced from 10px 16 10 */
+  padding: 0 12px;                    /* reduced side padding */
+  height: 44px;                       /* ← THIS is the real NYT header height in 2025 */
   border-bottom: 1px solid #d3d6da;
-  height: 56px;                   /* ← this is the magic line */
+  background: white;
+  z-index: 10;
   box-sizing: border-box;
 }
 
 .nyt-header .back {
-  font-size: 34px;                /* ← slightly smaller arrow */
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
   padding: 0;
-  margin-top: -2px;
+  margin: 0;
+  line-height: 1;
 }
 
 .nyt-header h1 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 0;
-  font-size: 26px;                /* ← down from 28px */
+  font-size: 24px;           /* real NYT size */
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
-/* Main game area — the single most important line */
 .nyt-game {
   flex: 1;
   display: flex;
@@ -102,8 +111,7 @@ body, html {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  padding: 0;
-  max-height: calc(100vh - 80px); /* header ≈ 80px */
+  padding: 8px 0 0 0;  /* nuclear fix for any overlap */
 }
 
 /* Board — exact NYT spacing */
