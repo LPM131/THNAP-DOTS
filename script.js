@@ -1,3 +1,28 @@
+// ————————————————
+// MOBILE VIEWPORT HEIGHT FIX — CRITICAL FOR iOS SAFARI
+// ————————————————
+// Fix vh units for iOS Safari when keyboard appears/disappears
+function setVH() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+// Initial set
+setVH();
+
+// Update on resize and orientation change
+window.addEventListener('resize', setVH);
+window.addEventListener('orientationchange', setVH);
+
+// Update when focus changes (keyboard detection)
+let height = window.innerHeight;
+window.addEventListener('focusin', () => {
+  setTimeout(() => setVH(), 100);
+});
+window.addEventListener('focusout', () => {
+  setTimeout(() => setVH(), 100);
+});
+
 // ———————————————————————————————
 // WORDLE — FINAL WORKING VERSION (Nov 2025)
 // ———————————————————————————————
@@ -332,8 +357,9 @@ function backToMain() {
 }
 
 // ——— DOTS NAVIGATION ———
+// Add both click and touch events for mobile compatibility
 document.querySelectorAll(".dot").forEach(dot => {
-  dot.addEventListener("click", () => {
+  const handleDotClick = () => {
     const id = parseInt(dot.dataset.id);
     if (id === 1) openChat();
     else if (id === 11) openWordle();
@@ -342,7 +368,14 @@ document.querySelectorAll(".dot").forEach(dot => {
       alert(`Dot ${id} coming soon!`);
       backToMain();
     }
-  });
+  };
+
+  // Add both click and touchstart for maximum mobile compatibility
+  dot.addEventListener("click", handleDotClick);
+  dot.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // Prevent double events
+    handleDotClick();
+  }, { passive: false });
 });
 
 // ———————————————
