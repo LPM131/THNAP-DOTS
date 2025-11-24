@@ -354,7 +354,7 @@ function getWordOfTheDay() {
   const start = new Date("2025-01-01");
   const today = new Date();
   const diff = Math.floor((today - start) / (86400000));
-  const answers = [...ANSWERS];
+  const answers = [...ANSWERS_EVER];
   return answers[diff % answers.length];
 }
 
