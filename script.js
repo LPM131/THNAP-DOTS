@@ -314,13 +314,207 @@ document.querySelectorAll(".dot").forEach(dot => {
   dot.addEventListener("click", () => {
     const id = parseInt(dot.dataset.id);
     if (id === 1) openChat();
-    else if (id === 11) {
-      openWordle();
-    } else if (id === 13) {
-      openPokemon();
-    } else {
+    else if (id === 11) openWordle();
+    else if (id === 13) openPokemon();
+    else {
       alert(`Dot ${id} coming soon!`);
       backToMain();
     }
   });
 });
+
+// ———————————————
+// CHAT SYSTEM — RESTORED
+// ———————————————
+let threadNames = ["Bot", "Mom", "Alex"];
+let threads = {};
+let threadsData = {};
+let currentThread = null;
+
+function initChat() {
+  const n = localStorage.getItem("threads_names");
+  const t = localStorage.getItem("threads");
+  const d = localStorage.getItem("threads_data");
+
+  threadNames = n ? JSON.parse(n) : threadNames;
+  threads = t ? JSON.parse(t) : {};
+  threadsData = d ? JSON.parse(d) : {};
+
+  threadNames.forEach(name => {
+    if (!threads[name]) threads[name] = [];
+    if (!threadsData[name]) threadsData[name] = { unread: 0 };
+  });
+
+  loadChatUI();
+}
+
+function loadChatUI() {
+  const chatList = document.getElementById("chat-list");
+  const messages = document.getElementById("messages");
+  const input = document.getElementById("chat-input");
+
+  chatList.innerHTML = "";
+  threadNames.forEach(thread => {
+    const threadDiv = document.createElement("div");
+    threadDiv.className = "thread";
+    threadDiv.textContent = thread;
+    threadDiv.onclick = () => openThread(thread);
+    chatList.appendChild(threadDiv);
+  });
+
+  input.focus();
+  input.onkeypress = (e) => {
+    if (e.key === "Enter" && input.value.trim()) {
+      sendMessage(input.value.trim());
+      input.value = "";
+    }
+  };
+}
+
+function openThread(name) {
+  const messages = document.getElementById("messages");
+  currentThread = name;
+  messages.innerHTML = "";
+
+  (threads[name] || []).forEach(msg => {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `message ${msg.from === "You" ? "user" : "other"}`;
+    msgDiv.textContent = `${msg.from}: ${msg.text}`;
+    messages.appendChild(msgDiv);
+  });
+
+  threadsData[name].unread = 0;
+  saveChat();
+
+  document.querySelectorAll(".thread").forEach(t => t.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+function sendMessage(text) {
+  if (!currentThread) {
+    alert("Select a conversation first!");
+    return;
+  }
+
+  const msg = { from: "You", text, time: Date.now() };
+  threads[currentThread].push(msg);
+  addMessageToUI(msg);
+
+  setTimeout(() => {
+    const response = { from: currentThread, text: getBotResponse(text), time: Date.now() };
+    threads[currentThread].push(response);
+    addMessageToUI(response);
+    saveChat();
+  }, 500);
+}
+
+function addMessageToUI(msg) {
+  const messages = document.getElementById("messages");
+  const msgDiv = document.createElement("div");
+  msgDiv.className = `message ${msg.from === "You" ? "user" : "other"}`;
+  msgDiv.textContent = `${msg.from}: ${msg.text}`;
+  messages.appendChild(msgDiv);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function getBotResponse(input) {
+  const responses = ["Got it!", "Interesting...", "Tell me more", "Thanks!", "Nice", "OK", "Cool!", "Yeah?", "Huh?", "Word"];
+  return responses[Math.floor(Math.random() * responses.length)];
+}
+
+function saveChat() {
+  localStorage.setItem("threads_names", JSON.stringify(threadNames));
+  localStorage.setItem("threads", JSON.stringify(threads));
+  localStorage.setItem("threads_data", JSON.stringify(threadsData));
+}
+
+// ———————————————
+// POKEMON SYSTEM — RESTORED
+// ———————————————
+function openPokemon() {
+  const pokemonModal = document.getElementById("pokemon-modal");
+  const mainGrid = document.getElementById("main-grid");
+
+  mainGrid.classList.add("hidden");
+  pokemonModal.classList.remove("hidden");
+
+  initPokemonBattle();
+}
+
+function initPokemonBattle() {
+  const battleArea = document.createElement("div");
+  battleArea.id = "battle-area";
+  battleArea.innerHTML = `
+    <h1>Pokemon Battle Arena</h1>
+    <div class="pokemon-scene">
+      <div class="player-team">
+        <div class="pokemon-card">
+          <h3>Charizard</h3>
+          <div class="pokemon-image">🐉</div>
+          <div class="health-bar">
+            <div class="health-fill" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="battle-controls">
+        <button onclick="attack()">Attack</button>
+        <button onclick="specialAttack()">Special Attack</button>
+        <button onclick="heal()">Heal</button>
+      </div>
+      <div class="opponent-team">
+        <div class="pokemon-card">
+          <h3>Mewtwo</h3>
+          <div class="pokemon-image">👾</div>
+          <div class="health-bar">
+            <div class="health-fill" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="battle-log" id="battle-log"></div>
+  `;
+
+  document.getElementById("pokemon-modal").appendChild(battleArea);
+}
+
+function attack() {
+  addToLog("Your Charizard used Scratch!");
+  setTimeout(() => {
+    addToLog("Mewtwo's HP went down!");
+    animateDamage('opponent');
+  }, 500);
+}
+
+function specialAttack() {
+  addToLog("Your Charizard used Flamethrower!");
+  setTimeout(() => {
+    addToLog("Critical hit! Mewtwo fainted!");
+    animateDamage('opponent');
+  }, 500);
+}
+
+function heal() {
+  addToLog("Your Charizard healed!");
+  animateHeal('player');
+}
+
+function addToLog(text) {
+  const log = document.getElementById("battle-log");
+  const entry = document.createElement("div");
+  entry.textContent = text;
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+}
+
+function animateDamage(target) {
+  const card = document.querySelector(`.${target}-team .pokemon-card`);
+  card.classList.add("damage");
+  setTimeout(() => card.classList.remove("damage"), 500);
+}
+
+function animateHeal(target) {
+  const bar = document.querySelector(`.${target}-team .health-fill`);
+  const currentWidth = parseInt(bar.style.width);
+  bar.style.width = Math.min(100, currentWidth + 20) + "%";
+}
+
