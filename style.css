@@ -611,24 +611,22 @@ html, body {
 
 /* ——— REAL WORDLE MESSAGE POPUP (NEVER PUSHES GRID) ——— */
 #game-message {
-  position: absolute;
-  top: 10px;
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%) translateY(-50px);
-  background: rgba(0,0,0,0.85);
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.9);
   color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 16px 32px;
+  border-radius: 12px;
   font-weight: bold;
-  font-size: 16px;
-  z-index: 1000;
+  font-size: 18px;
+  z-index: 9999;
   opacity: 0;
-  transition: all 0.4s ease;
   pointer-events: none;
-  white-space: nowrap;
+  transition: opacity 0.3s ease;
 }
 
 #game-message.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
 }

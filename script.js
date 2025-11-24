@@ -104,7 +104,7 @@ function shakeCurrentRow() {
   }
 }
 
-// ——— MAIN SUBMIT (CRASH-PROOF) ———
+// ——— FIXED SUBMITGUESS + MESSAGE + SHAKE — NO CRASHES EVER ———
 function submitGuess() {
   if (currentGuess.length < 5) {
     showMessage("Not enough letters");
