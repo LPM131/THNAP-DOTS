@@ -38,7 +38,10 @@ const mainGrid = document.getElementById("main-grid");
 const VALID_GUESSES = new Set([
   "ABOUT", "ABOVE", "ABUSE", "ACTOR", "ADMIT", "ADULT", "AFTER", "AGAIN", "AGENT", "ALIEN", "ALLOW", "ALONE", "ALONG", "ALOUD", "ALPHA",
   "ALTER", "AMBER", "AMONG", "AMPLE", "ANGER", "ANGRY", "ANKLE", "ANNEX", "ANNOY", "APART", "APPLE", "APPLY", "ARENA", "ARGUE", "ARISE",
-  "ARMOR", "AROSE", "AURAL", "AWAIT", "AWAKE", "AWASH", "AUDIO", "AUDIT", "AWADE", "AWAVE", "AWARE", "AZURE", "BACON", "BADGE", "BADLY",
+  "ARMOR", "AROSE", "AURAL", "AWAIT", "AWAKE", "AWASH", "AUDIO", "AUDIT", "AWADE", "AWAVE", "AWARE", "AZURE",
+  // Adding missing common words that players expect to work:
+  "CRANE", "SLATE", "TRACE", "RAISE", "STARE", "PRIDE", "BRIDE", "PRIME", "CLIME", "TRIBE", "BRIBE", "STARE", "GRAPE", "CRIME", "SLIME", "GRIME",
+  "BACON", "BADGE", "BADLY",
   "BAKER", "BALDY", "BANJO", "BEACH", "BEADS", "BEAMY", "BEANS", "BEARD", "BEAST", "BEING", "BELOW", "BENCH", "BERTH", "BESET", "BETEL",
   "BEVEL", "BEZEL", "BIBLE", "BIDDY", "BIGOT", "BILGE", "BINGE", "BISON", "BITTY", "BLACK", "BLADE", "BLAME", "BLAND", "BLAST", "BLEAK",
   "BLEAT", "BLEED", "BLEEP", "BLESS", "BLIMP", "BLIND", "BLING", "BLINK", "BLISS", "BLOCK", "BLOKE", "BLOOD", "BLOOM", "BLOWN", "BLUFF",
