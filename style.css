@@ -59,20 +59,63 @@ body, html {
     display: none !important;
 }
 
-/* WORDLE MODAL LAYOUT - iPhone-perfect forever */
+/* ——— EXACT NYT WORDLE 2025 LAYOUT ——— */
 #wordle-modal {
   height: 100dvh;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background: white;
   overflow: hidden;
 }
 
-/* HEADERS */
-.header {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
+/* Header — identical to real Wordle */
+.nyt-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #d3d6da;
+  font-size: 28px;
+  font-weight: bold;
+  color: black;
+}
+.nyt-header .back {
+  background: none;
+  border: none;
+  font-size: 32px;
+  padding: 0;
+  cursor: pointer;
+  color: #333;
+}
+.nyt-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.nyt-header .spacer { width: 40px; }
+
+/* Main game area — the single most important line */
+.nyt-game {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 0;
+  max-height: calc(100vh - 80px); /* header ≈ 80px */
+}
+
+/* Board — exact NYT spacing */
+#game-board {
+  display: grid;
+  grid-template-rows: repeat(6, 62px);
+  grid-template-columns: repeat(5, 62px);
+  gap: 5px;
+  margin: 0 0 10px 0; /* tiny gap below board */
 }
 
 /* CHAT */
@@ -483,12 +526,14 @@ body, html {
     padding: 0 10px;
 }
 
-/* ——— REAL NYT WORDLE KEYBOARD 2025 — 100% iPhone-perfect ——— */
+/* Keyboard — perfect NYT gap + safe-area */
 #keyboard {
   margin-top: auto;
-  padding: 0 6px 8px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
-  user-select: none;
+  padding: 0 8px 8px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 500px;
+  box-sizing: border-box;
 }
 
 #keyboard .row {
@@ -558,4 +603,3 @@ html, body {
   flex-direction: column;
   overflow: hidden !important;
 }
-

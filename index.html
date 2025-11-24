@@ -46,17 +46,23 @@
         </div>
     </div>
 
-    <!-- WORDLE MODAL -->
-    <div id="wordle-modal" class="modal hidden">
-        <div class="header">
-            <button class="back" onclick="backToMain()">Back</button>
-            <h2>WORDLE</h2>
-        </div>
-        <div class="wordle-game" style="max-height: calc(100% - 70px - 210px);">
-            <div id="game-board"></div>
-            <div id="game-message" class="game-message"></div>
-        </div>
-<div id="keyboard">
+<!-- WORDLE MODAL — EXACT NYT LAYOUT 2025 -->
+<div id="wordle-modal" class="modal hidden">
+  <!-- HEADER — exactly like NYT -->
+  <header class="nyt-header">
+    <button class="back" onclick="backToMain()">←</button>
+    <h1>Wordle</h1>
+    <div class="spacer"></div>
+  </header>
+
+  <!-- MAIN GAME AREA — the magic calc() from real Wordle -->
+  <main class="nyt-game">
+    <div id="game-board"></div>
+    <div id="game-message" class="game-message"></div>
+  </main>
+
+  <!-- KEYBOARD — stays exactly where NYT puts it -->
+  <div id="keyboard">
   <div class="row">
     <button class="key" data-key="Q">Q</button>
     <button class="key" data-key="W">W</button>
