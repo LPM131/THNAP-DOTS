@@ -114,9 +114,9 @@ async function loadOfficialWordleLists() {
       "FEAST", "FECAL", "FEIGN", "FENCE", "FERAL", "FERRY", "FETAL", "FETCH", "FETID", "FETUS", "FEVER", "FEWER", "FIATS", "FIBER", "FICHE",
       "FIELD", "FIEND", "FIERY", "FIFTH", "FIGHT", "FILED", "FILER", "FILES", "FILLY", "FILMS", "FILMY", "FILTH", "FINAL", "FINCH", "FINDS",
       "FINED", "FINER", "FINES", "FIRST",
-    ]);
+    ];
   }
-};
+}
 
 function isValidGuess(word) {
   return VALID_GUESSES.has(word.toUpperCase());
