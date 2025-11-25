@@ -1,0 +1,29 @@
+{
+  // --- Auto Save ---
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 500,
+
+  // --- Auto Backups ---
+  "files.hotExit": "onExitAndWindowClose",
+  
+  // Creates backup copies of files every time you save
+  "files.backup": ".dev-safety/backups",
+
+  // --- Disable AI From Editing Project Automatically ---
+  "github.copilot.enable": {
+    "*": true,
+    "**/*.json": false,        // prevents Copilot overwriting configs
+    "**/*.md": false
+  },
+
+  // Optional: prevent AI from touching these folders
+  "files.watcherExclude": {
+    "**/.dev-safety/**": true,
+    "**/node_modules/**": true
+  },
+
+  // --- Performance ---
+  "editor.stablePeek": true,
+  "editor.largeFileOptimizations": true,
+  "editor.formatOnSave": false
+}
