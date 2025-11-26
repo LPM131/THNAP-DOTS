@@ -1,40 +1,7 @@
-// chat-cylinder.js — builds the overlay + 3D cylinder selector
+// scripts/features/chat/chat-cylinder.js
 import { ThreadStore } from "./chat-threads.js";
 
-/* basic template loader if chat.html exists */
-function loadTemplateIntoBody() {
-  // prefer external chat.html if present
-  // attempt to fetch relative path (best-effort); otherwise use inline fallback
-  try {
-    // create node only if missing
-    if (document.getElementById("dots-text-overlay")) return document.getElementById("dots-text-overlay");
-    // try to fetch chat.html (non-blocking)
-    fetch("scripts/features/chat/chat.html").then(res => {
-      if (!res.ok) throw new Error("no template");
-      return res.text();
-    }).then(html => {
-      const temp = document.createElement("div");
-      temp.innerHTML = html;
-      document.body.appendChild(temp.firstElementChild);
-    }).catch(() => {
-      // fallback inline template if fetch fails
-      const TEMPLATE = `
-        <div id="dots-text-overlay" class="dots-text-overlay" aria-hidden="true">
-          <div class="overlay-backdrop" data-role="backdrop"></div>
-          <div class="overlay-content" role="dialog" aria-modal="true">
-            <button id="overlay-close" class="overlay-close" aria-label="Close">✕</button>
-            <div class="cylinder-shell"><div id="cylinder" class="cylinder"></div></div>
-            <div class="cylinder-footer"><button id="spin-unread" class="cta" type="button">Spin to unread</button></div>
-          </div>
-        </div>`;
-      const node = document.createElement("div");
-      node.innerHTML = TEMPLATE;
-      document.body.appendChild(node.firstElementChild);
-    });
-  } catch (e) {
-    console.warn("template load failed", e);
-  }
-}
+/* Public API: initCylinder() */
 
 let rotationX = 0;
 let angleStep = 18;
@@ -44,90 +11,109 @@ let prevY = 0;
 let velocity = 0;
 let momentumTimer = null;
 
-export function mountChatOverlay({ onClose, onOpenThread }) {
-  loadTemplateIntoBody();
+export function initCylinder() {
+  const overlay = document.getElementById("dots-text-overlay");
+  if (!overlay) {
+    console.error("initCylinder: overlay not found");
+    return;
+  }
 
-  // small delay till template is in DOM
-  const poll = setInterval(() => {
-    const overlayRoot = document.getElementById("dots-text-overlay");
-    if (!overlayRoot) return;
-    clearInterval(poll);
+  overlay.setAttribute("aria-hidden", "false");
 
-    // show overlay
-    overlayRoot.setAttribute("aria-hidden", "false");
-    overlayRoot.classList.add("show");
+  const closeBtn = overlay.querySelector("#overlay-close");
+  const backdrop = overlay.querySelector(".overlay-backdrop");
+  const cyl = overlay.querySelector("#cylinder");
 
-    // hookups
-    const closeBtn = overlayRoot.querySelector("#overlay-close");
-    const backdrop = overlayRoot.querySelector(".overlay-backdrop");
-    const cyl = overlayRoot.querySelector("#cylinder");
+  // safe-guards
+  if (!cyl) {
+    console.error("initCylinder: #cylinder element missing in overlay");
+    return;
+  }
 
-    closeBtn.addEventListener("click", () => { if (onClose) onClose(); });
-    backdrop.addEventListener("click", () => { if (onClose) onClose(); });
+  // close handler: hides overlay and restores homescreen
+  const closeOverlay = () => {
+    const root = document.getElementById("chat-root");
+    if (root) root.classList.add("hidden");
+    const main = document.getElementById("main-grid");
+    if (main) main.classList.remove("hidden");
+    // remove overlay node after a short fade
+    overlay.classList.remove("show");
+    setTimeout(() => { overlay.remove(); }, 260);
+  };
 
-    // render threads
-    const threads = ThreadStore.getAll();
-    cyl.innerHTML = "";
-    threads.forEach((t, i) => {
-      const el = document.createElement("div");
-      el.className = "thread";
-      el.dataset.index = i;
-      el.dataset.id = t.id;
-      el.innerHTML = `
-        <div class="thread-dot" style="background:${t.color}"></div>
-        <div class="thread-meta">
-          <div class="thread-name">${escapeHtml(t.name)}</div>
-          <div class="thread-preview">${escapeHtml(t.preview || "")}</div>
-        </div>`;
-      el.addEventListener("click", () => {
-        rotationX = -i * angleStep;
-        applyRotation();
-        setTimeout(() => { if (onOpenThread) onOpenThread(t.id); }, 260);
-      });
-      cyl.appendChild(el);
-    });
+  closeBtn?.addEventListener("click", closeOverlay);
+  backdrop?.addEventListener("click", closeOverlay);
 
-    // pointer handlers
-    cyl.addEventListener("pointerdown", (e) => {
-      dragging = true; prevY = e.clientY; clearInterval(momentumTimer);
-      cyl.setPointerCapture(e.pointerId);
-    });
-    window.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
-      const dy = e.clientY - prevY;
-      prevY = e.clientY;
-      rotationX += dy * 1.2;
-      velocity = dy * 1.2;
+  // render threads
+  const threads = ThreadStore.getAll();
+  cyl.innerHTML = "";
+  threads.forEach((t, i) => {
+    const el = document.createElement("div");
+    el.className = "thread";
+    el.dataset.index = i;
+    el.dataset.id = t.id;
+    el.innerHTML = `
+      <div class="thread-dot" style="background:${escapeHtmlAttr(t.color)}"></div>
+      <div class="thread-meta">
+        <div class="thread-name">${escapeHtml(t.name)}</div>
+        <div class="thread-preview">${escapeHtml(t.preview || "")}</div>
+      </div>`;
+    el.addEventListener("click", () => {
+      rotationX = -i * angleStep;
       applyRotation();
+      setTimeout(() => {
+        // Bridge to chat-screen: call global if present
+        if (typeof window.DOTS_CHAT_OPEN_THREAD === "function") {
+          window.DOTS_CHAT_OPEN_THREAD(t.id);
+        } else {
+          // dynamic import fallback (ensures chat-screen module available)
+          import("./chat-screen.js").then(m => {
+            if (typeof window.DOTS_CHAT_OPEN_THREAD === "function") window.DOTS_CHAT_OPEN_THREAD(t.id);
+            else if (typeof m.openThreadScreen === "function") m.openThreadScreen(t.id);
+          }).catch(err => console.error("chat-screen dynamic import failed", err));
+        }
+      }, 220);
     });
-    window.addEventListener("pointerup", (e) => {
-      if (!dragging) return;
-      dragging = false;
-      startMomentum();
-    });
-    window.addEventListener("wheel", (e) => {
-      rotationX += e.deltaY > 0 ? 15 : -15;
-      applyRotation();
-    });
+    cyl.appendChild(el);
+  });
 
-    const spinBtn = overlayRoot.querySelector("#spin-unread");
-    spinBtn.addEventListener("click", () => spinToFirstUnread());
+  // pointer handlers (pointer API)
+  cyl.addEventListener("pointerdown", (e) => {
+    if (cyl.classList.contains("frozen")) return;
+    dragging = true; prevY = e.clientY; clearInterval(momentumTimer);
+    try { cyl.setPointerCapture(e.pointerId); } catch (err) {}
+  });
 
+  window.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const dy = e.clientY - prevY;
+    prevY = e.clientY;
+    rotationX += dy * 1.3;
+    velocity = dy * 1.3;
     applyRotation();
-  }, 80);
+  });
 
-  // return overlay element for further manipulation if needed
-  return document.getElementById("dots-text-overlay");
+  window.addEventListener("pointerup", (e) => {
+    if (!dragging) return;
+    dragging = false;
+    startMomentum();
+  });
+
+  // wheel for desktop
+  window.addEventListener("wheel", (e) => {
+    rotationX += e.deltaY > 0 ? 16 : -16;
+    applyRotation();
+  }, { passive: true });
+
+  // spin unread
+  overlay.querySelector("#spin-unread")?.addEventListener("click", spinToFirstUnread);
+
+  // initial layout
+  applyRotation();
 }
 
-export function unmountChatOverlay() {
-  const el = document.getElementById("dots-text-overlay");
-  if (!el) return;
-  el.classList.remove("show");
-  setTimeout(() => { el.remove(); }, 320);
-}
+/* internal helpers */
 
-/* helpers */
 function applyRotation() {
   const threads = document.querySelectorAll("#cylinder .thread");
   threads.forEach((thread) => {
@@ -137,10 +123,12 @@ function applyRotation() {
     const z = radius * Math.cos(rad);
     const y = radius * Math.sin(rad);
     const scale = 0.45 + 0.55 * ((z + radius) / (2 * radius));
-    const opacity = 0.25 + 0.75 * ((z + radius) / (2 * radius));
+    const opacity = 0.24 + 0.76 * ((z + radius) / (2 * radius));
     const tilt = -y * 0.06;
     thread.style.transform = `translateY(${y}px) translateZ(${z}px) rotateX(${tilt}deg) scale(${scale})`;
     thread.style.opacity = opacity;
+    // set pointer events only for visible threads
+    thread.style.pointerEvents = opacity > 0.08 ? "auto" : "none";
   });
   highlightActive();
 }
@@ -207,6 +195,15 @@ function spinToFirstUnread() {
   requestAnimationFrame(step);
 }
 
+/* safe HTML escapes */
 function escapeHtml(s) {
-  return (s + "").replace(/[&<>"']/g, (m) => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[m]));
+  return String(s || "")
+    .replace(/&/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/"/g, """)
+    .replace(/'/g, "&#39;");
+}
+function escapeHtmlAttr(s) {
+  return escapeHtml(String(s || ""));
 }

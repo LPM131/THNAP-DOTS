@@ -1,22 +1,22 @@
-// chat-screen.js — full-screen iMessage-style chat screen + bridge
-
+// scripts/features/chat/chat-screen.js
 import { ThreadStore } from "./chat-threads.js";
 
 /* This module registers window.DOTS_CHAT_OPEN_THREAD(threadId) which the cylinder calls.
-   It also provides initChatScreen() (no-op) to satisfy index.js contract.
+   Exports:
+     - initChatScreen()  // registers bridge
+     - openThreadScreen(threadId)
 */
 
 let currentThreadId = null;
 let containerRoot = null;
 
 export function initChatScreen() {
-  // placeholder init (module loaded so it can register callback)
-  // register openThread function used by cylinder
+  // Register global bridge for cylinder -> chat screen
   window.DOTS_CHAT_OPEN_THREAD = async (threadId) => {
     try {
       await openThreadScreen(threadId);
     } catch (e) {
-      console.error("openThread error", e);
+      console.error("DOTS_CHAT_OPEN_THREAD error", e);
     }
   };
 }
@@ -31,6 +31,9 @@ export async function openThreadScreen(threadId) {
 
   // freeze cylinder interactions while chat is open
   overlay.querySelector("#cylinder")?.classList.add("frozen");
+
+  // prevent opening same thread twice
+  if (containerRoot) containerRoot.remove();
 
   // create container
   const wrapper = document.createElement("div");
@@ -71,6 +74,7 @@ export async function openThreadScreen(threadId) {
     ThreadStore.markRead(threadId);
     // remove screen
     wrapper.remove();
+    containerRoot = null;
     // unfreeze cylinder
     overlay.querySelector("#cylinder")?.classList.remove("frozen");
   });
@@ -105,4 +109,3 @@ function renderMessages(jumpBottom = false) {
     box.appendChild(msgEl);
   });
   if (jumpBottom) box.scrollTop = box.scrollHeight + 120;
-}
