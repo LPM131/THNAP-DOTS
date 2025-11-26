@@ -17,16 +17,16 @@ export async function initTextFeature() {
 
     // 3. Load chat.html template
     try {
-        const html = await fetch("chat.html")
+        const htmlUrl = new URL("chat.html", import.meta.url);
+
+        const html = await fetch(htmlUrl)
             .then(res => {
                 if (!res.ok) throw new Error("chat.html not found");
                 return res.text();
             });
 
-        // Insert the HTML template into the fullscreen root
         root.innerHTML = html;
         console.log("[Text] chat.html loaded successfully");
-
     } catch (err) {
         console.error("[Text] Failed to load chat.html:", err);
         return;
