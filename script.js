@@ -294,11 +294,11 @@ function backToMain() {
 document.querySelectorAll(".dot").forEach(dot => {
   const handleDotClick = () => {
     const id = parseInt(dot.dataset.id);
-    if (id === 1) openChat();
-    else if (id === 11) openWordle();
-    else if (id === 13) openPokemon();
-    else {
-      alert(`Dot ${id} coming soon!`);
+    if (id === 1) {
+        import("./scripts/features/chat/index.js").then(module => {
+            module.initTextFeature();
+        });
+        return;
       backToMain();
     }
   };
