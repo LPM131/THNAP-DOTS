@@ -603,3 +603,11 @@ html, body {
   10%,30%,50%,70%,90% { transform: translateX(-8px); }
   20%,40%,60%,80% { transform: translateX(8px); }
 }
+
+/* CHAT ROOT FULL SCREEN */
+#chat-root {
+    position: fixed;
+    inset: 0;
+    background: white;      /* temporary iMessage style, we’ll theme later */
+    z-index: 9999;
+}

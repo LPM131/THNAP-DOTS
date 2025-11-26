@@ -1,39 +1,61 @@
-// index.js — Text feature bootstrap + integration
-import { ThreadStore } from "./chat-threads.js";
-import { mountChatOverlay, unmountChatOverlay } from "./chat-cylinder.js";
-import { openThreadScreen } from "./chat-screen.js";
-import { animateDotToOverlay, animateOverlayToDot } from "./chat-animations.js";
+// scripts/features/chat/index.js
 
-let overlayRoot = null;
-let activeThreadId = null;
+// Entry point for the Text feature
+export async function initTextFeature() {
+    console.log("[Text] Initializing Text Feature…");
 
-export function initTextFeature() {
-  const dot = document.getElementById("text-dot") || document.querySelector('.dot[data-id="1"]');
-  if (!dot) {
-    console.warn("Text dot not found.");
-    return;
-  }
+    // 1. Get the fullscreen root container
+    const root = document.getElementById("chat-root");
+    if (!root) {
+        console.error("[Text] ERROR: #chat-root not found in DOM");
+        return;
+    }
 
-  dot.addEventListener("click", async (ev) => {
-    dot.classList.add("pressed");
-    await animateDotToOverlay(dot);
-    overlayRoot = mountChatOverlay({
-      onClose: async () => {
-        unmountChatOverlay();
-        await animateOverlayToDot(dot);
-      },
-      onOpenThread: async (threadId) => {
-        activeThreadId = threadId;
-        await openThreadScreen(document.getElementById("dots-text-overlay"), threadId, async () => {
-          // on close of chat screen, nothing extra for now
-        });
-      }
-    });
-  });
-}
+    // 2. Make sure the root is visible
+    root.classList.remove("hidden");
+    root.innerHTML = ""; // clear previous content if user reopens
 
-export function openTextDotProgrammatically() {
-  const dot = document.getElementById("text-dot") || document.querySelector('.dot[data-id="1"]');
-  if (!dot) return;
-  dot.click();
+    // 3. Load chat.html template
+    try {
+        const html = await fetch("/scripts/features/chat/chat.html")
+            .then(res => {
+                if (!res.ok) throw new Error("chat.html not found");
+                return res.text();
+            });
+
+        // Insert the HTML template into the fullscreen root
+        root.innerHTML = html;
+        console.log("[Text] chat.html loaded successfully");
+
+    } catch (err) {
+        console.error("[Text] Failed to load chat.html:", err);
+        return;
+    }
+
+    // 4. Load Barrel Cylinder Logic
+    try {
+        const cylinderModule = await import("./chat-cylinder.js");
+        cylinderModule.initCylinder();
+        console.log("[Text] Barrel Cylinder initialized");
+    } catch (err) {
+        console.error("[Text] Failed to load chat-cylinder.js:", err);
+    }
+
+    // 5. Load Chat Screen Logic (iMessage messages view)
+    try {
+        const screenModule = await import("./chat-screen.js");
+        screenModule.initChatScreen();
+        console.log("[Text] Chat Screen initialized");
+    } catch (err) {
+        console.error("[Text] Failed to load chat-screen.js:", err);
+    }
+
+    // 6. Load animations (DOT fly-up, chat drop-down)
+    try {
+        const animations = await import("./chat-animations.js");
+        animations.attachChatAnimations();
+        console.log("[Text] Chat animations ready");
+    } catch (err) {
+        console.error("[Text] Failed to load chat-animations.js:", err);
+    }
 }

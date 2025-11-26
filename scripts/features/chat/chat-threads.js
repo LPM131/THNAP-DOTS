@@ -60,25 +60,15 @@ export const ThreadStore = {
     }
   },
 
-  getAll() {
-    return this.load();
-  },
+  getAll() { return this.load(); },
 
-  getById(id) {
-    const threads = this.load();
-    return threads.find(t => t.id === id);
-  },
+  getById(id) { return this.load().find(t => t.id === id); },
 
   pushMessage(threadId, message) {
     const threads = this.load();
     const t = threads.find(x => x.id === threadId);
     if (!t) return false;
-    const msg = {
-      id: `m-${Date.now()}`,
-      from: message.from,
-      text: message.text,
-      ts: Date.now()
-    };
+    const msg = { id: `m-${Date.now()}`, from: message.from, text: message.text, ts: Date.now() };
     t.messages.push(msg);
     t.preview = message.text;
     if (message.from !== "You") t.unread = (t.unread || 0) + 1;
@@ -98,16 +88,9 @@ export const ThreadStore = {
     const threads = this.load();
     const id = `t-${Date.now()}`;
     const t = Object.assign({
-      id,
-      name: meta.name || "New",
-      color: meta.color || "#888",
-      members: meta.members || [],
-      preview: "",
-      unread: 0,
-      messages: []
+      id, name: meta.name || "New", color: meta.color || "#888", members: meta.members || [], preview: "", unread: 0, messages: []
     }, meta);
     threads.push(t);
     this.save(threads);
     return t;
   }
-};
