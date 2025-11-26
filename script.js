@@ -439,7 +439,3 @@ function spellingAssist() {
 
   list.style.display = matches.length ? "block" : "none";
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  initTextFeature();
-});
