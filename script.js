@@ -311,116 +311,7 @@ document.querySelectorAll(".dot").forEach(dot => {
   }, { passive: false });
 });
 
-// ———————————————
-// CHAT SYSTEM — RESTORED
-// ———————————————
-let threadNames = ["Bot", "Mom", "Alex"];
-let threads = {};
-let threadsData = {};
-let currentThread = null;
-
-function initChat() {
-  const n = localStorage.getItem("threads_names");
-  const t = localStorage.getItem("threads");
-  const d = localStorage.getItem("threads_data");
-
-  threadNames = n ? JSON.parse(n) : threadNames;
-  threads = t ? JSON.parse(t) : {};
-  threadsData = d ? JSON.parse(d) : {};
-
-  threadNames.forEach(name => {
-    if (!threads[name]) threads[name] = [];
-    if (!threadsData[name]) threadsData[name] = { unread: 0 };
-  });
-
-  loadChatUI();
-}
-
-function loadChatUI() {
-  const chatList = document.getElementById("chat-list");
-  const messages = document.getElementById("messages");
-  const input = document.getElementById("chat-input");
-
-  chatList.innerHTML = "";
-  threadNames.forEach(thread => {
-    const threadDiv = document.createElement("div");
-    threadDiv.className = "thread";
-    threadDiv.textContent = thread;
-threadDiv.addEventListener("click", function() { openThread(thread, this); });
-    chatList.appendChild(threadDiv);
-  });
-
-  input.focus();
-  input.onkeypress = (e) => {
-    if (e.key === "Enter" && input.value.trim()) {
-      sendMessage(input.value.trim());
-      input.value = "";
-    }
-  };
-}
-
-function openThread(name, target) {
-  const messages = document.getElementById("messages");
-  currentThread = name;
-  messages.innerHTML = "";
-
-  (threads[name] || []).forEach(msg => {
-    const msgDiv = document.createElement("div");
-    msgDiv.className = `message ${msg.from === "You" ? "user" : "other"}`;
-    msgDiv.textContent = `${msg.from}: ${msg.text}`;
-    messages.appendChild(msgDiv);
-  });
-
-  threadsData[name].unread = 0;
-  saveChat();
-
-  document.querySelectorAll(".thread").forEach(t => t.classList.remove("active"));
-  target.classList.add("active");
-}
-
-function sendMessage(text) {
-  if (!currentThread) {
-    alert("Select a conversation first!");
-    return;
-  }
-
-  const msg = { from: "You", text, time: Date.now() };
-  threads[currentThread].push(msg);
-  addMessageToUI(msg);
-
-  setTimeout(() => {
-    const response = { from: currentThread, text: getBotResponse(text), time: Date.now() };
-    threads[currentThread].push(response);
-    addMessageToUI(response);
-    saveChat();
-  }, 500);
-}
-
-function addMessageToUI(msg) {
-  const messages = document.getElementById("messages");
-  const msgDiv = document.createElement("div");
-  msgDiv.className = `message ${msg.from === "You" ? "user" : "other"}`;
-  msgDiv.textContent = `${msg.from}: ${msg.text}`;
-  messages.appendChild(msgDiv);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-function getBotResponse(input) {
-  const responses = ["Got it!", "Interesting...", "Tell me more", "Thanks!", "Nice", "OK", "Cool!", "Yeah?", "Huh?", "Word"];
-  return responses[Math.floor(Math.random() * responses.length)];
-}
-
-function saveChat() {
-  localStorage.setItem("threads_names", JSON.stringify(threadNames));
-  localStorage.setItem("threads", JSON.stringify(threads));
-  localStorage.setItem("threads_data", JSON.stringify(threadsData));
-}
-
-function openChat() {
-  mainGrid.classList.add("hidden");
-  document.getElementById("chat-modal").classList.remove("hidden");
-  loadChatUI();
-}
+import { initTextFeature } from "./features/chat/index.js";
 
 // ———————————————
 // POKEMON SYSTEM — RESTORED
@@ -549,4 +440,6 @@ function spellingAssist() {
   list.style.display = matches.length ? "block" : "none";
 }
 
-initChat();
+document.addEventListener("DOMContentLoaded", () => {
+  initTextFeature();
+});
