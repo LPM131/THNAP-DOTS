@@ -119,7 +119,7 @@ async function loadOfficialWordleLists() {
 }
 
 function isValidGuess(word) {
-  return VALID_GUESSES.has(word.toUpperCase());
+  return VALID_GUESSES.has(word.toUpperCase()) || ANSWERS.includes(word.toUpperCase());
 }
 
 function getWordOfTheDay() {
