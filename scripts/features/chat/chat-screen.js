@@ -1,111 +1,92 @@
 // scripts/features/chat/chat-screen.js
 import { ThreadStore } from "./chat-threads.js";
 
-/* This module registers window.DOTS_CHAT_OPEN_THREAD(threadId) which the cylinder calls.
-   Exports:
-     - initChatScreen()  // registers bridge
-     - openThreadScreen(threadId)
-*/
-
 let currentThreadId = null;
-let containerRoot = null;
+let container = null;
 
 export function initChatScreen() {
-  // Register global bridge for cylinder -> chat screen
-  window.DOTS_CHAT_OPEN_THREAD = async (threadId) => {
-    try {
-      await openThreadScreen(threadId);
-    } catch (e) {
-      console.error("DOTS_CHAT_OPEN_THREAD error", e);
-    }
-  };
+  window.DOTS_CHAT_OPEN_THREAD = (threadId) => openThreadScreen(threadId);
 }
 
-// openThreadScreen: injects chat-screen wrapper into the overlay-content
-export async function openThreadScreen(threadId) {
+export function openThreadScreen(threadId) {
   const overlay = document.getElementById("dots-text-overlay");
-  if (!overlay) {
-    console.warn("openThreadScreen: no overlay present");
-    return;
-  }
+  if (!overlay) return;
 
-  // freeze cylinder interactions while chat is open
   overlay.querySelector("#cylinder")?.classList.add("frozen");
 
-  // prevent opening same thread twice
-  if (containerRoot) containerRoot.remove();
+  if (container) container.remove();
 
-  // create container
-  const wrapper = document.createElement("div");
-  wrapper.className = "chat-screen-wrapper";
+  container = document.createElement("div");
+  container.className = "chat-screen-wrapper";
 
-  wrapper.innerHTML = `
+  container.innerHTML = `
     <div class="chat-header">
       <div id="header-avatar" class="header-avatar"></div>
       <div class="header-title">
-        <div id="header-name" class="header-name">Conversation</div>
+        <div id="header-name" class="header-name">Chat</div>
         <div id="header-sub" class="header-sub"></div>
       </div>
       <button id="chat-back" class="chat-back">Back</button>
     </div>
-    <div id="chat-messages" class="chat-messages" role="log" aria-live="polite"></div>
+
+    <div id="chat-messages" class="chat-messages"></div>
+
     <div class="chat-input-area">
-      <input id="chat-send-input" placeholder="Message" autocomplete="off"/>
+      <input id="chat-send-input" placeholder="Message" autocomplete="off">
       <button id="chat-send-btn">Send</button>
     </div>
   `;
 
-  overlay.querySelector(".overlay-content").appendChild(wrapper);
-  containerRoot = wrapper;
+  overlay.querySelector(".overlay-content").appendChild(container);
+
   currentThreadId = threadId;
+  const t = ThreadStore.getById(threadId);
 
-  // populate header
-  const t = ThreadStore.getById(threadId) || { name: "Unknown", color: "#888", members: [] };
-  wrapper.querySelector("#header-avatar").style.background = t.color;
-  wrapper.querySelector("#header-name").textContent = t.name;
-  wrapper.querySelector("#header-sub").textContent = `${t.members?.length || 1} member${(t.members?.length>1?"s":"")}`;
+  container.querySelector("#header-avatar").style.background = t.color;
+  container.querySelector("#header-name").textContent = t.name;
+  container.querySelector("#header-sub").textContent =
+    `${t.members?.length || 1} member${t.members?.length > 1 ? "s" : ""}`;
 
-  // render messages
   renderMessages();
 
-  // handlers
-  wrapper.querySelector("#chat-back").addEventListener("click", () => {
-    // mark read
+  container.querySelector("#chat-back").addEventListener("click", () => {
     ThreadStore.markRead(threadId);
-    // remove screen
-    wrapper.remove();
-    containerRoot = null;
-    // unfreeze cylinder
+
+    container.remove();
+    container = null;
+
     overlay.querySelector("#cylinder")?.classList.remove("frozen");
   });
 
-  const input = wrapper.querySelector("#chat-send-input");
-  wrapper.querySelector("#chat-send-btn").addEventListener("click", () => {
+  const input = container.querySelector("#chat-send-input");
+  container.querySelector("#chat-send-btn").addEventListener("click", () => {
     const text = input.value.trim();
     if (!text) return;
+
     ThreadStore.pushMessage(threadId, { from: "You", text });
     input.value = "";
     renderMessages(true);
   });
 
-  input.addEventListener("keydown", (e) => { if (e.key === "Enter") wrapper.querySelector("#chat-send-btn").click(); });
-
-  // scroll to bottom
-  setTimeout(() => { wrapper.querySelector("#chat-messages").scrollTop = wrapper.querySelector("#chat-messages").scrollHeight; }, 80);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") container.querySelector("#chat-send-btn").click();
+  });
 }
 
-function renderMessages(jumpBottom = false) {
-  const thread = ThreadStore.getById(currentThreadId) || { messages: [] };
-  const box = containerRoot?.querySelector("#chat-messages");
-  if (!box) return;
+function renderMessages(scrollToBottom = false) {
+  const t = ThreadStore.getById(currentThreadId);
+  const box = container.querySelector("#chat-messages");
+
   box.innerHTML = "";
-  (thread.messages || []).forEach(msg => {
+
+  t.messages.forEach(msg => {
     const msgEl = document.createElement("div");
     msgEl.className = `chat-msg ${msg.from === "You" ? "you" : "other"}`;
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    bubble.textContent = msg.text;
-    msgEl.appendChild(bubble);
+    msgEl.innerHTML = `<div class="bubble">${msg.text}</div>`;
     box.appendChild(msgEl);
   });
-  if (jumpBottom) box.scrollTop = box.scrollHeight + 120;
+
+  if (scrollToBottom) {
+    box.scrollTop = box.scrollHeight + 200;
+  }
+}
