@@ -17,7 +17,7 @@ export async function initTextFeature() {
 
     // 3. Load chat.html template
     try {
-        const html = await fetch("/scripts/features/chat/chat.html")
+        const html = await fetch("./chat.html")
             .then(res => {
                 if (!res.ok) throw new Error("chat.html not found");
                 return res.text();
