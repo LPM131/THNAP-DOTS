@@ -1,176 +1,219 @@
-/* chat-ui.css — full-screen barrel UI styles (vertical cylinder) */
+/* ---------------------------------------------------
+   FULL-SCREEN CYLINDER PAGE (IDENTICAL TO STANDALONE)
+--------------------------------------------------- */
 
-/* Full screen overlay */
 .chat-cylinder-page {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: linear-gradient(180deg, #0b0b0c 0%, #0f1113 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
+    position: fixed;
+    inset: 0;
+    background: #0d0d0f;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-/* Back button (top-left) */
+/* Smooth fade-in when overlay mounts */
+.chat-cylinder-page.show {
+    opacity: 1;
+}
+.chat-cylinder-page {
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+}
+
+/* ---------------------------------------------------
+   HEADER BAR
+--------------------------------------------------- */
+.chat-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    background: rgba(20,20,23,0.65);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
 .chat-back {
-  position: absolute;
-  top: calc(14px + env(safe-area-inset-top));
-  left: 16px;
-  padding: 8px 12px;
-  color: #fff;
-  background: rgba(255,255,255,0.06);
-  border-radius: 12px;
-  backdrop-filter: blur(6px);
-  font-weight: 600;
-  cursor: pointer;
-  z-index: 10010;
-  user-select: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.chat-back:hover {
+    background: rgba(255,255,255,0.12);
 }
 
-/* center container (keeps perspective) */
+.chat-title {
+    flex: 1;
+    text-align: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-right: 28px;
+}
+
+
+/* ---------------------------------------------------
+   CYLINDER CONTAINER — 1:1 STANDALONE LOOK
+--------------------------------------------------- */
 .cylinder-container {
-  width: 100%;
-  height: 100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  perspective: 1400px;
-  pointer-events: auto;
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1400px;
+    overflow: hidden;
 }
 
-/* cylinder viewport */
 .cylinder {
-  width: min(420px, 86vw);
-  height: min(720px, 84vh);
-  transform-style: preserve-3d;
-  position: relative;
-  will-change: transform;
-  touch-action: none; /* let JS handle pointer */
+    position: relative;
+    width: 320px;
+    height: 500px;
+    transform-style: preserve-3d;
 }
 
-/* Each thread (card) on cylinder */
-.cylinder .thread {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform-style: preserve-3d;
-  transform-origin: center center;
-  width: calc(100% - 40px);
-  max-width: 420px;
-  height: 78px;
-  margin-left: calc(-50% + 20px);
-  margin-top: -39px;
-  border-radius: 14px;
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  padding: 12px 16px;
-  box-sizing: border-box;
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-  backdrop-filter: blur(6px);
-  color: #fff;
-  transition: transform 220ms cubic-bezier(.2,.9,.2,1), opacity 220ms, filter 220ms;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.45);
-  cursor: pointer;
+/* ---------------------------------------------------
+   THREAD CARDS (PORTED EXACTLY FROM STANDALONE)
+--------------------------------------------------- */
+
+.thread {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 260px;
+    height: 70px;
+    margin-left: -130px;
+    margin-top: -35px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 16px;
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s, background 0.25s ease;
 }
 
-/* avatar dot */
-.cylinder .thread .dot {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  color:#fff;
+.thread.active {
+    background: rgba(255,255,255,0.20);
+    transform: scale(1.1) translateZ(40px);
+    opacity: 1 !important;
 }
 
-/* name + preview */
-.cylinder .thread .meta {
-  display:flex;
-  flex-direction:column;
-  min-width: 0;
-}
-.cylinder .thread .name {
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-.cylinder .thread .preview {
-  font-size: 0.88rem;
-  color: rgba(255,255,255,0.75);
-  margin-top: 6px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+/* Dot avatar — thick glow, identical to standalone */
+.thread .dot {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    margin-right: 14px;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-weight: 700;
+    box-shadow: 0 0 14px rgba(255,255,255,0.45);
 }
 
-/* active (front) thread */
-.cylinder .thread.active {
-  transform: translateY(0) translateZ(120px) scale(1.06) !important;
-  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
-  box-shadow: 0 18px 40px rgba(0,0,0,0.6);
-  z-index: 50;
+/* Text inside each thread */
+.meta {
+    display: flex;
+    flex-direction: column;
 }
 
-/* sonar pulse on avatar */
-.thread .sonar {
-  position:absolute;
-  width: 56px;
-  height: 56px;
-  border-radius:50%;
-  left: 12px;
-  top: 11px;
-  transform-origin:center center;
-  pointer-events:none;
-  border: 2px solid rgba(255,255,255,0.12);
-  animation: sonar 1100ms ease-out forwards;
+.meta .name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
 }
+
+.meta .preview {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-top: 2px;
+}
+
+
+/* ---------------------------------------------------
+   SONAR PULSE (PORTED)
+--------------------------------------------------- */
+
+.sonar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.6;
+    pointer-events: none;
+    animation: sonar 1.2s ease-out forwards;
+}
+
 @keyframes sonar {
-  0% { transform: scale(0.6); opacity: 0.6; }
-  60% { transform: scale(1.6); opacity: 0.14; }
-  100% { transform: scale(0.6); opacity: 0; }
+    0% { transform: translate(-50%,-50%) scale(0.5); opacity: 0.6; }
+    50% { transform: translate(-50%,-50%) scale(1.5); opacity: 0.2; }
+    100% { transform: translate(-50%,-50%) scale(0.5); opacity: 0; }
 }
 
-/* tiny bounce (used after sonar) */
-@keyframes bounceY {
-  0% { transform: translateY(0); }
-  45% { transform: translateY(-12px); }
-  100% { transform: translateY(0); }
-}
-.thread.bounce { animation: bounceY 780ms cubic-bezier(.2,.8,.2,1); }
 
-/* footer spin button */
+/* ---------------------------------------------------
+   THREAD BOUNCE (PORTED)
+--------------------------------------------------- */
+
+.bounce {
+    animation: bounce 0.8s ease-out forwards;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+
+/* ---------------------------------------------------
+   FOOTER
+--------------------------------------------------- */
 .cylinder-footer {
-  position: absolute;
-  bottom: 32px;
-  z-index: 10005;
-  pointer-events: auto;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(20,20,23,0.65);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(255,255,255,0.04);
 }
+
 .spin-unread {
-  background: rgba(255,255,255,0.06);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: white;
+    padding: 10px 26px;
+    border-radius: 14px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.spin-unread:hover {
+    background: rgba(255,255,255,0.22);
 }
 
-/* frozen cylinder when chat open */
-.cylinder.frozen { pointer-events: none; filter: blur(0.6px) grayscale(0.02); }
 
-/* small screens tweak */
-@media (max-width:480px) {
-  .chat-back { top: calc(8px + env(safe-area-inset-top)); left: 8px; padding: 8px; font-size: 16px; }
-  .cylinder { width: 92vw; height: 86vh; }
-  .cylinder .thread { height: 72px; }
-  .thread .dot { width: 48px; height: 48px; left: 8px; top: 12px; }
+/* ---------------------------------------------------
+   SCROLL DISABLE FOR MOBILE
+--------------------------------------------------- */
+body.no-scroll {
+    overflow: hidden;
+    touch-action: none;
 }
