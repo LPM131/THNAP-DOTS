@@ -24,11 +24,13 @@ export function initCylinder() {
 
   // inject stylesheet if not present
   if (!document.querySelector('link[data-chat-ui]')) {
-    const l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = './chat-ui.css';
-    l.dataset.chatUi = '1';
-    document.head.appendChild(l);
+    document.head.appendChild(Object.assign(
+        document.createElement("link"),
+        {
+            rel: "stylesheet",
+            href: "scripts/features/chat/chat-ui.css"
+        }
+    ));
   }
 
   root.classList.add('chat-root');
