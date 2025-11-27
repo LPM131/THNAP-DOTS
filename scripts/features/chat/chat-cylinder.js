@@ -1,7 +1,4 @@
-// chat-cylinder.js
-// Mounts a fullscreen cylinder UI into #chat-root
-// Exports initCylinder() and destroyCylinder()
-
+// chat-cylinder.js — updated
 import { ThreadStore } from "./chat-threads.js";
 
 let root = null;
@@ -16,90 +13,106 @@ let momentumTimer = null;
 let animLoop = null;
 
 export function initCylinder() {
+  // root is #chat-root (the fullscreen container created by index.js)
   root = document.getElementById("chat-root");
   if (!root) {
     console.error("[Cylinder] chat-root not found");
     return;
   }
 
-  // inject stylesheet if not present
-  if (!document.querySelector('link[data-chat-ui]')) {
-    const l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = '/scripts/features/chat/chat-ui.css';
-    l.dataset.chatUi = '1';
-    document.head.appendChild(l);
+  // ensure chat.html template already injected by index.js
+  const overlay = document.getElementById("dots-text-overlay");
+  if (!overlay) {
+    console.error("[Cylinder] overlay template missing (#dots-text-overlay). Make sure chat.html exists.");
+    return;
   }
 
-  root.classList.add('chat-root');
-  root.innerHTML = `
-    <div class="chat-header">
-      <button class="chat-back-btn" id="cyl-back">Back</button>
-      <div class="chat-title">Messages</div>
-    </div>
-    <div class="chat-body">
-      <div class="cylinder-shell">
-        <div id="cylinder"></div>
-      </div>
-    </div>
-  `;
+  // inject css using import.meta.url so it resolves relative to this module (works on GitHub Pages)
+  if (!document.querySelector('link[data-chat-ui]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    // relative to this module file
+    link.href = new URL("chat-ui.css", import.meta.url).href;
+    link.dataset.chatUi = "1";
+    document.head.appendChild(link);
+  }
 
-  cyl = root.querySelector('#cylinder');
+  // show overlay and make it truly full-screen
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden", "false");
 
-  // build threads (from ThreadStore)
+  // hide the main grid (so nothing shows behind the overlay)
+  const mainGrid = document.getElementById("main-grid");
+  if (mainGrid) mainGrid.classList.add("hidden");
+
+  // attach local references
+  cyl = overlay.querySelector("#cylinder");
+
+  // build threads from ThreadStore
   buildThreads();
 
-  // hook events
+  // pointer handlers, wheel, etc.
   bindPointerHandlers();
-  root.querySelector('#cyl-back').addEventListener('click', () => {
-    // back to dots homepage: call existing global function if available
-    if (typeof window.backToMain === 'function') {
-      // unmount cylinder UI first
-      destroyCylinder(false);
-      window.backToMain();
-    } else {
-      // fallback: hide root
-      destroyCylinder(true);
-    }
+
+  // back button: remove overlay, restore main grid
+  const backBtn = overlay.querySelector("#cyl-back");
+  backBtn?.addEventListener("click", () => {
+    destroyCylinder();
+    // restore the main grid
+    if (mainGrid) mainGrid.classList.remove("hidden");
   });
 
-  // start animation loop
+  // spin unread button
+  const spinBtn = overlay.querySelector("#spin-unread");
+  spinBtn?.addEventListener("click", () => { spinToFirstUnread(); });
+
+  // animation loop
   cancelAnimationFrame(animLoop);
   function loop() { updateThreads(); animLoop = requestAnimationFrame(loop); }
   loop();
 }
 
-export function destroyCylinder(keepRoot=false) {
-  // clear timers
+export function destroyCylinder() {
+  // clear timers & loop
   clearInterval(momentumTimer);
   cancelAnimationFrame(animLoop);
-  if (!keepRoot && root) root.innerHTML = "";
-  if (!keepRoot && root) root.classList.remove('chat-root');
+
+  // hide overlay if present
+  const overlay = document.getElementById("dots-text-overlay");
+  if (overlay) {
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  // if overlay was injected into #chat-root by index.js, leave chat-root but clear cylinder contents
+  if (cyl) cyl.innerHTML = "";
+  cyl = null;
+  rotationX = 0;
 }
 
-// ---------- build threads ----------
+// ---------- thread build ----------
 function buildThreads() {
+  if (!cyl) return;
   const threads = ThreadStore.getAll();
-  cyl.innerHTML = '';
+  cyl.innerHTML = "";
   threads.forEach((t, i) => {
-    const el = document.createElement('div');
-    el.className = 'thread';
+    const el = document.createElement("div");
+    el.className = "thread";
     el.dataset.index = i;
     el.dataset.id = t.id;
     el.innerHTML = `
-      <div class="dot" style="background:${t.color};">${(t.name||'')[0]||'?'}</div>
+      <div class="dot" style="background:${t.color}">${(t.name||'')[0]||'?'}</div>
       <div class="meta">
         <div class="name">${escapeHtml(t.name)}</div>
-        <div class="preview">${escapeHtml(t.preview||'')}</div>
+        <div class="preview">${escapeHtml(t.preview||"")}</div>
       </div>
     `;
-    el.addEventListener('click', () => {
-      // center this thread smoothly, then open thread
+    el.addEventListener("click", () => {
       const idx = Number(el.dataset.index);
       const target = -idx * angleStep;
-      animateTo(target, 260, () => {
-        // call global open thread (chat-screen registers window.DOTS_CHAT_OPEN_THREAD)
-        if (typeof window.DOTS_CHAT_OPEN_THREAD === 'function') {
+      // animate to that index then open thread screen
+      animateTo(target, 300, () => {
+        if (typeof window.DOTS_CHAT_OPEN_THREAD === "function") {
           window.DOTS_CHAT_OPEN_THREAD(t.id);
         }
       });
@@ -109,14 +122,14 @@ function buildThreads() {
   updateThreads();
 }
 
-// ---------- rotation math ----------
+// ---------- update math ----------
 function updateThreads() {
-  const threads = cyl.querySelectorAll('.thread');
+  if (!cyl) return;
+  const threads = cyl.querySelectorAll(".thread");
   threads.forEach(thread => {
     const idx = Number(thread.dataset.index);
     const angle = idx * angleStep + rotationX;
     const rad = angle * Math.PI / 180;
-    // single-axis rotation: Y (vertical) -> translateY, Z
     const z = radius * Math.cos(rad);
     const y = radius * Math.sin(rad);
     const scale = 0.45 + 0.55 * ((z + radius) / (2 * radius));
@@ -129,40 +142,41 @@ function updateThreads() {
 }
 
 function highlightActive() {
-  const threads = cyl.querySelectorAll('.thread');
+  if (!cyl) return;
   let closest = 0, best = 1e9;
-  threads.forEach(th => {
+  cyl.querySelectorAll(".thread").forEach(th => {
     const idx = Number(th.dataset.index);
     let a = idx * angleStep + rotationX;
     a = ((a % 360) + 360) % 360;
     const diff = Math.min(Math.abs(a), Math.abs(360 - a));
     if (diff < best) { best = diff; closest = idx; }
   });
-  threads.forEach(t => t.classList.remove('active'));
+  cyl.querySelectorAll(".thread").forEach(t => t.classList.remove("active"));
   const active = cyl.querySelector(`.thread[data-index="${closest}"]`);
-  if (active) active.classList.add('active');
+  if (active) active.classList.add("active");
 }
 
-// ---------- pointer/touch handlers ----------
+// ---------- pointers ----------
 function bindPointerHandlers() {
-  cyl.addEventListener('pointerdown', (e) => {
-    dragging = true; prevY = e.clientY; velocity = 0; clearInterval(momentumTimer);
+  if (!cyl) return;
+  cyl.addEventListener("pointerdown", (e) => {
+    dragging = true; prevY = e.clientY; velocity = 0;
+    clearInterval(momentumTimer);
     cyl.setPointerCapture?.(e.pointerId);
   });
-  window.addEventListener('pointermove', (e) => {
+  window.addEventListener("pointermove", (e) => {
     if (!dragging) return;
     const dy = e.clientY - prevY;
     prevY = e.clientY;
-    rotationX += dy * 0.9;   // tuned sensitivity
+    rotationX += dy * 0.9;
     velocity = dy * 0.9;
   });
-  window.addEventListener('pointerup', () => {
+  window.addEventListener("pointerup", () => {
     if (!dragging) return;
     dragging = false;
     startMomentum();
   });
-  // wheel for desktop
-  window.addEventListener('wheel', (e) => {
+  window.addEventListener("wheel", (e) => {
     rotationX += (e.deltaY > 0 ? 1 : -1) * 18;
   });
 }
@@ -186,7 +200,10 @@ function snapToNearest() {
 
 function animateTo(targetAngle, duration = 400, cb) {
   const start = rotationX;
-  const delta = targetAngle - start;
+  // normalize delta so we don't get figure-8s — keep smooth monotonic path
+  // compute shortest delta (handles wrap)
+  let delta = ((targetAngle - start + 540) % 360) - 180;
+  // if delta is small, just go directly
   const startTime = performance.now();
   function step(now) {
     const t = Math.min(1, (now - startTime) / duration);
@@ -194,6 +211,8 @@ function animateTo(targetAngle, duration = 400, cb) {
     rotationX = start + delta * ease;
     if (t < 1) requestAnimationFrame(step);
     else {
+      rotationX = start + delta;
+      // normalize rotationX to targetAngle (avoid drift)
       rotationX = targetAngle;
       if (cb) cb();
     }
@@ -201,20 +220,49 @@ function animateTo(targetAngle, duration = 400, cb) {
   requestAnimationFrame(step);
 }
 
-// ---------- spin to first unread (one circular spin) ----------
+// ---------- spin to first unread (one clean revolution) ----------
 export function spinToFirstUnread() {
   const threads = ThreadStore.getAll();
   const unread = threads.find(t => (t.unread || 0) > 0);
   if (!unread) return;
   const idx = threads.indexOf(unread);
   const target = -idx * angleStep;
-  const start = rotationX;
-  // do one full revolution then land
-  const diff = (target - start) + (target > start ? 360 : -360);
-  animateTo(start + diff, 900, () => { rotationX = target; });
+
+  // ensure we spin forward one full rotation and land on target in a single direction
+  // determine direction: prefer forward (positive) so it feels like one circle
+  let start = rotationX;
+  // compute minimal difference in [-180,180]
+  let minimal = ((target - start + 540) % 360) - 180;
+  // choose to add a full +360 (forward) if minimal is negative, to ensure forward spin
+  let diff = minimal;
+  if (diff < 0) diff = minimal + 360;
+  // final angle = start + diff (one forward spin possibly >360)
+  const endAngle = start + diff;
+
+  animateTo(endAngle, 900, () => {
+    // normalize to exact target after animation
+    rotationX = target;
+    // trigger sonar/bounce on unread items
+    const overlay = document.getElementById("dots-text-overlay");
+    if (overlay) {
+      const unreadThreads = threads.filter(t => (t.unread || 0) > 0);
+      unreadThreads.forEach(t => {
+        const el = overlay.querySelector(`.thread[data-id="${t.id}"]`);
+        if (el) {
+          el.classList.add("bounce");
+          // add sonar visual (if not present)
+          if (!el.querySelector(".sonar")) {
+            const s = document.createElement("div");
+            s.className = "sonar";
+            el.querySelector(".dot")?.appendChild(s);
+          }
+        }
+      });
+    }
+  });
 }
 
-// small escape helper
+// utility
 function escapeHtml(s) {
-  return (s + '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  return (s + "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
