@@ -26,7 +26,7 @@ export function initCylinder() {
   if (!document.querySelector('link[data-chat-ui]')) {
     const l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = '/scripts/features/chat/chat-ui.css';
+    l.href = './chat-ui.css';
     l.dataset.chatUi = '1';
     document.head.appendChild(l);
   }
