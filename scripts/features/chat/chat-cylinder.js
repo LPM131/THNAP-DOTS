@@ -24,13 +24,11 @@ export function initCylinder() {
 
   // inject stylesheet if not present
   if (!document.querySelector('link[data-chat-ui]')) {
-    document.head.appendChild(Object.assign(
-        document.createElement("link"),
-        {
-            rel: "stylesheet",
-            href: "scripts/features/chat/chat-ui.css"
-        }
-    ));
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = '/scripts/features/chat/chat-ui.css';
+    l.dataset.chatUi = '1';
+    document.head.appendChild(l);
   }
 
   root.classList.add('chat-root');
@@ -89,7 +87,7 @@ function buildThreads() {
     el.dataset.index = i;
     el.dataset.id = t.id;
     el.innerHTML = `
-      <div class="dot" style="background:${escapeHtmlAttr(t.color)};">${(t.name||'')[0]||'?'}</div>
+      <div class="dot" style="background:${t.color};">${(t.name||'')[0]||'?'}</div>
       <div class="meta">
         <div class="name">${escapeHtml(t.name)}</div>
         <div class="preview">${escapeHtml(t.preview||'')}</div>
@@ -218,8 +216,5 @@ export function spinToFirstUnread() {
 
 // small escape helper
 function escapeHtml(s) {
-  return (s + '').replace(/[&<>"']/g, m => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[m]));
-}
-function escapeHtmlAttr(s) {
-  return escapeHtml(s);
+  return (s + '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
