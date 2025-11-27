@@ -1,171 +1,137 @@
-# DOTS – Innovative Dots-Based Messaging Platform
+# DOTS — Innovative Dots-Based Messaging Platform
 
-## Overview
+DOTS is a mobile-first Progressive Web App (PWA) that reimagines interfaces with a "dots everywhere" paradigm. Every feature and action is represented as a tactile circular dot. The project emphasizes a snappy UX, offline-first behavior, and elegant micro-interactions — notably a 3D cylindrical ("barrel") chat selector with physics-based rotation and a fullscreen chat overlay.
 
-DOTS is a mobile-first Progressive Web App (PWA) that reimagines app interfaces using a "dots everywhere" concept. Every feature, function, and action is represented as a circular dot in a tactile, interactive grid. Inspired by Apple Watch aesthetics and modern minimalist design, DOTS prioritizes snappy response times, offline functionality, and user-friendly experiences.
+## Key Ideas & Philosophy
 
-DOTS is entirely self-contained — users create an account, interact with chats, games, and features entirely inside the app, with no external apps or services required. Future backend integration may support real-time messaging, invite-only communities, and end-to-end encryption.
+- **Everything is a dot**: UI, navigation, notifications and actions use circular touch targets.
+- **Mobile-first & tactile**: Designed for touch with large hit targets and gestures.
+- **Self-contained PWA**: Offline-first with local persistence (localStorage / future IndexedDB).
+- **Snappy UX**: Lightweight vanilla JS + CSS; minimal dependencies; smooth animations.
 
----
+## What's Included
 
-## Core Philosophy
+- 3D barrel-style thread selector with momentum, snap-to-center, unread sonar, and auto-spin.
+- Fullscreen chat overlay with simple conversation UI and simulated messages.
+- Wordle-like daily word game (offline-capable).
+- Modular code under `scripts/features/` for easy maintenance and extension.
 
-* **Everything is a dot:** All UI elements, interactions, and notifications are circular touch targets.
-* **Self-contained functionality:** The app works entirely in-browser/PWA; no external apps needed.
-* **Snappy UX:** Instant response times, smooth animations, and minimal lag.
-* **Mobile-first:** Optimized for phones and tablets with touch-friendly layouts and gestures.
-* **Offline-first:** Local storage (or IndexedDB) ensures core functionality without internet access.
-
----
-
-## User Flow
-
-1. **Launch App:** Centered dot grid loads instantly (3×5 on mobile).
-2. **Navigate:** Tap any dot to open its feature — e.g., chat (💬) or word game (🔤).
-3. **Messaging (💬):** Floating chat thread dots move freely like Apple Watch apps; tap a dot to open a conversation.
-4. **Word Game (🔤):** Interactive daily 5-letter word puzzle with flip animations and 6 attempts.
-5. **Back Navigation:** Return seamlessly to the main dot grid from any feature.
-
----
-
-## Features
-
-### 🔹 Current Implementation
-
-**Main Grid:**
-
-* 15-dot grid (3×5 on mobile) with tactile, centered dots.
-* Large touch targets (~90px) for mobile-friendly navigation.
-
-**Messaging System:**
-
-* Chat threads represented as floating, draggable dots inside the chat modal.
-* Apple Watch–style physics: smooth movement, bounce at container edges, and persistence of positions.
-* Tap a dot to open the conversation interface.
-* Local storage preserves chat history.
-
-**Word Game:**
-
-* Daily 5-letter word puzzle, 6 attempts per day.
-* Flip animations reveal correct/present/absent letters.
-* Offline-compatible and touch-optimized.
-
-**Crossword Puzzle (Planned / Mobile-first Optimized):**
-
-* NYT-style 15×15 grid.
-* Cell selection and highlighting for across/down clues.
-* Mobile-first touch-friendly input.
-* Offline-first functionality and letter persistence.
-
-### 🔹 Future Plans
-
-* Invite-only authentication: App-contained invite system for private communities.
-* Real-time messaging: Optional backend for live chat.
-* End-to-end encryption: Secure chat storage and transmission.
-* Additional dots: Calculator, to-do list, weather, and more, all using the dot paradigm.
-* Custom themes and dot icons: Initials, Bitmojis, or user-defined visuals.
-* Interactive notifications: Unread badges, context menus, and tap animations.
-
----
-
-## DOTS Rules & Guidelines
-
-### 1️⃣ Core Rules
-
-* All interactions must be represented by dots whenever possible.
-* The app must run entirely within the PWA — no external applications required.
-* Prioritize snappy response times and user-friendly interaction.
-* Local storage ensures offline access.
-
-### 2️⃣ Messaging Rules
-
-* Each chat thread is a draggable, floating dot.
-* Dots bounce at edges and avoid overlapping where possible.
-* Tap a dot to open chat; back button restores floating dot view.
-* Dot positions and chat history persist locally.
-
-### 3️⃣ Word Game Rules
-
-* 6×5 letter grid with flip animations on guesses.
-* Game must be fully functional offline.
-* Letter feedback uses color-coding (green, yellow, gray).
-
-### 4️⃣ Crossword Rules
-
-* Mobile-first 15×15 grid with touch input and correct numbering.
-* Across/Down clue panel updates based on selection.
-* Letter input persists; backspace removes letters only.
-* Cell highlighting matches NYT conventions.
-* Offline-first and responsive to all screen sizes.
-
-### 5️⃣ Design Rules
-
-* Uniform dot size: ~90px on mobile; consistent design language.
-* Minimalist interface: Clean screens with no unnecessary clutter.
-* Animations & feedback: Subtle float, bounce, or pulse effects that do not impact performance.
-* Responsive layout: Works on different mobile screen sizes, defaulting to 3×5 grid.
-
-### 6️⃣ Development Guidelines
-
-* Use vanilla JavaScript, HTML, and CSS to maintain speed and light weight.
-* New dots/features must be self-contained — no dependencies on external services.
-* Maintain backward compatibility for existing users' chats, game progress, and dot positions.
-* Snippets applied via AI (ChatGPT, Cline, etc.) must **never break core functionality** or remove working features. Use safe snippet executor rules (protected modules, modular updates, logs).
-
----
-
-## Technical Architecture
-
-**Files**
+## Project Structure (Important Files)
 
 ```
-DOTS/
-├── index.html          # Main structure
-├── style.css           # Responsive grid, animations, dot styles
-├── script.js           # Dot interactions, chat & game logic
-├── manifest.json       # PWA manifest
-└── README.md
+THNAP-DOTS/
+├─ index.html
+├─ script.js               # global app glue, grid + navigation
+├─ style.css
+├─ manifest.json
+├─ README.md
+└─ scripts/
+   └─ features/
+      └─ chat/
+         ├─ chat-cylinder.js    # barrel physics + thread rendering
+         ├─ chat-screen.js      # fullscreen chat view
+         ├─ chat-threads.js     # in-memory thread store (seed data)
+         ├─ chat-animations.js  # dot <-> overlay animations
+         ├─ chat-ui.css         # styling for fullscreen barrel UI
+         └─ chat.html           # chat overlay markup template
 ```
 
-**Technologies**
+The chat feature is intentionally modular: `scripts/features/chat/index.js` bootstraps `chat.html`, then imports `chat-cylinder.js`, `chat-screen.js`, etc.
 
-* Vanilla JavaScript, CSS Grid/Flexbox, HTML5
-* localStorage (upgradeable to IndexedDB)
-* PWA-first deployment
+## Quick Start (Developer)
 
-**Deployment**
+Clone the repository:
 
-* Local testing: `python -m http.server 8000`
-* Production: GitHub Pages or personal server
+```bash
+git clone https://github.com/LPM131/THNAP-DOTS.git
+cd THNAP-DOTS
+```
 
----
+Run a lightweight local server (recommended so `import.meta.url` and fetches behave like production):
 
-## Installation & Setup
+```bash
+# Python 3
+python -m http.server 8000
+# then open http://localhost:8000
+```
 
-1. Clone or download the repository.
-2. Open `index.html` in a modern web browser (Chrome recommended).
-3. Test mobile view using developer tools.
-4. Install as PWA for app-like experience.
+Open the app in a modern browser (Chrome/Edge/Firefox). Use devtools to test mobile viewport.
 
----
+## Development Notes & Best Practices
+
+- Use vanilla JS modules (ESM). When importing files relative to a module, prefer:
+
+  ```js
+  const url = new URL('./chat-ui.css', import.meta.url).href;
+  ```
+
+  This guarantees the correct relative resolution whether files are loaded from the root, a nested path, or GitHub Pages.
+
+- Keep feature code self-contained in `scripts/features/<feature>/`.
+- Persist user-visible state in localStorage (or migrate to IndexedDB for larger datasets).
+- Make animation loops passive-friendly and avoid heavy work on the main thread.
+
+## Deploying (GitHub Pages)
+
+Push `main` to GitHub.
+
+In your repository settings → Pages:
+
+- **Source**: Deploy from a branch → `main` → `root (/)`.
+
+Save.
+
+Wait a minute. Visit `https://<username>.github.io/<repo>/` or the custom domain you set.
+
+## Troubleshooting — Common Issues (and Fixes)
+
+### 1) `chat-ui.css` 404 in the console
+
+**Causes & Fixes:**
+
+- **Wrong href path**: Ensure `chat-cylinder.js` injects the stylesheet with a relative path resolved from that module:
+
+  ```js
+  // preferred in chat-cylinder.js
+  const cssUrl = new URL('./chat-ui.css', import.meta.url).href;
+  link.href = cssUrl;
+  ```
+
+- **File not committed / not in the repo location**: Confirm `scripts/features/chat/chat-ui.css` exists in GitHub and on your local branch.
+- **Case sensitivity**: `chat-ui.css` vs `Chat-UI.css` — GitHub is case-sensitive. Make sure file name and path casing match.
+- **GitHub Pages serving path**: Double-check the deployed URL. If you open the file in your browser via the GitHub UI and see plain text, that's normal — raw GitHub file views are not the same as the raw file URL used from the site. Use the site root (deployed GitHub Pages URL) to test.
+- **Browser cache**: Do a hard refresh (Ctrl+F5) or open DevTools → Network → Disable cache while devtools open.
+
+### 2) `SyntaxError: Unexpected end of input`
+
+Usually caused by incomplete file uploads or trailing partial commits. Re-open the file in VS Code and ensure there's no corruption. Re-commit if needed.
+
+### 3) Blank page / app not loading but repo shows changes
+
+Ensure index.html references are correct, and you served with a static server (some imports require HTTP origin).
+
+Check Console for the first error — subsequent errors may cascade.
+
+### 4) Local VS Code file types showing as different icons (blue #, etc.)
+
+That's visual only — confirm the file extension actually ends with `.css` and the file contents are valid CSS. Windows file properties confirmed earlier shows it's a CSS file — good.
+
+## UX / Feature Requests (Ready Roadmap)
+
+- Restore exact original barrel physics (you provided a standalone barrel UI that you prefer). I can:
+  - Merge its rotation/momentum math into `chat-cylinder.js` while keeping modular APIs.
+  - Keep the enhanced UI structure (header/back button/styling) from `chat-ui.css`.
+  - Add more seeded messages per thread for realistic simulation.
+  - Improve spin behavior so it rotates one circular direction only (no figure-8), and add a per-thread easing profile.
+
+If you want, tell me which barrel file is canonical (paste it again or give the commit SHA) and I'll create a PR-ready patch that copies the original physics math into `chat-cylinder.js` and keeps the existing file layout.
 
 ## Contributing
 
-* New features must adhere to the DOTS paradigm.
-* Prioritize performance, user-friendliness, and offline functionality.
-* Follow design rules and ensure dot consistency across the interface.
-* All AI-generated snippets must be validated with **safe snippet executor rules**.
-
----
-
-## Privacy & Security
-
-* Current: Data stored locally; no external tracking.
-* Future: E2E encryption and optional server storage.
-* Invite-based authentication will control access while maintaining privacy.
-
----
+- Keep changes modular and backwards-compatible.
+- When adding feature files, place them under `scripts/features/<name>/`.
+- Add tests or at least manual QA steps for UI (mobile + desktop).
 
 ## License
 
-Open-source under the MIT License — modify and use freely.
+MIT — see LICENSE (or add one). Free to modify and redistribute.
