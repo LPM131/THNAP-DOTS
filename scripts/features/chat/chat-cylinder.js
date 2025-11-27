@@ -25,13 +25,16 @@ export function initCylinder() {
     return;
   }
 
-  // inject stylesheet if missing (same path your index expects)
+  // inject stylesheet if not present
   if (!document.querySelector('link[data-chat-ui]')) {
-    const l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = '/scripts/features/chat/chat-ui.css';
-    l.setAttribute('data-chat-ui', '1');
-    document.head.appendChild(l);
+    // Load CSS relative to this file (GitHub Pages safe)
+    const cssURL = new URL("./chat-ui.css", import.meta.url).href;
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = cssURL;
+
+    document.head.appendChild(link);
   }
 
   // mark root as fullscreen chat area
