@@ -311,7 +311,7 @@ document.querySelectorAll(".dot").forEach(dot => {
   }, { passive: false });
 });
 
-import { initTextFeature } from "./scripts/features/chat/index.js";
+// ———————————————
 
 // ———————————————
 // POKEMON SYSTEM — RESTORED
