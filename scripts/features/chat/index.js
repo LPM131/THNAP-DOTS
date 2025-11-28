@@ -4,18 +4,11 @@
 export async function initTextFeature() {
     console.log("[Text] Initializing Text Feature…");
 
-    // 1. Get the fullscreen root container
-    const root = document.getElementById("chat-root");
-    if (!root) {
-        console.error("[Text] ERROR: #chat-root not found in DOM");
-        return;
-    }
+    // 1. Create fullscreen chat overlay container
+    const screen = document.createElement("div");
+    screen.classList.add("chat-cylinder-page");
 
-    // 2. Make sure the root is visible
-    root.classList.remove("hidden");
-    root.innerHTML = ""; // clear previous content if user reopens
-
-    // 3. Load chat.html template
+    // 2. Load chat.html template
     try {
         const htmlUrl = new URL("chat.html", import.meta.url);
 
@@ -25,7 +18,8 @@ export async function initTextFeature() {
                 return res.text();
             });
 
-        root.innerHTML = html;
+        screen.innerHTML = html;
+        document.body.appendChild(screen);
         console.log("[Text] chat.html loaded successfully");
     } catch (err) {
         console.error("[Text] Failed to load chat.html:", err);
