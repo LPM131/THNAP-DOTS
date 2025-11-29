@@ -1,102 +1,164 @@
-// index.js
-(function(){
-  // ensure DOM is ready
-  function qs(sel, base=document) { return base.querySelector(sel); }
-  function qsa(sel, base=document) { return Array.from(base.querySelectorAll(sel)); }
+// index.js — module-compatible wrapper for the legacy global-style chat components
+// Exports: initChatFeature() and initTextFeature() (alias for compatibility)
 
-  // inject template & css if not present
+export async function initChatFeature() {
+
+  function qs(sel, base=document) { return base.querySelector(sel); }
+
+  // ---------------------------------
+  // 1. LOAD CHAT TEMPLATE + CSS
+  // ---------------------------------
   async function mountTemplate(){
-    const rootPlaceholder = document.body;
-    // load html if needed (we assume chat.html file exists as raw; if your bundler supports fetch, adjust accordingly)
-    // For simplicity, we attempt to fetch chat.html relative to current script.
     try {
       const resp = await fetch('./scripts/features/chat/chat.html');
       const html = await resp.text();
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = html;
-      document.body.appendChild(wrapper);
-    } catch(e){
-      console.warn('Could not fetch chat.html; ensure file is copied. Falling back to in-code template.');
-      // fallback: create container manually (minimal)
+      const wrap = document.createElement('div');
+      wrap.innerHTML = html;
+      document.body.appendChild(wrap);
+    } catch(err) {
+      console.warn("chat.html missing, using fallback");
       const fallback = document.createElement('div');
-      fallback.id = 'chat-root';
-      fallback.className = 'chat-root hidden';
-      fallback.innerHTML = `<div id="cylinder-container" class="cylinder-container"><div id="cylinder" class="cylinder"></div><button id="cylinder-back" class="cylinder-back">✕</button></div><div id="chat-screen" class="chat-screen hidden"><header class="chat-screen-header"><button id="chat-back" class="chat-back">←</button><div class="chat-header-title"><div id="chat-header-dot" class="chat-header-dot"></div><div id="chat-header-name" class="chat-header-name"></div></div></header><main id="messages" class="messages"></main><form id="chat-form" class="chat-form" autocomplete="off"><input id="chat-input" class="chat-input" type="text" placeholder="Message..."/><button id="chat-send" class="chat-send" type="submit">Send</button></form></div>`;
+      fallback.id = "chat-root";
+      fallback.className = "chat-root hidden";
+
+      fallback.innerHTML = `
+        <div id="cylinder-container" class="cylinder-container">
+          <div id="cylinder" class="cylinder"></div>
+          <button id="cylinder-back" class="cylinder-back">✕</button>
+        </div>
+
+        <div id="chat-screen" class="chat-screen hidden">
+          <header class="chat-screen-header">
+            <button id="chat-back" class="chat-back">←</button>
+
+            <div class="chat-header-title">
+              <div id="chat-header-dot" class="chat-header-dot"></div>
+              <div id="chat-header-name" class="chat-header-name"></div>
+            </div>
+          </header>
+
+          <main id="messages" class="messages"></main>
+
+          <form id="chat-form" class="chat-form" autocomplete="off">
+            <input id="chat-input" class="chat-input" type="text" placeholder="Message..." />
+            <button id="chat-send" class="chat-send" type="submit">Send</button>
+          </form>
+        </div>
+      `;
+
       document.body.appendChild(fallback);
     }
 
-    // inject CSS
-    const cssUrl = './scripts/features/chat/chat-ui.css';
-    if(!document.querySelector(`link[data-dots-chat]`)){
+    // Inject CSS if not already present
+    if(!document.querySelector('link[data-dots-chat]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = cssUrl;
+      link.href = './scripts/features/chat/chat-ui.css';
       link.setAttribute('data-dots-chat','1');
       document.head.appendChild(link);
     }
   }
 
-  async function init(){
+  // ---------------------------------
+  // 2. WAIT FOR GLOBALS (legacy modules)
+  // ---------------------------------
+  function waitForGlobals() {
+    return new Promise(resolve => {
+      const check = () => {
+        if(
+          window.DOTSChatCylinder &&
+          window.DOTSChatThreads &&
+          window.DOTSChatScreen
+        ) { return resolve(); }
+        requestAnimationFrame(check);
+      };
+      check();
+    });
+  }
+
+  // ---------------------------------
+  // 3. MAIN INIT
+  // ---------------------------------
+  async function init() {
     await mountTemplate();
+    await waitForGlobals(); // ensure legacy globals are present
+
     const root = document.getElementById('chat-root');
-    if(!root) return console.error('chat root missing');
+    if(!root) {
+      console.error("chat root missing");
+      return;
+    }
 
     // show chat root full screen
     root.classList.remove('hidden');
 
-    // create modules
     const threadsApi = window.DOTSChatThreads;
+
+    // create cylinder instance (uses legacy global factory)
     const cylinder = window.DOTSChatCylinder.create(root, threadsApi, {
-      onThreadOpen: (threadId)=>{
-        openThread(threadId);
-      }
+      onThreadOpen: threadId => openThread(threadId)
     });
 
+    // create chat screen instance
     const chatScreen = window.DOTSChatScreen.create(root, threadsApi);
 
-    // wire navigation between cylinder and chat-screen
-    function openThread(threadId){
-      // animate cylinder out and open chat
-      root.querySelector('.cylinder-container').classList.add('hidden');
-      chatScreen.open(threadId);
+    // open thread: hide cylinder and show chat screen
+    function openThread(threadId) {
+      const cylContainer = root.querySelector('.cylinder-container');
+      if(cylContainer) cylContainer.classList.add('hidden');
+      if(chatScreen && typeof chatScreen.open === 'function') chatScreen.open(threadId);
     }
 
-    // back from chat to cylinder
-    window.addEventListener('dots:chat:closed', ()=> {
-      root.querySelector('.cylinder-container').classList.remove('hidden');
-      // rebuild threads to pick up new previews/unreads
-      cylinder.threads = threadsApi.load();
-      cylinder.buildThreads();
-      cylinder.updateThreads();
+    // when chat screen closes, show cylinder again and refresh list
+    window.addEventListener('dots:chat:closed', () => {
+      const cylContainer = root.querySelector('.cylinder-container');
+      if(cylContainer) cylContainer.classList.remove('hidden');
+
+      // refresh cylinder threads
+      try {
+        cylinder.threads = threadsApi.load();
+        if(typeof cylinder.buildThreads === 'function') cylinder.buildThreads();
+        if(typeof cylinder.updateThreads === 'function') cylinder.updateThreads();
+      } catch(e){ /* swallow */ }
     });
 
-    // close cylinder (back to app main grid)
-    window.addEventListener('dots:cylinder:close', ()=> {
-      // hide chat root and fire event so app returns to main grid
+    // when cylinder requests close -> hide chat root and notify app
+    window.addEventListener('dots:cylinder:close', () => {
       root.classList.add('hidden');
       window.dispatchEvent(new CustomEvent('dots:chat:hide'));
     });
 
-    // expose quick API
+    // expose small global API for app shell
     window.DOTSChat = {
-      spinToUnread: ()=> cylinder.spinToUnread(),
-      openThread: (id)=> openThread(id),
-      root,
-      refresh: ()=> {
-        cylinder.threads = threadsApi.load();
-        cylinder.buildThreads();
-        cylinder.updateThreads();
-      }
+      spinToUnread: () => { try { cylinder.spinToUnread(); } catch(e){} },
+      openThread: id => openThread(id),
+      refresh: () => {
+        try {
+          cylinder.threads = threadsApi.load();
+          cylinder.buildThreads();
+          cylinder.updateThreads();
+        } catch(e){}
+      },
+      root
     };
 
-    // autoplay spinToUnread on first load if items with unread
-    setTimeout(()=> {
-      const threads = threadsApi.load();
-      if(threads.some(t=>t.hasUnread)) cylinder.spinToUnread();
+    // autoplay spinToUnread if there are unread threads
+    setTimeout(() => {
+      try {
+        const threads = threadsApi.load();
+        if(Array.isArray(threads) && threads.some(t => t && t.hasUnread)) cylinder.spinToUnread();
+      } catch(e) {}
     }, 700);
   }
 
-  // init when DOM loaded
-  if(['interactive','complete'].includes(document.readyState)) init();
-  else document.addEventListener('DOMContentLoaded', init);
-})();
+  // Auto-start when module is executed (preserve existing behavior)
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    // run but do NOT block; this mirrors your original IIFE behavior
+    init().catch(err => console.error('initChatFeature error', err));
+  } else {
+    document.addEventListener('DOMContentLoaded', () => init().catch(err => console.error('initChatFeature error', err)));
+  }
+}
+
+// Backwards-compatible alias for old loader code that calls initTextFeature()
+export const initTextFeature = initChatFeature;
