@@ -66,4 +66,7 @@ export async function initTextFeature() {
     } catch (err) {
         console.error("[Text] Failed to load chat-animations.js:", err);
     }
+
+    // Unhide the chat container
+    document.getElementById("chat-root")?.classList.remove("hidden");
 }
