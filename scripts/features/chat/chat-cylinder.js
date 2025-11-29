@@ -22,7 +22,7 @@ export function initCylinder() {
     return;
   }
 
-  // ensure DOTS_CHAT_OPEN_THREAD exists (safe placeholder until chat-screen registers)
+  // safe placeholder until chat-screen registers DOTS_CHAT_OPEN_THREAD
   if (typeof window.DOTS_CHAT_OPEN_THREAD !== "function") {
     window.DOTS_CHAT_OPEN_THREAD = function (/*threadId*/) {
       console.warn("DOTS_CHAT_OPEN_THREAD not yet registered");
@@ -35,7 +35,7 @@ export function initCylinder() {
     l.rel = "stylesheet";
     l.href = new URL("./chat-ui.css", import.meta.url).href;
     l.dataset.chatUi = "1";
-    l.onload = () => { /* loaded */ };
+    l.onload = () => { /* chat-ui.css loaded */ };
     l.onerror = (e) => console.warn("[Cylinder] chat-ui.css failed to load", e);
     document.head.appendChild(l);
   }
