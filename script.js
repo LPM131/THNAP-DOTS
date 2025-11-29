@@ -290,25 +290,38 @@ function backToMain() {
 }
 
 // ——— DOTS NAVIGATION ———
+let chatLoaded = false;
+
+function loadChatFeatureOnce() {
+  if (chatLoaded) return;
+  chatLoaded = true;
+
+  import("./scripts/features/chat/index.js").then(module => {
+    module.initTextFeature();
+  });
+}
+
 // Add both click and touch events for mobile compatibility
 window.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".dot").forEach(dot => {
+
     const handleDotClick = () => {
       const id = parseInt(dot.dataset.id);
       if (id === 1) {
-        import("./scripts/features/chat/index.js").then(module => {
-          module.initTextFeature();
-        });
+        loadChatFeatureOnce();
         return;
       }
       backToMain();
     };
 
     dot.addEventListener("click", handleDotClick);
+
+    // Remove the duplicated touch→click cascade
     dot.addEventListener("touchstart", e => {
       e.preventDefault();
       handleDotClick();
     }, { passive: false });
+
   });
 });
 
