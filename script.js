@@ -291,24 +291,25 @@ function backToMain() {
 
 // ——— DOTS NAVIGATION ———
 // Add both click and touch events for mobile compatibility
-document.querySelectorAll(".dot").forEach(dot => {
-  const handleDotClick = () => {
-    const id = parseInt(dot.dataset.id);
-    if (id === 1) {
+window.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".dot").forEach(dot => {
+    const handleDotClick = () => {
+      const id = parseInt(dot.dataset.id);
+      if (id === 1) {
         import("./scripts/features/chat/index.js").then(module => {
-            module.initTextFeature();
+          module.initTextFeature();
         });
         return;
+      }
       backToMain();
-    }
-  };
+    };
 
-  // Add both click and touchstart for maximum mobile compatibility
-  dot.addEventListener("click", handleDotClick);
-  dot.addEventListener("touchstart", (e) => {
-    e.preventDefault(); // Prevent double events
-    handleDotClick();
-  }, { passive: false });
+    dot.addEventListener("click", handleDotClick);
+    dot.addEventListener("touchstart", e => {
+      e.preventDefault();
+      handleDotClick();
+    }, { passive: false });
+  });
 });
 
 // ———————————————

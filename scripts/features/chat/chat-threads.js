@@ -19,6 +19,7 @@ export const ThreadStore = {
             color: "#50E3C2",
             members: ["Bot"],
             unread: 1,
+            justArrived: true,
             messages: [
                 { from: "Bot", text: "What should we build next?" }
             ],

@@ -22,24 +22,29 @@ export function initCylinder() {
     return;
   }
 
+  // ensure DOTS_CHAT_OPEN_THREAD exists (safe placeholder until chat-screen registers)
+  if (typeof window.DOTS_CHAT_OPEN_THREAD !== "function") {
+    window.DOTS_CHAT_OPEN_THREAD = function (/*threadId*/) {
+      console.warn("DOTS_CHAT_OPEN_THREAD not yet registered");
+    };
+  }
+
   // inject stylesheet relative to this module so path works on GH Pages and locally
   if (!document.querySelector('link[data-chat-ui]')) {
     const l = document.createElement("link");
     l.rel = "stylesheet";
-    // Resolve path relative to this module
     l.href = new URL("./chat-ui.css", import.meta.url).href;
     l.dataset.chatUi = "1";
-    l.onload = () => { /* optional log */ };
+    l.onload = () => { /* loaded */ };
     l.onerror = (e) => console.warn("[Cylinder] chat-ui.css failed to load", e);
     document.head.appendChild(l);
   }
 
   root.classList.add("chat-cylinder-page", "show");
-  // If chat.html replaced root.innerHTML before, we expect header, cylinder, footer present.
-  // Ensure cylinder container exists:
+
+  // Ensure cylinder DOM exists (chat.html should provide it, fallback to create)
   cyl = root.querySelector("#cylinder");
   if (!cyl) {
-    // Fallback: create minimal structure
     root.innerHTML = `
       <div class="chat-header">
         <button class="chat-back" id="cyl-back">Back</button>
@@ -65,12 +70,10 @@ export function initCylinder() {
   const backBtn = root.querySelector("#cyl-back");
   if (backBtn) {
     backBtn.addEventListener("click", () => {
-      // Preferred: call existing global function
       if (typeof window.backToMain === "function") {
         destroyCylinder(false);
         window.backToMain();
       } else {
-        // Otherwise just hide/unmount
         destroyCylinder(true);
       }
     });
@@ -92,8 +95,7 @@ export function initCylinder() {
 }
 
 export function destroyCylinder(keepRoot = false) {
-  // clear timers/intervals
-  if (momentumTimer) clearInterval(momentumTimer);
+  if (momentumTimer) { clearInterval(momentumTimer); momentumTimer = null; }
   cancelAnimationFrame(animLoop);
   if (!keepRoot && root) {
     root.innerHTML = "";
@@ -147,21 +149,18 @@ function updateThreads() {
     const idx = Number(thread.dataset.index);
     const angle = idx * angleStep + rotationX;
     const rad = (angle * Math.PI) / 180;
-    // vertical/cylindrical mapping (single axis)
     const z = radius * Math.cos(rad);
-    const y = radius * Math.sin(rad) * 0.62; // slight squash for better visual
-    const depthFactor = (z + radius) / (2 * radius); // 0..1
+    const y = radius * Math.sin(rad) * 0.62;
+    const depthFactor = (z + radius) / (2 * radius);
     const scale = 0.46 + 0.6 * depthFactor;
     const opacity = 0.18 + 0.82 * depthFactor;
     const tilt = -y * 0.04;
     thread.style.transform = `translateY(${y}px) translateZ(${z}px) rotateX(${tilt}deg) scale(${scale})`;
     thread.style.opacity = opacity;
 
-    // manage sonar if unread
     const threadId = thread.dataset.id;
     const t = ThreadStore.getById(threadId);
     if (t && (t.unread || 0) > 0) {
-      // if not already showing sonar, and justArrived flag exists, show one pulse
       if (!thread.querySelector(".sonar") && t.justArrived) {
         const dot = thread.querySelector(".dot");
         const s = document.createElement("div");
@@ -169,11 +168,9 @@ function updateThreads() {
         s.style.color = t.color;
         dot.appendChild(s);
         t.justArrived = false;
-        // add bounce after sonar
         setTimeout(() => thread.classList.add("bounce"), 1200);
       }
     } else {
-      // remove sonar if no unread
       const s = thread.querySelector(".sonar");
       if (s) s.remove();
       thread.classList.remove("bounce");
@@ -202,7 +199,6 @@ function highlightActive() {
 // ---------- pointer/touch handlers ----------
 function bindPointerHandlers() {
   if (!cyl) return;
-  // Pointer events for robust cross-device support
   cyl.addEventListener("pointerdown", (e) => {
     dragging = true;
     prevY = e.clientY;
@@ -214,7 +210,6 @@ function bindPointerHandlers() {
     if (!dragging) return;
     const dy = e.clientY - prevY;
     prevY = e.clientY;
-    // tuned sensitivity to match original barrel physics
     rotationX += dy * 0.95;
     velocity = dy * 0.95;
   });
@@ -230,13 +225,12 @@ function bindPointerHandlers() {
 
 function startMomentum() {
   if (momentumTimer) clearInterval(momentumTimer);
-  momentumInterval = setInterval(() => {
-    // damping tuned to feel like original
+  momentumTimer = setInterval(() => {
     velocity *= 0.92;
     rotationX += velocity;
     if (Math.abs(velocity) < 0.12) {
-      clearInterval(momentumInterval);
-      momentumInterval = null;
+      clearInterval(momentumTimer);
+      momentumTimer = null;
       snapToNearest();
     }
   }, 16);
@@ -253,7 +247,7 @@ function animateTo(targetAngle, duration = 400, cb) {
   const startTime = performance.now();
   function step(now) {
     const t = Math.min(1, (now - startTime) / duration);
-    const ease = 1 - Math.pow(1 - t, 3); // easeOut cubic
+    const ease = 1 - Math.pow(1 - t, 3);
     rotationX = start + delta * ease;
     if (t < 1) requestAnimationFrame(step);
     else {
@@ -272,25 +266,22 @@ export function spinToFirstUnread() {
   const idx = threads.indexOf(unread);
   const target = -idx * angleStep;
   const start = rotationX;
-  // add one full revolution in the direction that looks natural
   const direction = (target - start) > 0 ? 1 : -1;
   const diff = (target - start) + direction * 360;
   animateTo(start + diff, 900, () => {
     rotationX = target;
-    // mark animations for unread threads
     threads.forEach(t => { if (t.unread) t.justArrived = true; });
   });
 }
 
 // ---------- utils ----------
 function escapeHtml(s) {
-  return (s + "").replace(/[&<>"']/g, m => ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" }[m]));
+  return (s + "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 }
 
-// produces readable (white/black) text against avatar color
 function contrastingTextColor(hex) {
   try {
-    // accept hsl used earlier too - fallback to white
+    if (!hex) return "#fff";
     if (hex.startsWith("hsl")) return "#000";
     if (hex.startsWith("#")) {
       const c = hex.substring(1);
@@ -302,3 +293,4 @@ function contrastingTextColor(hex) {
     }
   } catch (e) { /* ignore */ }
   return "#fff";
+}
