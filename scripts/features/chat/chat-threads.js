@@ -1,89 +1,147 @@
-// chat-threads.js
+// chat-threads.js — cleaned, stable, modern message & thread storage
+
 (function(global){
-  const STORAGE_KEY = 'dots_chat_threads_v1';
 
-  function defaultThreads(){
-    // lightweight demo data; real app will push/populate
-    return Array.from({length:12}, (_,i)=>({
-      id: `t-${i+1}`,
-      name: `User ${i+1}`,
-      color: `hsl(${(i*360/12)}, 70%, 55%)`,
-      preview: `Last message from User ${i+1}`,
-      messages: [{id: `m-${i+1}-1`, from: 'them', text:`Hello from User ${i+1}`, ts: Date.now()}],
-      hasUnread: false,
-      justArrived: false,
-      createdAt: Date.now() - i*100000
-    }));
-  }
+  const STORAGE_KEY = 'dots-chat-threads-v2';
 
+  // -------------------------------
+  // DEFAULT THREADS (optional)
+  // -------------------------------
+  const DEFAULT_THREADS = [
+    {
+      id: 1,
+      name: "Assistant",
+      color: "#4cffb7",
+      hasUnread: true,
+      messages: [
+        {
+          id: "initial-1",
+          from: "them",
+          text: "Hey — welcome to DOTS Chat! 👋",
+          ts: Date.now() - 10000
+        }
+      ]
+    }
+  ];
+
+  // -------------------------------
+  // LOAD FROM STORAGE
+  // -------------------------------
   function load(){
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) {
-        const init = defaultThreads();
-        save(init);
-        return init;
+      if(!raw){
+        // initialize default data
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_THREADS));
+        return JSON.parse(JSON.stringify(DEFAULT_THREADS));
       }
       return JSON.parse(raw);
     } catch(e){
-      console.error('load threads', e);
-      const init = defaultThreads();
-      save(init);
-      return init;
+      console.warn("load threads failed:", e);
+      return JSON.parse(JSON.stringify(DEFAULT_THREADS));
     }
   }
 
+  // -------------------------------
+  // SAVE TO STORAGE
+  // -------------------------------
   function save(threads){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+    } catch(e){
+      console.error("save threads failed:", e);
+    }
   }
 
-  function find(threads, id){
-    return threads.find(t=>t.id===id);
+  // -------------------------------
+  // FIND THREAD
+  // -------------------------------
+  function findThread(threads, id){
+    return threads.find(t => t.id === id);
   }
 
+  // -------------------------------
+  // ADD MESSAGE
+  // -------------------------------
   function addMessage(threads, threadId, message){
-    const t = find(threads, threadId);
-    if(!t) return;
+    let t = findThread(threads, threadId);
+
+    // Create thread if missing
+    if(!t){
+      t = {
+        id: threadId,
+        name: "Chat " + threadId,
+        color: "#666",
+        hasUnread: true,
+        messages: []
+      };
+      threads.push(t);
+    }
+
     t.messages.push(message);
-    t.preview = message.text;
-    t.hasUnread = message.from === 'them' ? true : t.hasUnread;
-    t.justArrived = message.from === 'them';
-    save(threads);
+    updatePreview(t);
+    sortThreads(threads);
+
+    // If message is from "them", mark unread
+    if(message.from === "them"){
+      t.hasUnread = true;
+    }
+
     return t;
   }
 
-  function createThread(threads, opts){
-    const t = Object.assign({
-      id: `t-${Date.now()}`,
-      name: opts.name||'New',
-      color: opts.color || '#888',
-      preview: '',
-      messages: [],
-      hasUnread: false,
-      justArrived:false,
-      createdAt: Date.now()
-    }, opts);
-    threads.unshift(t);
-    save(threads);
-    return t;
-  }
-
+  // -------------------------------
+  // MARK THREAD READ
+  // -------------------------------
   function markRead(threads, threadId){
-    const t = find(threads, threadId);
-    if(!t) return;
-    t.hasUnread = false;
-    t.justArrived = false;
-    save(threads);
+    const t = findThread(threads, threadId);
+    if(t){
+      t.hasUnread = false;
+    }
   }
 
-  // expose API
+  // -------------------------------
+  // UNREAD COUNT
+  // -------------------------------
+  function unreadCount(threads){
+    return threads.filter(t => t.hasUnread).length;
+  }
+
+  // -------------------------------
+  // PREVIEW TEXT
+  // -------------------------------
+  function updatePreview(thread){
+    const last = thread.messages[thread.messages.length - 1];
+    if(!last) return;
+
+    let txt = last.text;
+    if(txt.length > 42) txt = txt.slice(0, 42) + "…";
+    thread.preview = txt;
+    thread.previewTs = last.ts;
+  }
+
+  // -------------------------------
+  // SORT THREADS (most recent first)
+  // -------------------------------
+  function sortThreads(threads){
+    threads.sort((a,b)=>{
+      const ta = a.previewTs || 0;
+      const tb = b.previewTs || 0;
+      return tb - ta;
+    });
+  }
+
+  // -------------------------------
+  // PUBLIC API
+  // -------------------------------
   global.DOTSChatThreads = {
-    STORAGE_KEY,
     load,
     save,
-    find,
     addMessage,
-    createThread,
-    markRead
+    markRead,
+    unreadCount,
+    find: findThread,
+    sort: sortThreads
   };
+
 })(window);

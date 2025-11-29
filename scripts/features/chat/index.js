@@ -81,7 +81,7 @@ export async function initChatFeature() {
   // ---------------------------------
   async function init() {
     await mountTemplate();
-    await waitForGlobals(); // ensure legacy globals are present
+    await waitForGlobals();
 
     const root = document.getElementById('chat-root');
     if(!root) {
@@ -89,12 +89,11 @@ export async function initChatFeature() {
       return;
     }
 
-    // show chat root full screen
     root.classList.remove('hidden');
 
     const threadsApi = window.DOTSChatThreads;
 
-    // create cylinder instance (uses legacy global factory)
+    // create cylinder instance
     const cylinder = window.DOTSChatCylinder.create(root, threadsApi, {
       onThreadOpen: threadId => openThread(threadId)
     });
@@ -102,14 +101,14 @@ export async function initChatFeature() {
     // create chat screen instance
     const chatScreen = window.DOTSChatScreen.create(root, threadsApi);
 
-    // open thread: hide cylinder and show chat screen
+    // open thread
     function openThread(threadId) {
       const cylContainer = root.querySelector('.cylinder-container');
       if(cylContainer) cylContainer.classList.add('hidden');
       if(chatScreen && typeof chatScreen.open === 'function') chatScreen.open(threadId);
     }
 
-    // when chat screen closes, show cylinder again and refresh list
+    // closing chat screen returns to cylinder
     window.addEventListener('dots:chat:closed', () => {
       const cylContainer = root.querySelector('.cylinder-container');
       if(cylContainer) cylContainer.classList.remove('hidden');
@@ -117,20 +116,19 @@ export async function initChatFeature() {
       // refresh cylinder threads
       try {
         cylinder.threads = threadsApi.load();
-        if(typeof cylinder.buildThreads === 'function') cylinder.buildThreads();
-        if(typeof cylinder.updateThreads === 'function') cylinder.updateThreads();
-      } catch(e){ /* swallow */ }
+        cylinder.buildThreads();
+        cylinder.updateThreads();
+      } catch(e){}
     });
 
-    // when cylinder requests close -> hide chat root and notify app
+    // closing cylinder exits chat module
     window.addEventListener('dots:cylinder:close', () => {
       root.classList.add('hidden');
       window.dispatchEvent(new CustomEvent('dots:chat:hide'));
     });
 
-    // expose small global API for app shell
+    // PUBLIC API (spinToUnread removed)
     window.DOTSChat = {
-      spinToUnread: () => { try { cylinder.spinToUnread(); } catch(e){} },
       openThread: id => openThread(id),
       refresh: () => {
         try {
@@ -142,23 +140,18 @@ export async function initChatFeature() {
       root
     };
 
-    // autoplay spinToUnread if there are unread threads
-    setTimeout(() => {
-      try {
-        const threads = threadsApi.load();
-        if(Array.isArray(threads) && threads.some(t => t && t.hasUnread)) cylinder.spinToUnread();
-      } catch(e) {}
-    }, 700);
+    // NOTE: No automatic spin-to-unread here anymore.
   }
 
-  // Auto-start when module is executed (preserve existing behavior)
+  // Auto-start on DOM ready
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    // run but do NOT block; this mirrors your original IIFE behavior
     init().catch(err => console.error('initChatFeature error', err));
   } else {
-    document.addEventListener('DOMContentLoaded', () => init().catch(err => console.error('initChatFeature error', err)));
+    document.addEventListener('DOMContentLoaded', () =>
+      init().catch(err => console.error('initChatFeature error', err))
+    );
   }
 }
 
-// Backwards-compatible alias for old loader code that calls initTextFeature()
+// Backwards-compatible alias
 export const initTextFeature = initChatFeature;
