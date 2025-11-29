@@ -1,296 +1,259 @@
 // chat-cylinder.js
-// Mounts a fullscreen cylinder UI into #chat-root
-// Exports initCylinder(), destroyCylinder(), spinToFirstUnread()
+(function(global){
+  const RADIUS = 450;
+  const ANGLE_STEP = 18;
 
-import { ThreadStore } from "./chat-threads.js";
-
-let root = null;
-let cyl = null;
-let rotationX = 0;
-let angleStep = 18;
-let radius = 420;
-let dragging = false;
-let prevY = 0;
-let velocity = 0;
-let momentumTimer = null;
-let animLoop = 0;
-
-export function initCylinder() {
-  root = document.getElementById("chat-root");
-  if (!root) {
-    console.error("[Cylinder] chat-root not found");
-    return;
+  function Cylinder(rootEl, threadsApi, opts = {}){
+    this.root = rootEl;
+    this.cyl = rootEl.querySelector('#cylinder');
+    this.backBtn = rootEl.querySelector('#cylinder-back');
+    this.rotationX = 0;
+    this.angleStep = ANGLE_STEP;
+    this.radius = RADIUS;
+    this.dragging = false;
+    this.prevY = 0;
+    this.velocity = 0;
+    this.momentum = null;
+    this.threadsApi = threadsApi;
+    this.threads = threadsApi.load();
+    this.onThreadOpen = opts.onThreadOpen || function(){};
+    this.init();
   }
 
-  // safe placeholder until chat-screen registers DOTS_CHAT_OPEN_THREAD
-  if (typeof window.DOTS_CHAT_OPEN_THREAD !== "function") {
-    window.DOTS_CHAT_OPEN_THREAD = function (/*threadId*/) {
-      console.warn("DOTS_CHAT_OPEN_THREAD not yet registered");
-    };
-  }
+  Cylinder.prototype.init = function(){
+    this.buildThreads();
+    this.attachEvents();
+    this.updateThreads();
+    requestAnimationFrame(()=>this.loop());
+  };
 
-  // inject stylesheet relative to this module so path works on GH Pages and locally
-  if (!document.querySelector('link[data-chat-ui]')) {
-    const l = document.createElement("link");
-    l.rel = "stylesheet";
-    l.href = new URL("./chat-ui.css", import.meta.url).href;
-    l.dataset.chatUi = "1";
-    l.onload = () => { /* chat-ui.css loaded */ };
-    l.onerror = (e) => console.warn("[Cylinder] chat-ui.css failed to load", e);
-    document.head.appendChild(l);
-  }
+  Cylinder.prototype.buildThreads = function(){
+    this.cyl.innerHTML = '';
+    this.threads.forEach((t,i) => {
+      const div = document.createElement('div');
+      div.className = 'thread';
+      div.dataset.index = i;
+      div.dataset.id = t.id;
 
-  root.classList.add("chat-cylinder-page", "show");
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.style.background = t.color;
+      dot.style.boxShadow = `0 0 12px ${t.color}`;
 
-  // Ensure cylinder DOM exists (chat.html should provide it, fallback to create)
-  cyl = root.querySelector("#cylinder");
-  if (!cyl) {
-    root.innerHTML = `
-      <div class="chat-header">
-        <button class="chat-back" id="cyl-back">Back</button>
-        <div class="chat-title">Messages</div>
-      </div>
-      <div class="cylinder-container">
-        <div id="cylinder" class="cylinder"></div>
-      </div>
-      <div class="cylinder-footer">
-        <button id="spin-unread" class="spin-unread">Spin to unread</button>
-      </div>
-    `;
-    cyl = root.querySelector("#cylinder");
-  }
+      const meta = document.createElement('div');
+      meta.className = 'meta';
 
-  // Build threads (reads from ThreadStore)
-  buildThreads();
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = t.name;
 
-  // Hook controls
-  bindPointerHandlers();
+      const preview = document.createElement('div');
+      preview.className = 'preview';
+      preview.textContent = t.preview || '';
 
-  // Back button
-  const backBtn = root.querySelector("#cyl-back");
-  if (backBtn) {
-    backBtn.addEventListener("click", () => {
-      if (typeof window.backToMain === "function") {
-        destroyCylinder(false);
-        window.backToMain();
-      } else {
-        destroyCylinder(true);
-      }
-    });
-  }
+      meta.appendChild(name);
+      meta.appendChild(preview);
+      div.appendChild(dot);
+      div.appendChild(meta);
 
-  // Spin unread button
-  const spinBtn = root.querySelector("#spin-unread");
-  if (spinBtn) spinBtn.addEventListener("click", spinToFirstUnread);
-
-  // Start animation loop
-  cancelAnimationFrame(animLoop);
-  function loop() {
-    updateThreads();
-    animLoop = requestAnimationFrame(loop);
-  }
-  loop();
-
-  console.log("[Cylinder] Barrel Cylinder initialized");
-}
-
-export function destroyCylinder(keepRoot = false) {
-  if (momentumTimer) { clearInterval(momentumTimer); momentumTimer = null; }
-  cancelAnimationFrame(animLoop);
-  if (!keepRoot && root) {
-    root.innerHTML = "";
-    root.classList.remove("chat-cylinder-page", "show");
-  }
-  cyl = null;
-}
-
-// ---------- build threads ----------
-function buildThreads() {
-  const threads = ThreadStore.getAll();
-  if (!cyl) return;
-  cyl.innerHTML = "";
-  threads.forEach((t, i) => {
-    const el = document.createElement("div");
-    el.className = "thread";
-    el.dataset.index = i;
-    el.dataset.id = t.id;
-
-    el.innerHTML = `
-      <div class="dot" style="background:${t.color}; color: ${contrastingTextColor(t.color)};">
-        ${(t.name||"")[0]||"?"}
-      </div>
-      <div class="meta">
-        <div class="name">${escapeHtml(t.name)}</div>
-        <div class="preview">${escapeHtml(t.preview||"")}</div>
-      </div>
-    `;
-
-    // click to center + open thread
-    el.addEventListener("click", () => {
-      const idx = Number(el.dataset.index);
-      const target = -idx * angleStep;
-      animateTo(target, 260, () => {
-        if (typeof window.DOTS_CHAT_OPEN_THREAD === "function") {
-          window.DOTS_CHAT_OPEN_THREAD(t.id);
-        }
+      div.addEventListener('click', () => {
+        // open thread
+        this.onThreadOpen(t.id);
       });
+
+      this.cyl.appendChild(div);
     });
-    cyl.appendChild(el);
-  });
-  // initial layout
-  updateThreads();
-}
+  };
 
-// ---------- rotation math ----------
-function updateThreads() {
-  if (!cyl) return;
-  const threads = cyl.querySelectorAll(".thread");
-  threads.forEach(thread => {
-    const idx = Number(thread.dataset.index);
-    const angle = idx * angleStep + rotationX;
-    const rad = (angle * Math.PI) / 180;
-    const z = radius * Math.cos(rad);
-    const y = radius * Math.sin(rad) * 0.62;
-    const depthFactor = (z + radius) / (2 * radius);
-    const scale = 0.46 + 0.6 * depthFactor;
-    const opacity = 0.18 + 0.82 * depthFactor;
-    const tilt = -y * 0.04;
-    thread.style.transform = `translateY(${y}px) translateZ(${z}px) rotateX(${tilt}deg) scale(${scale})`;
-    thread.style.opacity = opacity;
+  Cylinder.prototype.attachEvents = function(){
+    // pointer for better touch support
+    this.cyl.addEventListener('pointerdown', (e)=>{
+      e.preventDefault();
+      this.dragging = true;
+      this.prevY = e.clientY;
+      this.velocity = 0;
+      if(this.momentum) { clearInterval(this.momentum); this.momentum = null; }
+      this.cyl.setPointerCapture && this.cyl.setPointerCapture(e.pointerId);
+    });
 
-    const threadId = thread.dataset.id;
-    const t = ThreadStore.getById(threadId);
-    if (t && (t.unread || 0) > 0) {
-      if (!thread.querySelector(".sonar") && t.justArrived) {
-        const dot = thread.querySelector(".dot");
-        const s = document.createElement("div");
-        s.className = "sonar";
-        s.style.color = t.color;
-        dot.appendChild(s);
-        t.justArrived = false;
-        setTimeout(() => thread.classList.add("bounce"), 1200);
+    window.addEventListener('pointermove', (e)=>{
+      if(!this.dragging) return;
+      const dy = e.clientY - this.prevY;
+      this.rotationX += dy*1.2;
+      this.velocity = dy*1.2;
+      this.prevY = e.clientY;
+      this.updateThreads();
+    });
+
+    window.addEventListener('pointerup', (e)=>{
+      if(!this.dragging) return;
+      this.dragging = false;
+      // momentum
+      this.momentum = setInterval(()=>{
+        this.velocity *= 0.92;
+        this.rotationX += this.velocity;
+        this.updateThreads();
+        if(Math.abs(this.velocity) < 0.1){
+          clearInterval(this.momentum);
+          this.momentum = null;
+          this.snapToNearest();
+        }
+      }, 16);
+    });
+
+    window.addEventListener('wheel', (e)=>{
+      this.rotationX += (e.deltaY > 0) ? 15 : -15;
+      this.updateThreads();
+      this.snapToNearestDebounced();
+    });
+
+    this.backBtn.addEventListener('click', () => {
+      // dispatch close event
+      const ev = new CustomEvent('dots:cylinder:close');
+      window.dispatchEvent(ev);
+    });
+  };
+
+  Cylinder.prototype.updateThreads = function(){
+    const threadsEls = Array.from(this.cyl.querySelectorAll('.thread'));
+    const threadsData = this.threads;
+    threadsEls.forEach((threadEl) => {
+      const idx = Number(threadEl.dataset.index);
+      const item = threadsData[idx];
+      const angle = this.angleStep * idx + this.rotationX;
+      const rad = angle * Math.PI/180;
+      const z = this.radius * Math.cos(rad);
+      const y = this.radius * Math.sin(rad);
+      let scale = 0.5 + 0.5 * ((z + this.radius)/(2*this.radius));
+      const opacity = 0.28 + 0.72 * ((z + this.radius)/(2*this.radius));
+      const tilt = -y * 0.05;
+
+      const dot = threadEl.querySelector('.dot');
+
+      // sonar handling
+      const existingSonar = threadEl.querySelector('.sonar');
+      threadEl.classList.remove('bounce');
+      if(item.hasUnread){
+        if(item.justArrived && !existingSonar){
+          const sonar = document.createElement('div');
+          sonar.className = 'sonar';
+          sonar.style.borderColor = item.color;
+          dot.appendChild(sonar);
+          // mark that animation was applied so we don't re-add it repeatedly
+          item.justArrived = false;
+          setTimeout(()=>{ threadEl.classList.add('bounce'); }, 1200);
+        }
+      } else {
+        if(existingSonar) existingSonar.remove();
       }
+
+      threadEl.style.transform = `translateY(${y}px) translateZ(${z}px) rotateX(${tilt}deg) scale(${scale})`;
+      threadEl.style.opacity = opacity;
+    });
+    this.highlightActiveThread();
+  };
+
+  Cylinder.prototype.highlightActiveThread = function(){
+    let closestIdx = 0;
+    let minDiff = Infinity;
+    const threadsEls = Array.from(this.cyl.querySelectorAll('.thread'));
+    threadsEls.forEach(threadEl => {
+      const idx = Number(threadEl.dataset.index);
+      let threadAngle = this.angleStep * idx + this.rotationX;
+      threadAngle = ((threadAngle % 360) + 360) % 360;
+      const diff = Math.min(Math.abs(threadAngle), Math.abs(360 - threadAngle));
+      if(diff < minDiff){ minDiff = diff; closestIdx = idx; }
+    });
+    threadsEls.forEach(t => t.classList.remove('active'));
+    const active = this.cyl.querySelector(`.thread[data-index="${closestIdx}"]`);
+    if(active) active.classList.add('active');
+  };
+
+  Cylinder.prototype.snapToNearest = function(){
+    const target = Math.round(this.rotationX / this.angleStep) * this.angleStep;
+    const start = this.rotationX;
+    const diffTotal = target - start;
+    const duration = 280;
+    const startTime = performance.now();
+    const step = () => {
+      const now = performance.now();
+      const t = Math.min((now - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      this.rotationX = start + diffTotal * ease;
+      this.updateThreads();
+      if(t < 1) requestAnimationFrame(step);
+      else {
+        this.rotationX = target;
+        this.updateThreads();
+      }
+    };
+    requestAnimationFrame(step);
+  };
+
+  Cylinder.prototype.snapToNearestDebounced = function(){
+    clearTimeout(this._snapT);
+    this._snapT = setTimeout(()=> this.snapToNearest(), 120);
+  };
+
+  Cylinder.prototype.spinToUnread = function(){
+    const unread = this.threads.filter(t=>t.hasUnread);
+    if(!unread.length) return;
+    const firstIdx = this.threads.indexOf(unread[0]);
+    const targetAngle = -firstIdx * this.angleStep;
+    const start = this.rotationX;
+    const diff = targetAngle - start + 360*1;
+    const duration = 880;
+    const startTime = performance.now();
+    const animate = (now) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      this.rotationX = start + diff * ease;
+      this.updateThreads();
+      if(t < 1) requestAnimationFrame(animate);
+      else {
+        this.rotationX = targetAngle;
+        this.updateThreads();
+        // trigger sonar on unread items
+        this.threads.forEach((item, idx) => {
+          if(item.hasUnread){
+            item.justArrived = true;
+            // no immediate save — leave to threads API to persist when required
+          }
+        });
+        // re-render to create sonar
+        this.updateThreads();
+      }
+    };
+    requestAnimationFrame(animate);
+  };
+
+  Cylinder.prototype.loop = function(){
+    // If underlying thread data changed (external push), reload
+    const latest = this.threadsApi.load();
+    // shallow compare length or timestamps
+    if(latest.length !== this.threads.length){
+      this.threads = latest;
+      this.buildThreads();
+      this.updateThreads();
     } else {
-      const s = thread.querySelector(".sonar");
-      if (s) s.remove();
-      thread.classList.remove("bounce");
+      // update previews/unread flags
+      let changed = false;
+      for(let i=0;i<latest.length;i++){
+        if(latest[i].preview !== this.threads[i].preview || latest[i].hasUnread !== this.threads[i].hasUnread){
+          changed = true; break;
+        }
+      }
+      if(changed){
+        this.threads = latest;
+        this.updateThreads();
+      }
     }
-  });
-  highlightActive();
-}
+    requestAnimationFrame(()=>this.loop());
+  };
 
-function highlightActive() {
-  if (!cyl) return;
-  const threads = cyl.querySelectorAll(".thread");
-  let closest = 0;
-  let best = Infinity;
-  threads.forEach(th => {
-    const idx = Number(th.dataset.index);
-    let a = idx * angleStep + rotationX;
-    a = ((a % 360) + 360) % 360;
-    const diff = Math.min(Math.abs(a), Math.abs(360 - a));
-    if (diff < best) { best = diff; closest = idx; }
-  });
-  threads.forEach(t => t.classList.remove("active"));
-  const active = cyl.querySelector(`.thread[data-index="${closest}"]`);
-  if (active) active.classList.add("active");
-}
-
-// ---------- pointer/touch handlers ----------
-function bindPointerHandlers() {
-  if (!cyl) return;
-  cyl.addEventListener("pointerdown", (e) => {
-    dragging = true;
-    prevY = e.clientY;
-    velocity = 0;
-    if (e.pointerId) cyl.setPointerCapture?.(e.pointerId);
-    if (momentumTimer) { clearInterval(momentumTimer); momentumTimer = null; }
-  });
-  window.addEventListener("pointermove", (e) => {
-    if (!dragging) return;
-    const dy = e.clientY - prevY;
-    prevY = e.clientY;
-    rotationX += dy * 0.95;
-    velocity = dy * 0.95;
-  });
-  window.addEventListener("pointerup", () => {
-    if (!dragging) return;
-    dragging = false;
-    startMomentum();
-  });
-  window.addEventListener("wheel", (e) => {
-    rotationX += (e.deltaY > 0 ? 1 : -1) * angleStep;
-  }, { passive: true });
-}
-
-function startMomentum() {
-  if (momentumTimer) clearInterval(momentumTimer);
-  momentumTimer = setInterval(() => {
-    velocity *= 0.92;
-    rotationX += velocity;
-    if (Math.abs(velocity) < 0.12) {
-      clearInterval(momentumTimer);
-      momentumTimer = null;
-      snapToNearest();
-    }
-  }, 16);
-}
-
-function snapToNearest() {
-  const target = Math.round(rotationX / angleStep) * angleStep;
-  animateTo(target, 320);
-}
-
-function animateTo(targetAngle, duration = 400, cb) {
-  const start = rotationX;
-  const delta = targetAngle - start;
-  const startTime = performance.now();
-  function step(now) {
-    const t = Math.min(1, (now - startTime) / duration);
-    const ease = 1 - Math.pow(1 - t, 3);
-    rotationX = start + delta * ease;
-    if (t < 1) requestAnimationFrame(step);
-    else {
-      rotationX = targetAngle;
-      if (typeof cb === "function") cb();
-    }
-  }
-  requestAnimationFrame(step);
-}
-
-// ---------- spin to first unread (one circular spin) ----------
-export function spinToFirstUnread() {
-  const threads = ThreadStore.getAll();
-  const unread = threads.find(t => (t.unread || 0) > 0);
-  if (!unread) return;
-  const idx = threads.indexOf(unread);
-  const target = -idx * angleStep;
-  const start = rotationX;
-  const direction = (target - start) > 0 ? 1 : -1;
-  const diff = (target - start) + direction * 360;
-  animateTo(start + diff, 900, () => {
-    rotationX = target;
-    threads.forEach(t => { if (t.unread) t.justArrived = true; });
-  });
-}
-
-// ---------- utils ----------
-function escapeHtml(s) {
-  return (s + "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
-}
-
-function contrastingTextColor(hex) {
-  try {
-    if (!hex) return "#fff";
-    if (hex.startsWith("hsl")) return "#000";
-    if (hex.startsWith("#")) {
-      const c = hex.substring(1);
-      const r = parseInt(c.length === 3 ? c[0]+c[0] : c.substring(0,2), 16);
-      const g = parseInt(c.length === 3 ? c[1]+c[1] : c.substring(2,4), 16);
-      const b = parseInt(c.length === 3 ? c[2]+c[2] : c.substring(4,6), 16);
-      const yiq = (r*299 + g*587 + b*114) / 1000;
-      return yiq >= 128 ? "#000" : "#fff";
-    }
-  } catch (e) { /* ignore */ }
-  return "#fff";
-}
+  // export factory
+  global.DOTSChatCylinder = {
+    create: (rootEl, threadsApi, opts) => new Cylinder(rootEl, threadsApi, opts)
+  };
+})(window);

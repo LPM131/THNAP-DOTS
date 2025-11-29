@@ -1,15 +1,26 @@
-<!-- chat.html (template loaded into #chat-root) -->
-<div id="dots-text-overlay" aria-hidden="true">
-  <div class="chat-header">
-    <button id="cyl-back" class="chat-back">Back</button>
-    <div class="chat-title">Messages</div>
+<!-- chat.html -->
+<div id="chat-root" class="chat-root hidden">
+  <!-- Cylinder Stage (full-screen) -->
+  <div id="cylinder-container" class="cylinder-container">
+    <div id="cylinder" class="cylinder" role="list" aria-label="Threads"></div>
+    <button id="cylinder-back" class="cylinder-back" aria-label="Back to grid">✕</button>
   </div>
 
-  <div class="cylinder-container">
-    <div id="cylinder" class="cylinder" aria-role="list"></div>
-  </div>
+  <!-- Chat Screen (full-screen, hidden until thread open) -->
+  <div id="chat-screen" class="chat-screen hidden" role="dialog" aria-label="Chat">
+    <header class="chat-screen-header">
+      <button id="chat-back" class="chat-back" aria-label="Back to threads">←</button>
+      <div class="chat-header-title">
+        <div id="chat-header-dot" class="chat-header-dot"></div>
+        <div id="chat-header-name" class="chat-header-name"></div>
+      </div>
+    </header>
 
-  <div class="cylinder-footer">
-    <button id="spin-unread" class="spin-unread" type="button">Spin to unread</button>
+    <main id="messages" class="messages" tabindex="0"></main>
+
+    <form id="chat-form" class="chat-form" autocomplete="off">
+      <input id="chat-input" class="chat-input" type="text" placeholder="Message..." />
+      <button id="chat-send" class="chat-send" type="submit">Send</button>
+    </form>
   </div>
 </div>
