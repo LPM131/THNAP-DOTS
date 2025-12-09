@@ -311,6 +311,14 @@ window.addEventListener("DOMContentLoaded", () => {
         loadChatFeatureOnce();
         return;
       }
+      if (id === 11) {
+        openWordle();
+        return;
+      }
+      if (id === 13) {
+        openPokemon();
+        return;
+      }
       backToMain();
     };
 
