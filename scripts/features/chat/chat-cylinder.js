@@ -12,12 +12,16 @@
 
     this.threads = [];
     this.angle = 0;
-    this.radius = 300; 
+    this.radius = 300;
     this.count = 0;
 
     this.dragging = false;
     this.startY = 0;
     this.startAngle = 0;
+
+    this.isAutoSpinning = true;
+    this.snapSpeed = 0.02;
+    this.autoSpinSpeed = 0.3;
 
     this.init();
   }
@@ -31,6 +35,7 @@
     this.updateThreads();
 
     this.attachEvents();
+    this.startAnimation();
   };
 
   // ------------------------------
@@ -111,6 +116,7 @@
     // TOUCH
     cyl.addEventListener("touchstart", e => {
       this.dragging = true;
+      this.isAutoSpinning = false;
       this.startY = e.touches[0].clientY;
       this.startAngle = this.angle;
     }, { passive:false });
@@ -125,13 +131,44 @@
 
     cyl.addEventListener("touchend", () => {
       this.dragging = false;
+      // Resume auto-spin after interaction
+      setTimeout(() => {
+        this.isAutoSpinning = true;
+      }, 2000); // 2 second delay
     });
 
     // MOUSE SCROLL
     cyl.addEventListener("wheel", e => {
+      this.isAutoSpinning = false;
       this.angle += e.deltaY * 0.2;
       this.updateThreads();
+      // Resume auto-spin after scroll
+      clearTimeout(this.scrollTimeout);
+      this.scrollTimeout = setTimeout(() => {
+        this.isAutoSpinning = true;
+      }, 1000); // 1 second delay
     }, { passive:true });
+  };
+
+  // ------------------------------
+  // ANIMATION LOOP
+  // ------------------------------
+  Cylinder.prototype.startAnimation = function(){
+    this.animate();
+  };
+
+  Cylinder.prototype.animate = function(){
+    if (this.isAutoSpinning && !this.dragging) {
+      this.angle += this.autoSpinSpeed;
+    } else if (!this.dragging) {
+      // Snap to center (nearest thread at front)
+      const step = 360 / Math.max(1, this.count);
+      const currentStep = Math.round(this.angle / step);
+      const targetAngle = currentStep * step;
+      this.angle += (targetAngle - this.angle) * this.snapSpeed;
+    }
+    this.updateThreads();
+    requestAnimationFrame(() => this.animate());
   };
 
   // ------------------------------
