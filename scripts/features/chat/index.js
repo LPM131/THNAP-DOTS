@@ -10,7 +10,8 @@ export async function initChatFeature() {
   // ---------------------------------
   async function mountTemplate(){
     try {
-      const resp = await fetch('./chat.html');
+      const htmlUrl = new URL('./chat.html', import.meta.url).href;
+      const resp = await fetch(htmlUrl);
       const html = await resp.text();
       const wrap = document.createElement('div');
       wrap.innerHTML = html;
@@ -53,7 +54,7 @@ export async function initChatFeature() {
     if(!document.querySelector('link[data-dots-chat]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = './chat-ui.css';
+      link.href = new URL('./chat-ui.css', import.meta.url).href;
       link.setAttribute('data-dots-chat','1');
       document.head.appendChild(link);
     }
