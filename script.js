@@ -470,3 +470,10 @@ function spellingAssist() {
 
   list.style.display = matches.length ? "block" : "none";
 }
+
+// Expose functions to global scope for HTML onclick attributes
+window.backToMain = backToMain;
+window.openPokemon = openPokemon;
+window.guessPokemon = guessPokemon;
+window.giveHint = giveHint;
+window.setGeneration = setGeneration;
