@@ -416,7 +416,14 @@ function openPokemon() {
   mainGrid.classList.add("hidden");
 
   loadAllPokemonNames().then(() => {
-    document.querySelector('.gen-row button:first-child').classList.add('active');
+    // Only set default generation if none is currently selected
+    if (!document.querySelector('.gen-row button.active')) {
+      document.querySelector('.gen-row button:first-child').classList.add('active');
+      // Set initial filteredList to Gen 1
+      const start = GEN_RANGES["Gen 1"][0] - 1;
+      const end = GEN_RANGES["Gen 1"][1];
+      filteredList = fullPokemonData.slice(start, end);
+    }
     loadPokemon();
   });
 
