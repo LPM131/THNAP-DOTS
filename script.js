@@ -331,6 +331,15 @@ window.addEventListener("DOMContentLoaded", () => {
     }, { passive: false });
 
   });
+
+  // Ensure all back buttons work properly
+  document.querySelectorAll(".back").forEach(button => {
+    button.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      backToMain();
+    });
+  });
 });
 
 // ———————————————
