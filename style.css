@@ -205,6 +205,11 @@ REMOVED: OLD CHAT STYLES
     background: #005ec9;
 }
 
+.gen-row button.active {
+    border: 3px solid #ffcc00;
+    background: #0066cc;
+}
+
 /* IMAGE */
 #pokemon-silhouette {
     width: 160px;
