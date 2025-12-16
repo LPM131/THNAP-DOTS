@@ -211,6 +211,28 @@ REMOVED: OLD CHAT STYLES
     background: #0066cc;
 }
 
+/* Mobile header improvements */
+@media (max-width: 768px) {
+    .nyt-header {
+        height: 56px; /* Increased from 44px for better mobile touch targets */
+        padding: 0 16px; /* Increased side padding */
+    }
+
+    .nyt-header h1 {
+        font-size: 20px; /* Slightly smaller font for mobile */
+        white-space: nowrap; /* Prevent text wrapping */
+        max-width: calc(100vw - 120px); /* Ensure it fits between back button and edge */
+        overflow: hidden;
+        text-overflow: ellipsis; /* Fallback in case text is still too long */
+    }
+
+    .nyt-header .back {
+        font-size: 28px; /* Slightly smaller for mobile */
+        padding: 8px; /* Add touch target padding */
+        margin-left: -8px; /* Compensate for padding */
+    }
+}
+
 /* IMAGE */
 #pokemon-silhouette {
     width: 160px;
