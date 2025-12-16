@@ -356,7 +356,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const hintBtn = document.getElementById("hint-btn");
 
   if (guessBtn) {
-    guessBtn.addEventListener("click", () => guessPokemon());
+    guessBtn.addEventListener("click", () => {
+      if (isCorrectGuess) {
+        loadNextPokemon();
+      } else {
+        guessPokemon();
+      }
+    });
   }
 
   if (hintBtn) {
@@ -455,7 +461,11 @@ async function loadPokemon() {
   document.getElementById("pokemon-suggestions").style.display = "none";
 }
 
+let isCorrectGuess = false;
+
 function guessPokemon() {
+  const guessBtn = document.getElementById("guess-btn");
+  const hintBtn = document.getElementById("hint-btn");
   const guess = document.getElementById("pokemon-guess").value.trim().toLowerCase();
   if (!guess) return;
 
@@ -465,10 +475,26 @@ function guessPokemon() {
     feedback.textContent = "🎉 Correct!";
     document.getElementById("pokemon-silhouette").style.filter = "none";
 
-    setTimeout(loadPokemon, 1500);
+    // Change Guess button to Next and hide Hint button
+    guessBtn.textContent = "Next";
+    hintBtn.style.display = "none";
+    isCorrectGuess = true;
   } else {
     feedback.textContent = "❌ Wrong. Try again!";
   }
+}
+
+function loadNextPokemon() {
+  const guessBtn = document.getElementById("guess-btn");
+  const hintBtn = document.getElementById("hint-btn");
+
+  // Reset button states
+  guessBtn.textContent = "Guess";
+  hintBtn.style.display = "";
+  isCorrectGuess = false;
+
+  // Load new Pokemon
+  loadPokemon();
 }
 
 function giveHint() {
