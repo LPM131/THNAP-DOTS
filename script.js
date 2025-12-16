@@ -340,6 +340,36 @@ window.addEventListener("DOMContentLoaded", () => {
       backToMain();
     });
   });
+
+  // Pokemon back button specifically
+  const pokemonBackBtn = document.getElementById("pokemon-back-btn");
+  if (pokemonBackBtn) {
+    pokemonBackBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      backToMain();
+    });
+  }
+
+  // Pokemon modal buttons
+  const guessBtn = document.getElementById("guess-btn");
+  const hintBtn = document.getElementById("hint-btn");
+
+  if (guessBtn) {
+    guessBtn.addEventListener("click", () => guessPokemon());
+  }
+
+  if (hintBtn) {
+    hintBtn.addEventListener("click", () => giveHint());
+  }
+
+  // Generation buttons
+  document.querySelectorAll(".gen-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      const gen = button.dataset.gen;
+      setGeneration(gen === 'all' ? 'all' : parseInt(gen));
+    });
+  });
 });
 
 // ———————————————

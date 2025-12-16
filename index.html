@@ -76,24 +76,24 @@
     <!-- POKÉMON MODAL -->
     <div id="pokemon-modal" class="modal hidden">
         <div class="nyt-header">
-            <button class="back" onclick="backToMain()">Back</button>
+            <button class="back" id="pokemon-back-btn">Back</button>
             <h1>Guess the Pokémon</h1>
         </div>
         <div class="pokemon-area">
             <div class="gen-filter">
                 <div class="gen-row">
-                    <button onclick="setGeneration(1)">Gen 1</button>
-                    <button onclick="setGeneration(2)">Gen 2</button>
-                    <button onclick="setGeneration(3)">Gen 3</button>
-                    <button onclick="setGeneration(4)">Gen 4</button>
-                    <button onclick="setGeneration(5)">Gen 5</button>
+                    <button class="gen-btn" data-gen="1">Gen 1</button>
+                    <button class="gen-btn" data-gen="2">Gen 2</button>
+                    <button class="gen-btn" data-gen="3">Gen 3</button>
+                    <button class="gen-btn" data-gen="4">Gen 4</button>
+                    <button class="gen-btn" data-gen="5">Gen 5</button>
                 </div>
                 <div class="gen-row">
-                    <button onclick="setGeneration(6)">Gen 6</button>
-                    <button onclick="setGeneration(7)">Gen 7</button>
-                    <button onclick="setGeneration(8)">Gen 8</button>
-                    <button onclick="setGeneration(9)">Gen 9</button>
-                    <button onclick="setGeneration('all')">All</button>
+                    <button class="gen-btn" data-gen="6">Gen 6</button>
+                    <button class="gen-btn" data-gen="7">Gen 7</button>
+                    <button class="gen-btn" data-gen="8">Gen 8</button>
+                    <button class="gen-btn" data-gen="9">Gen 9</button>
+                    <button class="gen-btn" data-gen="all">All</button>
                 </div>
             </div>
             <img id="pokemon-silhouette" src="" alt="Silhouette">
@@ -101,9 +101,9 @@
                 <input id="pokemon-guess" type="text" placeholder="Who's that Pokémon?" autocomplete="off">
                 <ul id="pokemon-suggestions" class="pokemon-suggestions"></ul>
             </div>
-            <div class="poke-buttons">
-                <button class="guess-btn" onclick="guessPokemon()">Guess</button>
-                <button class="hint-btn" onclick="giveHint()">Hint</button>
+        <div class="poke-buttons">
+                <button class="guess-btn" id="guess-btn">Guess</button>
+                <button class="hint-btn" id="hint-btn">Hint</button>
             </div>
             <p id="pokemon-feedback"></p>
         </div>
