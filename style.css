@@ -198,6 +198,7 @@ REMOVED: OLD CHAT STYLES
     color: white;
     font-weight: bold;
     cursor: pointer;
+    outline: none;
 }
 
 .gen-row button:active {
