@@ -388,6 +388,8 @@ let fullPokemonData = [];
 let filteredList = [];
 let currentPokemonName = "";
 let currentPokemonSprite = "";
+let currentPokemonTypes = [];
+let incorrectGuesses = 0;
 
 const GEN_RANGES = {
   "Gen 1": [1, 151],
@@ -458,6 +460,10 @@ async function loadPokemon() {
 
   currentPokemonName = data.name;
   currentPokemonSprite = data.sprites.front_default;
+  currentPokemonTypes = data.types.map(t => t.type.name);
+
+  // Reset incorrect guesses counter for new Pokemon
+  incorrectGuesses = 0;
 
   const img = document.getElementById("pokemon-silhouette");
   img.src = currentPokemonSprite;
@@ -488,6 +494,7 @@ function guessPokemon() {
     isCorrectGuess = true;
   } else {
     feedback.textContent = "❌ Wrong. Try again!";
+    incorrectGuesses++; // Increment counter on wrong guess
   }
 }
 
@@ -506,7 +513,17 @@ function loadNextPokemon() {
 
 function giveHint() {
   const feedback = document.getElementById("pokemon-feedback");
-  feedback.textContent = `Hint: Starts with \"${currentPokemonName[0].toUpperCase()}\"`;
+
+  if (incorrectGuesses >= 3) {
+    // Second hint: Pokemon type(s)
+    const typesText = currentPokemonTypes.length === 1
+      ? `${currentPokemonTypes[0]} type`
+      : `${currentPokemonTypes.join(' and ')} types`;
+    feedback.textContent = `Hint: This is a ${typesText} Pokémon`;
+  } else {
+    // First hint: Starts with letter
+    feedback.textContent = `Hint: Starts with \"${currentPokemonName[0].toUpperCase()}\"`;
+  }
 }
 
 // SPELLING ASSIST DROPDOWN
