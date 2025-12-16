@@ -495,6 +495,11 @@ function guessPokemon() {
   } else {
     feedback.textContent = "❌ Wrong. Try again!";
     incorrectGuesses++; // Increment counter on wrong guess
+
+    // Clear the feedback after 1.5 seconds
+    setTimeout(() => {
+      feedback.textContent = "";
+    }, 1500);
   }
 }
 
